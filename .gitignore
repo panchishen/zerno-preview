@@ -1,0 +1,7 @@
+# OneDrive / Windows служебные файлы
+desktop.ini
+Thumbs.db
+.DS_Store
+
+# Локальный сервер прототипов — на сайте не нужен
+запустить-сервер.bat

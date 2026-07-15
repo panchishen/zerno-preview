@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зерно — ресторан и музей · Главная</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prosto+One&family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+<!-- сквозные хедер и футер: разметку вставляет chrome.js -->
+<link rel="stylesheet" href="assets/chrome.css">
+<script src="assets/chrome.js" defer></script>
+<!-- демпфер scroll-driven анимаций; без defer — инлайн-скрипты страницы зовут createScrub при парсинге -->
+<script src="assets/scrub.js"></script>
+<style>
+/* ===== Зерно · токены (из зерно-цвета.tokens.json) ===== */
+:root{
+  --sand-50:#FDFAF1; --sand-100:#F9F3E4; --sand-200:#F0E6CE; --sand-300:#E4D8BD;
+  --gold-500:#CB9C3F; --gold-600:#A97C19; --gold-700:#896100;
+  --graphite-600:#5C5A59; --graphite-800:#2B2A29; --graphite-900:#1A1918;
+  --font-heading:'Prosto One', system-ui, sans-serif;
+  --font-body:'Manrope', system-ui, sans-serif;
+  /* сетка: поля по брейкпоинтам, контент не шире 1600px, по центру */
+  --margin:160px;
+  --cw:min(100vw - var(--margin)*2, 1600px);   /* ширина контейнера */
+  --pad:calc((100vw - var(--cw)) / 2);         /* от края окна до контейнера */
+}
+@media (max-width:1439px){ :root{ --margin:80px } }
+@media (max-width:1199px){ :root{ --margin:48px } }
+@media (max-width:1023px){ :root{ --margin:40px } }
+@media (max-width:767px){ :root{ --margin:16px } }
+*{ box-sizing:border-box }
+body{
+  margin:0; background:#FFFFFF; color:var(--graphite-800);
+  font-family:var(--font-body); font-size:20px; line-height:1.6;
+}
+.container{ width:var(--cw); margin-inline:auto }
+
+/* ===== Золотой шейдер-фон: лёгкий декор на всю страницу, z-index:-1 не задевает верстку ===== */
+#gold-shader-bg{
+  position:fixed; inset:0; width:100%; height:100%;
+  z-index:-1; pointer-events:none; display:block;
+}
+
+/* Хедер и футер — сквозные компоненты: assets/chrome.css + assets/chrome.js */
+
+/* ===== БЛОК 3: музей — zoom parallax ===== */
+.s3-museum{ padding-top:0 } /* 200px даёт padding-bottom карусельного блока; фон прозрачный — просвечивает золотой шейдер */
+.s3-museum .s3__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
+.s3-museum h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.s3-museum .s3__sub{ font-size:20px; line-height:1.6; color:var(--graphite-800); margin:32px 0 0 }
+.s3-museum .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s3-museum.in .reveal{ opacity:1; transform:none }
+.s3-museum.in .s3__sub{ transition-delay:.3s }
+
+.zoom{ height:300vh; position:relative; margin-top:64px;
+  /* композиция целиком в кадре, как в макете: масштаб по ширине контейнера,
+     но с потолком по высоте (коллаж = 0.847 юнита, поля по 48px сверху/снизу).
+     Юнит удвоен (2x пре-скейл), базовый transform scale(.5): текстуры карточек
+     растеризуются вдвое плотнее — без пикселизации при зуме */
+  --zu:calc(min(var(--cw), calc((100vh - 96px) / 0.847)) * 2);
+}
+.zoom__stage{ position:sticky; top:0; height:100vh; overflow:clip }
+.zp{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; will-change:transform; transform:scale(.5) }
+.zp__box{ position:relative; border-radius:8px; corner-shape:squircle; overflow:hidden; background:var(--sand-100) }
+.zp__box img, .zp__box video{ width:100%; height:100%; object-fit:cover; display:block }
+/* раскладка из мокапа (доли контейнера 1600, смещения центров от центра видео) */
+.zp--v .zp__box{ width:calc(var(--zu)*.3238); height:calc(var(--zu)*.2163) }
+.zp--1 .zp__box{ width:calc(var(--zu)*.4919); height:calc(var(--zu)*.3281); left:calc(var(--zu)*.0841);  top:calc(var(--zu)*-.2872) }
+.zp--2 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.4050); left:calc(var(--zu)*-.3384); top:calc(var(--zu)*-.0944) }
+.zp--3 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.2163); left:calc(var(--zu)*.3384);  top:0 }
+.zp--4 .zp__box{ width:calc(var(--zu)*.3244); height:calc(var(--zu)*.2163); left:calc(var(--zu)*-.2534); top:calc(var(--zu)*.2313) }
+.zp--5 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.2725); left:calc(var(--zu)*.0847);  top:calc(var(--zu)*.2594) }
+.zp--6 .zp__box{ width:calc(var(--zu)*.2394); height:calc(var(--zu)*.1594); left:calc(var(--zu)*.3809);  top:calc(var(--zu)*.2028) }
+.zoom__cta-row{
+  display:flex; justify-content:center; position:relative; z-index:5;
+  /* 64px (в масштабе контейнера) от ВИДИМОГО низа видео:
+     если видео целиком в сцене — от его настоящего низа (0.334cw - 50vh < 0),
+     если низ обрезан сценой — от нижнего края сцены (слагаемое зануляется) */
+  margin-top:calc(min(var(--cw)*0.334 - 50vh, 0px) + var(--cw)*0.04);
+  margin-bottom:200px;
+}
+.zoom__cta{
+  opacity:0; transform:translateY(14px); pointer-events:none;
+  transition:opacity .5s ease, transform .5s cubic-bezier(.22,.61,.21,1);
+  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
+  color:#FFFFFF; background:var(--gold-600); border:0; border-radius:8px; corner-shape:squircle;
+  padding:17px 32px; cursor:pointer;
+}
+.zoom__cta:hover{ background:var(--gold-700) }
+.zoom__cta.show{ opacity:1; transform:none; pointer-events:auto }
+.zoom__cta:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+
+@media (prefers-reduced-motion: reduce){
+  .s3-museum .reveal{ opacity:1; transform:none; transition:none }
+  .zoom{ height:auto }
+  .zoom__stage{ position:static; height:auto; padding-block:40px;
+    display:flex; align-items:center; justify-content:center }
+  .zp{ display:none }
+  .zp--v{ display:flex; position:relative }
+  .zp--v .zp__box{ width:var(--cw) }
+  .zp--v{ transform:none }
+  .zoom__cta-row{ margin-top:64px; margin-bottom:120px }
+  .zoom__cta{ opacity:1; transform:none; pointer-events:auto }
+}
+
+/* ===== HERO: интро 1.1 → 1.2, скролл 1.2 → 1.3 ===== */
+.hero{ height:260vh; position:relative }
+.hero__stage{ position:sticky; top:0; height:100vh; overflow:clip }
+
+/* Лого: Block 1.1 — 518px (27vw) по центру; Block 1.2 — 320px (16.7vw), центр на 24vh */
+.hero__logo{
+  position:absolute; left:50%; top:50vh; width:27vw;
+  transform:translate(-50%,-50%);
+  opacity:0; will-change:transform,opacity;
+  transition:opacity .9s ease, transform 1s cubic-bezier(.22,.61,.21,1);
+}
+.hero__logo svg{ width:100%; height:auto; display:block }
+body.s1 .hero__logo{ opacity:1 }
+body.s2 .hero__logo{ transform:translate(-50%,-50%) translateY(-25.9vh) scale(.618) }
+/* Уход лого — не скраб, а триггер: скролл только даёт команду, длительность фиксирована.
+   Иначе при резком колесе прогресс перепрыгивает окно затухания и лого выключается рубильником. */
+body.hero-off .hero__logo{ opacity:0; transition:opacity .55s ease }
+
+/* Заголовок: Block 1.2 — 64px (3.333vw) на 44.7vh, появляется на месте */
+.hero__slogan{
+  position:absolute; left:0; right:0; width:var(--cw); margin:0 auto; top:44.7vh;
+  font-family:var(--font-heading); font-weight:400;
+  font-size:calc(var(--cw) * 0.04); line-height:1.1; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--gold-600); text-align:center;
+  opacity:0; transition:opacity .8s ease;
+  will-change:transform,opacity;
+}
+body.s3 .hero__slogan{ opacity:1 }
+
+/* Видео: Block 1.2 — 1058×516 (55.1vw, 2.05:1), верх на 84vh — выглядывает снизу */
+.hero__media{
+  /* ширина: 1058/1600 контейнера (финал ×1.512 = ровно контейнер);
+     высота с потолком — на «низких» окнах кадр мягко кропится, ширина не страдает */
+  position:absolute; left:50%; top:84vh;
+  width:calc(var(--cw) * 0.66125);
+  height:min(calc(var(--cw) * 0.3224), 48.9vh);
+  transform:translateX(-50%); transform-origin:top center;
+  border-radius:16px; corner-shape:squircle; overflow:hidden; background:var(--graphite-900);
+  opacity:0; transition:opacity .8s ease;
+  will-change:transform,opacity;
+}
+body.s4 .hero__media{ opacity:1 }
+.hero__media video{ width:100%; height:100%; object-fit:cover; display:block }
+
+/* ===== БЛОК 2: ресторан (макет 83:186) ===== */
+.s2-restaurant{ padding-top:200px; padding-bottom:200px } /* фон прозрачный — просвечивает золотой шейдер */
+.s2-restaurant .s2__head{
+  width:min(1058px, var(--cw)); margin:0 auto; text-align:center;
+}
+.s2-restaurant h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600);
+  margin:0; text-wrap:balance;
+}
+.s2-restaurant .s2__sub{
+  font-size:24px; line-height:1.6; color:var(--graphite-800); margin:32px 0 0;
+}
+/* поэтапное появление блока: заголовок -> текст -> карточки */
+.s2-restaurant .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s2-restaurant.in .reveal{ opacity:1; transform:none }
+.s2-restaurant.in .s2__sub{ transition-delay:.3s }
+.s2-restaurant.in .car{ transition-delay:.65s }
+
+/* карусель: вьюпорт от левого поля, обрезка по контейнеру */
+.car{
+  position:relative; height:480px; margin-top:64px;
+  overflow:hidden; cursor:default; touch-action:pan-y; user-select:none;
+}
+/* «рука» только над полосой карточек — слева пустое поле, там курсор обычный (класс вешает JS) */
+.car.over-cards{ cursor:grab }
+.car.dragging{ cursor:grabbing }
+.car__card{
+  position:absolute; top:0; left:calc((100% - var(--cw)) / 2); width:382px; height:480px;
+  border-radius:16px; corner-shape:squircle; overflow:hidden;
+  background:var(--graphite-100,#E8E8E7); will-change:transform;
+}
+.car__card img, .car__card video{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; pointer-events:none;
+}
+.car__card .shade{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(73,50,0,1) 0%, rgba(73,50,0,.4) 100%);
+}
+.car__card .inner{ position:absolute; inset:0; padding:32px; display:flex; flex-direction:column }
+.car__label{
+  font:600 16px/1.3 var(--font-body); letter-spacing:.08em; text-transform:uppercase;
+  color:#FFFFFF; margin:0 0 16px;
+}
+.car__title{
+  font-family:var(--font-heading); font-weight:400; font-size:24px; line-height:1.36;
+  letter-spacing:.06em; text-transform:uppercase; color:#FFFFFF; margin:0;
+}
+.car__btn{
+  margin-top:auto; align-self:flex-start;
+  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
+  color:#FFFFFF; background:var(--gold-600); border:0; border-radius:8px; corner-shape:squircle;
+  padding:17px 32px; cursor:pointer; transition:background .2s ease;
+}
+.car__btn:hover{ background:var(--gold-700) }
+.car__btn:active{ background:#674800 }
+.car__btn:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+
+/* ===== БЛОК 2.5: открытая кухня — стек карточек со scroll-driven перелистыванием ===== */
+.s-kitchen{ padding-top:0; padding-bottom:0 } /* сверху — margin-bottom кнопки музея (200px); снизу 200px даёт запас хода .sk-pin (без него — свои 200px); фон прозрачный, просвечивает золотой шейдер */
+.s-kitchen .sk__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
+.s-kitchen h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.s-kitchen .sk__sub{ font-size:24px; line-height:1.6; color:var(--graphite-800); margin:32px 0 0 }
+.s-kitchen .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s-kitchen.in .reveal{ opacity:1; transform:none }
+.s-kitchen.in .sk__sub{ transition-delay:.3s }
+
+/* стек: один sticky-пин на всю секцию (4 карты × 100vh скролл-трека), каждая карточка
+   выезжает снизу и накрывает предыдущую — та остаётся на месте, просто оказывается под ней */
+.sk-stack{ position:relative; margin-top:80px; height:400vh }
+.sk-pin{ position:sticky; top:128px; height:calc(min(70vh, 700px) + 200px); overflow:hidden } /* 88px хедер + 40px зазор; +200px запаса — виден въезд снизу, а не проявление на месте */
+.sk-card{
+  position:absolute; inset:0; display:flex; align-items:flex-start; justify-content:center;
+  transform:translateY(100%); will-change:transform;
+  transition:transform .7s cubic-bezier(.22,.61,.21,1); /* фиксированная скорость входа, не зависит от скорости скролла */
+}
+.sk-card.show{ transform:translateY(0) }
+.sk-card__box{
+  position:relative; width:min(1058px, var(--cw)); height:min(70vh, 700px);
+  border-radius:16px; corner-shape:squircle; overflow:hidden;
+  background:var(--sand-100);
+}
+.sk-card__box img, .sk-card__box video{ width:100%; height:100%; object-fit:cover; display:block }
+
+@media (prefers-reduced-motion: reduce){
+  .s-kitchen .reveal{ opacity:1; transform:none; transition:none }
+  .sk-stack{ height:auto }
+  .sk-pin{ position:static; height:auto; display:flex; flex-direction:column; align-items:center; gap:24px; overflow:visible }
+  .sk-card{ position:static; transform:none; transition:none }
+  .sk-card__box{ height:min(60vh, 600px) }
+}
+
+/* ===== БЛОК 3: музей — zoom parallax ===== */
+.s3-museum{ padding-top:0 } /* 200px даёт padding-bottom карусельного блока; фон прозрачный — просвечивает золотой шейдер */
+.s3-museum .s3__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
+.s3-museum h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.s3-museum .s3__sub{ font-size:20px; line-height:1.6; color:var(--graphite-800); margin:32px 0 0 }
+.s3-museum .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s3-museum.in .reveal{ opacity:1; transform:none }
+.s3-museum.in .s3__sub{ transition-delay:.3s }
+
+.zoom{ height:300vh; position:relative; margin-top:64px;
+  /* композиция целиком в кадре, как в макете: масштаб по ширине контейнера,
+     но с потолком по высоте (коллаж = 0.847 юнита, поля по 48px сверху/снизу).
+     Юнит удвоен (2x пре-скейл), базовый transform scale(.5): текстуры карточек
+     растеризуются вдвое плотнее — без пикселизации при зуме */
+  --zu:calc(min(var(--cw), calc((100vh - 96px) / 0.847)) * 2);
+}
+.zoom__stage{ position:sticky; top:0; height:100vh; overflow:clip }
+.zp{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; will-change:transform; transform:scale(.5) }
+.zp__box{ position:relative; border-radius:8px; corner-shape:squircle; overflow:hidden; background:var(--sand-100) }
+.zp__box img, .zp__box video{ width:100%; height:100%; object-fit:cover; display:block }
+/* раскладка из мокапа (доли контейнера 1600, смещения центров от центра видео) */
+.zp--v .zp__box{ width:calc(var(--zu)*.3238); height:calc(var(--zu)*.2163) }
+.zp--1 .zp__box{ width:calc(var(--zu)*.4919); height:calc(var(--zu)*.3281); left:calc(var(--zu)*.0841);  top:calc(var(--zu)*-.2872) }
+.zp--2 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.4050); left:calc(var(--zu)*-.3384); top:calc(var(--zu)*-.0944) }
+.zp--3 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.2163); left:calc(var(--zu)*.3384);  top:0 }
+.zp--4 .zp__box{ width:calc(var(--zu)*.3244); height:calc(var(--zu)*.2163); left:calc(var(--zu)*-.2534); top:calc(var(--zu)*.2313) }
+.zp--5 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.2725); left:calc(var(--zu)*.0847);  top:calc(var(--zu)*.2594) }
+.zp--6 .zp__box{ width:calc(var(--zu)*.2394); height:calc(var(--zu)*.1594); left:calc(var(--zu)*.3809);  top:calc(var(--zu)*.2028) }
+.zoom__cta-row{
+  display:flex; justify-content:center; position:relative; z-index:5;
+  /* 64px (в масштабе контейнера) от ВИДИМОГО низа видео:
+     если видео целиком в сцене — от его настоящего низа (0.334cw - 50vh < 0),
+     если низ обрезан сценой — от нижнего края сцены (слагаемое зануляется) */
+  margin-top:calc(min(var(--cw)*0.334 - 50vh, 0px) + var(--cw)*0.04);
+  margin-bottom:200px;
+}
+.zoom__cta{
+  opacity:0; transform:translateY(14px); pointer-events:none;
+  transition:opacity .5s ease, transform .5s cubic-bezier(.22,.61,.21,1);
+  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
+  color:#FFFFFF; background:var(--gold-600); border:0; border-radius:8px; corner-shape:squircle;
+  padding:17px 32px; cursor:pointer;
+}
+.zoom__cta:hover{ background:var(--gold-700) }
+.zoom__cta.show{ opacity:1; transform:none; pointer-events:auto }
+.zoom__cta:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+
+@media (prefers-reduced-motion: reduce){
+  .s3-museum .reveal{ opacity:1; transform:none; transition:none }
+  .zoom{ height:auto }
+  .zoom__stage{ position:static; height:auto; padding-block:40px;
+    display:flex; align-items:center; justify-content:center }
+  .zp{ display:none }
+  .zp--v{ display:flex; position:relative }
+  .zp--v .zp__box{ width:var(--cw) }
+  .zp--v{ transform:none }
+  .zoom__cta-row{ margin-top:64px; margin-bottom:120px }
+  .zoom__cta{ opacity:1; transform:none; pointer-events:auto }
+  .s2-restaurant .reveal{ opacity:1; transform:none; transition:none }
+  .hero{ height:auto }
+  .hero__stage{ position:static; height:auto; padding-block:64px;
+    display:flex; flex-direction:column; align-items:center; gap:40px }
+  .hero__logo{ display:none }
+  .hero__logo, .hero__slogan, .hero__media{
+    position:static; opacity:1; transform:none; transition:none }
+  .hero__slogan{ width:100% }
+  .hero__media{ width:calc(100% - var(--pad)*2) }
+}
+
+/* ===== БЛОК: контакты — «Как попасть в это место» (макет 144:357 заголовок + 144:360 карта) ===== */
+.s-contacts{ padding-top:0; padding-bottom:200px } /* сверху — 200px отзывов, снизу — свои 200px; фон прозрачный, просвечивает золотой шейдер */
+.s-contacts .sc__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
+.s-contacts h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.s-contacts .sc__sub{ font-size:24px; line-height:1.6; color:var(--graphite-600); margin:32px 0 0 }
+.s-contacts .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s-contacts.in .reveal{ opacity:1; transform:none }
+.s-contacts.in .sc__sub{ transition-delay:.3s }
+.s-contacts.in .sc-map{ transition-delay:.5s }
+
+/* карта: ширина по сетке, пропорции макета 1600×600 (8:3), squircle-скругление как у остальных медиа */
+.sc-map{
+  position:relative; width:var(--cw); margin:64px auto 0;
+  aspect-ratio:1600 / 600;
+  border-radius:16px; corner-shape:squircle; overflow:hidden;
+  background:var(--sand-100);
+}
+.sc-map iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; display:block }
+/* на узких экранах карта выше — плоская 8:3 неудобна для тача */
+@media (max-width:767px){
+  .s-contacts{ padding-bottom:120px }
+  .sc-map{ aspect-ratio:auto; height:min(70vh, 460px) }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .s-contacts .reveal{ opacity:1; transform:none; transition:none }
+}
+
+/* ===== БЛОК ОТЗЫВЫ (макет 141:205): три колонки-бегущие ленты ===== */
+.s-reviews{ padding-top:0; padding-bottom:200px } /* сверху — 200px кухни, снизу — свои 200px до контактов; фон прозрачный, просвечивает золотой шейдер */
+.s-reviews .rv__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
+.s-reviews h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.s-reviews .rv__sub{ font-size:20px; line-height:1.6; color:var(--graphite-800); margin:32px 0 0 }
+.s-reviews .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s-reviews.in .reveal{ opacity:1; transform:none }
+.s-reviews.in .rv__sub{ transition-delay:.3s }
+
+/* окно ленты: три колонки, обрезка по высоте + мягкие маски сверху/снизу */
+.rv-marquee{
+  width:var(--cw); margin:80px auto 0; /* макет 157:363: автолейаут блока, itemSpacing 80 */
+  height:clamp(560px, 76vh, 800px);
+  display:flex; gap:24px; justify-content:center; align-items:flex-start;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+          mask-image:linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+}
+.rv-col{ flex:1 1 0; min-width:0; max-width:520px }
+/* трек бесконечно едет вверх; клоны карточек добавляет скрипт → на -50% шов бесшовный */
+.rv-track{
+  display:flex; flex-direction:column; will-change:transform;
+  animation:rv-scroll var(--rv-dur, 54s) linear infinite;
+}
+.rv-col:hover .rv-track{ animation-play-state:paused } /* пауза колонки под курсором — удобно читать */
+@keyframes rv-scroll{ from{ transform:translateY(0) } to{ transform:translateY(-50%) } }
+
+.rv-card{
+  background:#FFFFFF; border:1px solid var(--sand-300);
+  border-radius:8px; corner-shape:squircle;
+  box-shadow:0 8px 8px rgba(169,124,25,.08); /* gold-600 8% */
+  padding:40px 48px; margin-bottom:24px; /* margin, а не gap — чтобы период трека был ровным */
+  display:flex; flex-direction:column; gap:24px;
+}
+.rv-card__text{ margin:0; font:400 20px/1.6 var(--font-body); color:var(--graphite-800); overflow-wrap:break-word }
+.rv-card__author{ display:flex; align-items:center; gap:16px }
+.rv-card__ava{
+  flex:none; width:56px; height:56px; border-radius:50%;
+  object-fit:cover; background:var(--sand-200); display:block;
+}
+.rv-card__meta{ min-width:0; flex:1 }
+.rv-card__name{
+  margin:0; font:700 20px/1.6 var(--font-body); color:var(--graphite-800);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.rv-card__role{
+  margin:0; font:400 16px/1.52 var(--font-body); color:var(--graphite-600);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.rv-cta-row{ display:flex; justify-content:center; margin-top:80px } /* макет 157:363: itemSpacing 80 */
+.rv-cta{
+  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
+  color:#FFFFFF; background:var(--gold-600); border:0; border-radius:8px; corner-shape:squircle;
+  padding:17px 32px; cursor:pointer; transition:background .2s ease;
+}
+.rv-cta:hover{ background:var(--gold-700) }
+.rv-cta:active{ background:#674800 }
+.rv-cta:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+
+/* адаптив: на планшете прячем 3-ю колонку, на телефоне — и 2-ю */
+@media (max-width:1023px){ .rv-col:nth-child(3){ display:none } }
+@media (max-width:639px){ .rv-col:nth-child(2){ display:none } }
+
+@media (prefers-reduced-motion: reduce){
+  .s-reviews .reveal{ opacity:1; transform:none; transition:none }
+  .rv-marquee{ height:auto; overflow:visible; -webkit-mask-image:none; mask-image:none }
+  .rv-track{ animation:none }
+  .rv-track .rv-dup{ display:none } /* без анимации клоны не нужны */
+}
+</style>
+</head>
+<body>
+
+<canvas id="gold-shader-bg" aria-hidden="true"></canvas>
+
+<section class="hero" id="hero">
+  <div class="hero__stage">
+    <div class="hero__logo" id="heroLogo">
+      <svg
+   version="1.1"
+  
+   viewBox="0 0 681.29434 333.40733"
+   id="svg77"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs77" />
+  <g
+     id="Layer1000"
+     transform="translate(-80.2826,-131.1362)">
+    <g
+       id="Layer1001">
+      <defs
+         id="defs6">
+        <linearGradient
+           id="grad1">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop1" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop2" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop3" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop4" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop5" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop6" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad1"
+           id="grad2"
+           x1="204.30803"
+           y1="274.67737"
+           x2="204.30803"
+           y2="302.17419"
+           gradientTransform="scale(2.0945961,0.47741902)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 427.9428,144.2637 c 9.3047,-4.7611 19.6808,-9.2039 29.1481,-11.733 13.1885,-3.523 22.1708,-0.3349 28.4466,9.1575 -20.4783,-3.1969 -40.2056,-4.0122 -57.5947,2.5755 z"
+         style="fill:url(#grad2)"
+         id="path6" />
+      <defs
+         id="defs12">
+        <linearGradient
+           id="grad3">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop7" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop8" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop9" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop10" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop11" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop12" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad3"
+           id="grad4"
+           x1="407.61557"
+           y1="139.20589"
+           x2="407.61557"
+           y2="194.3662"
+           gradientTransform="scale(1.0439535,0.95789707)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 483.1165,138.4958 c -1.8132,-2.1153 -3.8623,-3.9685 -6.514,-5.1509 2.4219,5.096 -34.394,38.2581 -51.0708,52.8379 l 43.763,-20.8982 z"
+         style="fill:url(#grad4)"
+         id="path12" />
+      <defs
+         id="defs18">
+        <linearGradient
+           id="grad5">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop13" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop14" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop15" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop16" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop17" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop18" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad5"
+           id="grad6"
+           x1="362.23254"
+           y1="224.59708"
+           x2="362.23254"
+           y2="329.02539"
+           gradientTransform="scale(0.90992417,1.0989927)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 422.6698,354.1641 c -24.1494,16.6856 -41.2835,2.5694 -58.4883,-15.6895 -28.5647,-30.3147 -37.276,-58.9054 -33.8846,-84.7002 0.6308,2.6423 4.348,-9.1651 4.0971,-6.568 -6.0189,62.2888 67.4694,96.399 90.232,105.7647 -0.6528,0.3976 -1.2962,0.796 -1.9562,1.193 z"
+         style="fill:url(#grad6)"
+         id="path18" />
+      <defs
+         id="defs24">
+        <linearGradient
+           id="grad7">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop19" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop20" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop21" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop22" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop23" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop24" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad7"
+           id="grad8"
+           x1="1116.7531"
+           y1="63.2103"
+           x2="1116.7531"
+           y2="125.96368"
+           gradientTransform="scale(0.43429297,2.3025931)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 487.7701,145.5476 c 28.7142,56.4889 32.2616,101.015 10.1536,139.5915 l -12.9257,4.904 c 8.516,-38.423 12.1011,-98.4082 2.7721,-144.4955 z"
+         style="fill:url(#grad8)"
+         id="path24" />
+      <defs
+         id="defs30">
+        <linearGradient
+           id="grad9">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop25" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop26" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop27" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop28" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop29" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop30" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad9"
+           id="grad10"
+           x1="484.16751"
+           y1="144.02319"
+           x2="484.16751"
+           y2="239.35406"
+           gradientTransform="scale(0.87108925,1.147988)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 496.9933,165.3369 c 3.0606,7.2482 5.661,14.2915 7.8015,21.1451 l -11.8012,21.442 -37.4178,45.5162 -24.1646,20.3799 -9.6581,0.9555 c 43.4794,-35.1083 76.1535,-73.6191 75.2402,-109.4387 z"
+         style="fill:url(#grad10)"
+         id="path30" />
+      <defs
+         id="defs36">
+        <linearGradient
+           id="grad11">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop31" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop32" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop33" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop34" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop35" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop36" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad11"
+           id="grad12"
+           x1="498.94406"
+           y1="126.01401"
+           x2="498.94406"
+           y2="193.88776"
+           gradientTransform="scale(0.87681314,1.1404939)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 487.2761,144.6059 c 0.1665,0.3091 0.3318,0.6222 0.494,0.9417 3.4395,6.7662 6.5067,13.3558 9.2232,19.7893 l -46.086,51.6333 -13.4266,4.1576 c 4.152,-4.2874 63.6553,-52.1399 47.3856,-77.4096 z"
+         style="fill:url(#grad12)"
+         id="path36" />
+      <defs
+         id="defs42">
+        <linearGradient
+           id="grad13">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop37" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop38" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop39" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop40" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop41" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop42" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad13"
+           id="grad14"
+           x1="373.50052"
+           y1="146.19128"
+           x2="373.50052"
+           y2="306.47653"
+           gradientTransform="scale(0.93394285,1.0707293)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 355.1801,328.1534 c -1.4134,-1.7521 -2.7846,-3.5004 -4.0698,-5.2398 -6.7387,-16.6491 2.256,-30.5399 16.3724,-43.5317 30.5886,-28.1522 67.7305,-53.732 98.2906,-83.6887 15.4855,-15.1803 25.332,-28.4806 27.3221,-39.1619 1.9601,4.2392 3.77,8.4098 5.43,12.5142 -10.7535,23.9885 -31.7737,42.8873 -52.1718,59.1174 -11.0547,8.7954 -24.976,19.6717 -38.6884,30.828 -18.2282,14.8305 -62.236,42.1981 -52.4851,69.1625 z"
+         style="fill:url(#grad14)"
+         id="path42" />
+      <defs
+         id="defs48">
+        <linearGradient
+           id="grad15">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop43" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop44" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop45" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop46" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop47" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop48" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad15"
+           id="grad16"
+           x1="349.17798"
+           y1="123.78791"
+           x2="349.17798"
+           y2="275.74918"
+           gradientTransform="scale(0.94395957,1.0593674)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 334.4277,292.1197 c -22.1109,-63.7204 36.2771,-115.753 85.8105,-143.7131 10.9745,-6.1947 24.6667,-12.6204 36.8527,-15.8759 6.199,-1.656 11.4681,-1.8279 15.9643,-0.561 -15.8446,-1.6312 -65.425,38.6317 -98.049,71.472 -25.6889,25.8596 -43.6792,49.668 -40.5785,88.678 z"
+         style="fill:url(#grad16)"
+         id="path48" />
+      <defs
+         id="defs54">
+        <linearGradient
+           id="grad17">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop49" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop50" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop51" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop52" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop53" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop54" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad17"
+           id="grad18"
+           x1="591.83667"
+           y1="133.67114"
+           x2="591.83667"
+           y2="242.81123"
+           gradientTransform="scale(0.73076967,1.3684202)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 503.6565,182.9183 c 20.4349,61.4826 4.5141,107.7651 -48.6003,149.2139 l -22.5599,0.1356 c 37.6148,-35.6552 77.829,-70.2705 71.1602,-149.3495 z"
+         style="fill:url(#grad18)"
+         id="path54" />
+      <defs
+         id="defs60">
+        <linearGradient
+           id="grad19">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop55" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop56" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop57" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop58" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop59" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop60" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad19"
+           id="grad20"
+           x1="420.81006"
+           y1="190.34953"
+           x2="420.81006"
+           y2="330.31152"
+           gradientTransform="scale(0.91348194,1.0947124)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 409.174,360.6393 c -8.8932,2.2969 -16.839,0.2856 -24.3277,-4.187 l -0.4439,-0.2693 c 6.9174,2.7905 17.6414,0.098 28.0568,-7.9192 32.6019,-25.0948 82.1647,-66.6353 93.0955,-111.819 2.1818,-9.0178 3.8301,-18.3723 4.6233,-28.0668 0.4286,2.4507 0.7907,4.883 1.0985,7.3003 0.3082,2.5104 0.5447,4.9944 0.7071,7.4526 1.7219,26.0442 -4.7421,49.2191 -19.4828,70.6227 -14.9659,21.731 -60.08,60.8812 -83.3268,66.8857 z"
+         style="fill:url(#grad20)"
+         id="path60" />
+      <defs
+         id="defs66">
+        <linearGradient
+           id="grad21">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop61" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop62" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop63" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop64" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop65" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop66" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad21"
+           id="grad22"
+           x1="366.85245"
+           y1="124.96041"
+           x2="366.85245"
+           y2="290.1684"
+           gradientTransform="scale(0.9162066,1.0914569)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 346.7933,316.7063 c -2.216,-3.3669 -4.2102,-6.709 -5.9691,-10.0226 -9.2716,-20.734 -4.0127,-37.8194 8.3987,-53.2569 14.4074,-17.9206 49.4915,-44.6934 68.7007,-60.857 21.6419,-18.2107 43.699,-36.2243 63.1128,-56.1809 2.4515,2.1911 4.5814,5.059 6.4409,8.5926 -1.0546,3.171 -3.1516,6.6327 -6.0323,10.2923 -13.6483,17.3381 -40.1498,36.1674 -57.8658,49.8032 -21.1653,16.2905 -42.8362,32.8885 -59.702,49.0524 -17.225,16.5078 -28.1525,35.9483 -17.0839,62.5769 z"
+         style="fill:url(#grad22)"
+         id="path66" />
+      <defs
+         id="defs72">
+        <linearGradient
+           id="grad23">
+          <stop
+             offset="0.0000%"
+             stop-color="#e3bd6b"
+             stop-opacity="1.0000"
+             id="stop67" />
+          <stop
+             offset="13.0000%"
+             stop-color="#c6943b"
+             stop-opacity="1.0000"
+             id="stop68" />
+          <stop
+             offset="33.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop69" />
+          <stop
+             offset="52.0000%"
+             stop-color="#f4de8b"
+             stop-opacity="1.0000"
+             id="stop70" />
+          <stop
+             offset="66.0000%"
+             stop-color="#f4d662"
+             stop-opacity="1.0000"
+             id="stop71" />
+          <stop
+             offset="100.0000%"
+             stop-color="#b2782a"
+             stop-opacity="1.0000"
+             id="stop72" />
+        </linearGradient>
+        <linearGradient
+           xlink:href="#grad23"
+           id="grad24"
+           x1="401.02441"
+           y1="161.86171"
+           x2="401.02441"
+           y2="317.20624"
+           gradientTransform="scale(0.91027387,1.0985705)"
+           gradientUnits="userSpaceOnUse" />
+      </defs>
+      <path
+         d="m 374.2792,348.4734 c -2.4974,-2.238 -4.9682,-4.6662 -7.4327,-7.2085 -7.1603,-15.2095 8.0148,-30.003 27.4364,-45.1816 24.6155,-19.238 54.2075,-40.8788 75.5621,-63.5539 14.394,-15.2843 25.9369,-32.8354 32.0366,-54.7129 1.7416,4.8394 3.2632,9.5857 4.5665,14.2432 -7.2547,18.0197 -18.2306,34.4302 -32.1227,49.5797 -23.9516,26.1204 -52.3837,45.5764 -79.2527,67.8214 -15.2242,12.6046 -26.1231,25.4175 -20.7935,39.0126 z"
+         style="fill:url(#grad24)"
+         id="path72" />
+    </g>
+    <g
+       id="Layer1002">
+      <path
+         d="m 317.4418,459.6089 c 0,3.2896 -1.59,4.9345 -4.7702,4.9345 h -69.2481 c -4.1672,0 -7.6762,-1.3433 -10.5273,-4.03 -2.8511,-2.6864 -4.2766,-6.0585 -4.2766,-10.1157 0,-3.1802 1.2611,-6.1407 3.7834,-8.8824 -2.632,-2.9605 -3.8929,-6.031 -3.7834,-9.2111 v -0.4933 -0.1647 c -0.1095,-3.8378 1.2886,-7.0452 4.1944,-9.6222 2.9061,-2.5769 6.4423,-3.8656 10.6095,-3.8656 h 69.2481 c 3.1802,0 4.7702,1.645 4.7702,4.9346 0,3.2899 -1.6997,4.9348 -5.099,4.9348 h -67.4391 c -3.7284,0 -5.5924,1.3981 -5.5924,4.1942 0,2.906 1.9737,4.3588 5.9213,4.3588 h 1.1514 -0.1644 49.5102 c 3.2896,0 4.9345,1.6449 4.9345,4.9345 0,3.1802 -1.5899,4.7702 -4.7701,4.7702 h -50.6616 c -3.9476,0 -5.9213,1.4255 -5.9213,4.2766 0,2.7414 1.864,4.1122 5.5924,4.1122 h 67.4391 c 3.3993,0 5.099,1.645 5.099,4.9346 z"
+         style="fill:#cb9c3f;fill-rule:evenodd"
+         id="path73" />
+      <path
+         d="m 464.9017,437.8144 c 0.1097,4.3591 -1.7818,8.7727 -5.6746,13.1865 -3.8929,4.4136 -9.5128,6.6342 -16.8597,6.6342 h -55.2671 v 6.9083 h -10.3626 v -29.6623 c 0,-8.7451 3.2349,-13.981 9.7047,-15.7357 0,0 3.2349,-0.3291 9.7044,-0.987 h 44.5757 c 7.8953,0 13.5975,1.5353 17.1065,4.5783 2.6317,2.1931 4.3863,4.1669 5.2634,5.894 1.2064,2.3029 1.8093,5.3734 1.8093,9.1837 z m -10.6914,0.3291 c 0,-2.2753 -0.932,-4.5507 -2.7964,-6.7714 -1.864,-2.2204 -5.373,-3.3443 -10.527,-3.3443 h -46.2203 c -4.0572,0 -6.4698,1.4253 -7.2374,4.2491 -0.2194,0.8499 -0.3289,2.3851 -0.3289,4.5508 v 10.9383 h 53.7866 c 1.7546,0 3.3171,-0.1647 4.6879,-0.4935 1.3706,-0.3291 2.7139,-0.987 4.0298,-1.9465 3.0705,-2.1932 4.6057,-4.578 4.6057,-7.1825 z"
+         style="fill:#cb9c3f;fill-rule:evenodd"
+         id="path74" />
+      <path
+         d="M 612.4717,464.5434 H 602.1091 V 452.865 c 0,-2.3029 -0.0547,-3.509 -0.1644,-3.6187 -0.2194,-0.8774 -0.9871,-1.3159 -2.3029,-1.3159 h -62.6689 c -1.3159,0 -2.0835,0.4385 -2.3029,1.3159 0,-0.1097 0,1.0967 0,3.6187 v 11.6784 h -10.3626 v -46.385 H 534.67 v 14.804 c 0,2.5219 0,3.7831 0,3.7831 0.2194,0.877 0.987,1.3158 2.3304,1.3158 h 62.6139 c 1.3433,0 2.111,-0.4388 2.3304,-1.3158 0.1097,-0.2194 0.1644,-1.4806 0.1644,-3.7831 0,-1.3162 0,-4.1945 0,-8.6358 0,-4.441 0,-6.497 0,-6.1682 h 10.3626 z"
+         style="fill:#cb9c3f;fill-rule:evenodd"
+         id="path75" />
+      <path
+         d="m 761.5772,441.3509 c 0,6.6892 -1.9738,12.2817 -5.9216,16.7777 -2.0835,2.4123 -4.4958,4.0573 -7.2371,4.9346 0,0 -3.1255,0.4932 -9.3759,1.4802 h -44.7401 c -2.1931,-0.2194 -5.3183,-0.7126 -9.3756,-1.4802 -2.7414,-0.8773 -5.1539,-2.5223 -7.2374,-4.9346 -3.9475,-4.496 -5.9213,-10.0885 -5.9213,-16.7777 0,-6.6889 1.9738,-12.2814 5.9213,-16.7774 2.0835,-2.4126 4.496,-4.0572 7.2374,-4.9345 0,0 3.1252,-0.4936 9.3756,-1.4806 h 44.7401 c 2.1931,0.1097 5.3183,0.6032 9.3759,1.4806 2.7413,0.8773 5.1536,2.5219 7.2371,4.9345 3.9478,4.496 5.9216,10.0885 5.9216,16.7774 z m -10.6915,-0.1644 c 0,-7.1277 -2.906,-11.3496 -8.7179,-12.6655 -1.4256,-0.3288 -2.9605,-0.4932 -4.6055,-0.4932 h -41.7792 c -1.645,0 -3.1802,0.1644 -4.6058,0.4932 -5.8116,1.3159 -8.7176,5.5378 -8.7176,12.6655 0,7.2374 2.906,11.5688 8.7176,12.9943 1.4256,0.3291 2.9608,0.4935 4.6058,0.4935 h 41.7792 c 1.645,0 3.1799,-0.1644 4.6055,-0.4935 5.8119,-1.4255 8.7179,-5.7569 8.7179,-12.9943 z"
+         style="fill:#cb9c3f;fill-rule:evenodd"
+         id="path76" />
+      <path
+         d="m 80.2826,459.6089 c 0,3.2896 1.5899,4.9345 4.7701,4.9345 h 69.2481 c 4.1672,0 7.6762,-1.3433 10.5273,-4.03 2.8511,-2.6864 4.2767,-6.0585 4.2767,-10.1157 0,-3.1802 -1.2612,-6.1407 -3.7834,-8.8824 2.6319,-2.9605 3.8928,-6.031 3.7834,-9.2111 v -0.4933 -0.1647 c 0.1094,-3.8378 -1.2887,-7.0452 -4.1945,-9.6222 -2.906,-2.5769 -6.4423,-3.8656 -10.6095,-3.8656 H 85.0527 c -3.1802,0 -4.7701,1.645 -4.7701,4.9346 0,3.2899 1.6996,4.9348 5.0989,4.9348 h 67.4391 c 3.7284,0 5.5924,1.3981 5.5924,4.1942 0,2.906 -1.9737,4.3588 -5.9213,4.3588 h -1.1514 0.1644 -49.5102 c -3.2896,0 -4.9345,1.6449 -4.9345,4.9345 0,3.1802 1.5899,4.7702 4.7701,4.7702 h 50.6616 c 3.9476,0 5.9213,1.4255 5.9213,4.2766 0,2.7414 -1.864,4.1122 -5.5924,4.1122 H 85.3815 c -3.3993,0 -5.0989,1.645 -5.0989,4.9346 z"
+         style="fill:#cb9c3f;fill-rule:evenodd"
+         id="path77" />
+    </g>
+  </g>
+</svg>
+    </div>
+    <h1 class="hero__slogan" id="heroSlogan">Место про&nbsp;хлеб, людей и&nbsp;время</h1>
+    <div class="hero__media" id="heroMedia">
+      <video src="assets/hero.mp4" autoplay muted loop playsinline preload="metadata"
+             aria-label="Видео: ресторан, кухня и музей Зерно"></video>
+    </div>
+  </div>
+</section>
+
+<section class="s2-restaurant" id="restaurant">
+  <div class="s2__head">
+    <h2 class="reveal">Место, где историю можно попробовать на&nbsp;вкус</h2>
+    <p class="s2__sub reveal">Зерно, мука, хлеб — в&nbsp;блюдах, которые готовили на&nbsp;Урале сто лет назад,<br>и&nbsp;в&nbsp;тех, что придумали вчера.</p>
+  </div>
+  <div class="car reveal" id="car" aria-label="Карусель: ресторан, открытая кухня и события. Листайте перетаскиванием или колесом мыши">
+    <article class="car__card">
+      <video src="assets/hero.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="shade"></div>
+      <div class="inner">
+        <p class="car__label">Ресторан</p>
+        <h3 class="car__title">Кухня без лишней сложности, но&nbsp;с&nbsp;вниманием к&nbsp;тому, из&nbsp;чего всё сделано</h3>
+        <button class="car__btn" type="button">Бронировать стол</button>
+      </div>
+    </article>
+    <article class="car__card"><img src="assets/card2.jpg" alt="Стол ресторана с сервировкой"></article>
+    <article class="car__card">
+      <video src="assets/kitchen.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="shade"></div>
+      <div class="inner">
+        <p class="car__label">Открытая кухня</p>
+        <h3 class="car__title">Мастер-классы от&nbsp;именитого шеф-повара</h3>
+        <button class="car__btn" type="button">Записаться</button>
+      </div>
+    </article>
+    <article class="car__card"><img src="assets/card3.jpg" alt="Интерьер ресторана"></article>
+    <article class="car__card">
+      <video src="assets/hero.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="shade"></div>
+      <div class="inner">
+        <p class="car__label">События</p>
+        <h3 class="car__title">Уютный вечер и&nbsp;живая музыка</h3>
+        <button class="car__btn" type="button">Подробнее</button>
+      </div>
+    </article>
+    <article class="car__card"><img src="assets/card5.jpg" alt="Зал ресторана"></article>
+    <article class="car__card"><img src="assets/card6.jpg" alt="Кафе и пекарня"></article>
+  </div>
+</section>
+
+<section class="s3-museum" id="s3">
+  <div class="s3__head">
+    <h2 class="reveal">Место, где историю можно увидеть</h2>
+    <p class="s3__sub reveal">Истории людей, которые растили зерно на&nbsp;Урале и&nbsp;строили мелькомбинат</p>
+  </div>
+  <div class="zoom" id="zoom">
+    <div class="zoom__stage">
+      <div class="zp zp--1"><div class="zp__box"><img src="assets/z1.jpg" alt="Экспозиция: зернотёрка"></div></div>
+      <div class="zp zp--2"><div class="zp__box"><img src="assets/z2.jpg" alt="Изба с печью"></div></div>
+      <div class="zp zp--v"><div class="zp__box">
+        <video src="assets/museum.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      </div></div>
+      <div class="zp zp--3"><div class="zp__box"><img src="assets/z3.jpg" alt="Вывеска Челябинскъ"></div></div>
+      <div class="zp zp--4"><div class="zp__box"><img src="assets/z4.jpg" alt="Зал музея"></div></div>
+      <div class="zp zp--5"><div class="zp__box"><img src="assets/z5.jpg" alt="Экспозиция музея"></div></div>
+      <div class="zp zp--6"><div class="zp__box"><img src="assets/z6.jpg" alt="Устройство мельницы"></div></div>
+    </div>
+  </div>
+  <div class="zoom__cta-row">
+      <button class="zoom__cta" id="zoomCta" type="button">Записаться на экскурсию</button>
+  </div>
+</section>
+
+<section class="s-kitchen" id="kitchen">
+  <div class="sk__head">
+    <h2 class="reveal">Место, где рецепты не&nbsp;держат в&nbsp;секрете</h2>
+    <p class="sk__sub reveal">На открытой кухне шеф-повар делится тем, что обычно остаётся за&nbsp;дверями ресторана: рецептами, приёмами и&nbsp;мелочами, из&nbsp;которых складывается вкус</p>
+  </div>
+  <div class="sk-stack" id="skStack">
+    <div class="sk-pin">
+      <div class="sk-card" style="z-index:1"><div class="sk-card__box">
+        <img src="assets/recipe1.jpg" alt="Открытая кухня: рабочая зона с разделочными досками и ножами">
+      </div></div>
+      <div class="sk-card" style="z-index:2"><div class="sk-card__box">
+        <img src="assets/recipe2.jpg" alt="Открытая кухня: кухонный остров и рабочая зона">
+      </div></div>
+      <div class="sk-card" style="z-index:3"><div class="sk-card__box">
+        <img src="assets/recipe3.jpg" alt="Открытая кухня: общий план зала для мастер-классов">
+      </div></div>
+      <div class="sk-card" style="z-index:4"><div class="sk-card__box">
+        <video src="assets/kitchen.mp4" autoplay muted loop playsinline preload="metadata"
+               aria-label="Видео: шеф-повар готовит на открытой кухне"></video>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="s-reviews" id="reviews">
+  <div class="rv__head">
+    <h2 class="reveal">Место, о&nbsp;котором говорят</h2>
+    <p class="rv__sub reveal">К нам часто приходят по&nbsp;совету — а&nbsp;уходя, советуют сами</p>
+  </div>
+
+  <div class="rv-marquee reveal" aria-label="Отзывы гостей">
+    <!-- Колонка 1 -->
+    <div class="rv-col">
+      <div class="rv-track">
+        <article class="rv-card">
+          <p class="rv-card__text">Пришли пообедать, а ушли через четыре часа: между горячим и десертом успели обойти весь музей. Теперь знаю про мелькомбинат больше, чем про собственную работу. Хлеб взяли с собой домой.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av01.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Анна Черепанова</p><p class="rv-card__role">Знаток города 3 уровня</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Светлое, продуманное пространство, колосья в интерьере. Меню построено вокруг зерна, но без занудства: каши, выпечка и вполне современные блюда. Порции честные.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av02.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Игорь Вахрушев</p><p class="rv-card__role">Знаток города 5 уровня</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Я челябинец, про мелькомбинат слышал всю жизнь, но только здесь понял, какая за ним история. Музей сделан с уважением к людям, которые его строили. После экскурсии пообедали — правильное завершение.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av03.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Андрей Щербинин</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Муж подарил сертификат на мастер-класс — лучший подарок за годы. Шеф без пафоса: объясняет, шутит, поправляет. Тесто теперь получается и дома.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av04.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Светлана Ромашова</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Возил сюда деловых партнёров из Москвы: удивить их сложно, а здесь получилось. Сначала экскурсия по музею, потом ужин. Уехали с хлебом и впечатлениями.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av05.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Константин Зыков</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Отмечали день рождения мамы. Она печёт всю жизнь — на мастер-классе спорила с шефом о тесте, а он слушал и смеялся. Лучший её праздник за долгое время.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av06.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Дарья Огнева</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Были на мастер-классе вдвоём с сыном-подростком. Впервые видел, чтобы он три часа не смотрел в телефон. Приготовили ужин, съели его тут же — и записались ещё раз.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av07.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Роман Дегтярёв</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Колонка 2 -->
+    <div class="rv-col">
+      <div class="rv-track">
+        <article class="rv-card">
+          <p class="rv-card__text">Водил родителей, им за семьдесят. Мама полмузея вспоминала своё деревенское детство, отец рассказывал про завод. Потом сидели в ресторане и разговаривали так хорошо, как давно не получалось.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av08.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Дмитрий Санников</p><p class="rv-card__role">12 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Заглянули случайно, по дороге, а оказалось — целый мир: ресторан, музей и кухня, где учат готовить. За один визит всё не успели. Вернёмся за мастер-классом.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av09.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Наталья Козлова</p><p class="rv-card__role">Знаток города 1 уровня</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Отмечали здесь годовщину свадьбы. Брали блюда по старым уральским рецептам и кое-что из нового меню — вкусно и то, и другое. Вечером в зале очень тёплый свет.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av10.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Екатерина Малозёмова</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Обедаю здесь по будням, офис рядом. Кухня стабильная, обслуживание быстрое, и приятно, что даже простая каша здесь со смыслом. Привёл коллег — теперь ходим вместе.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av11.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Виктор Плотников</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Моя бабушка работала на мелькомбинате, и в музее я будто встретилась с её молодостью. Спасибо тем, кто собрал эти истории. Посидели потом в ресторане — уходить не хотелось.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av12.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Татьяна Ведерникова</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Зашли с женой на час, ушли под закрытие. Пока ждали горячее, посмотрели часть экспозиции — удобно, что всё в одном месте. Кухня достойная, хлеб забрали с собой.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av13.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Михаил Кравцов</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Люблю места, где за красивой картинкой есть содержание. Здесь оно есть: история мелькомбината, уральский хлеб, живая кухня. Ушла с ощущением, что город стал мне понятнее.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av14.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Вера Лазарева</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Колонка 3 -->
+    <div class="rv-col">
+      <div class="rv-track">
+        <article class="rv-card">
+          <p class="rv-card__text">Была на мастер-классе на открытой кухне. Боялась, что буду мешаться, но шеф объясняет так, что получилось даже у меня. Дома повторила — не поверили, что готовила сама.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av15.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Ольга Меньшикова</p><p class="rv-card__role">Знаток города 5 уровня</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Редкое место, куда можно прийти всей семьёй и никому не скучно. Сын залип на старых механизмах в музее, дочь попросилась готовить с шефом. Обед прошёл без капризов — у нас это событие.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av16.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Марина Полозова</p><p class="rv-card__role">68 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Приезжали из Екатеринбурга специально ради музея — не пожалели. История о том, как на Урале растили хлеб, рассказана через судьбы конкретных людей. Обратно везли свежий хлеб и план вернуться.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av17.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Павел Ерохин</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Пришла ради красивых фотографий, осталась из-за еды. Интерьер действительно фотогеничный, но хлеб и десерты — главное открытие. В музей заглянула на десять минут, зависла на час.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av18.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Юлия Стрельцова</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">Скептически отношусь к местам «с концепцией», но тут всё по-настоящему. В музее интересно, в ресторане вкусно, на кухне шеф действительно учит, а не показывает шоу. Редкое сочетание.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av19.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Алексей Мурзин</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="rv-card">
+          <p class="rv-card__text">С моей фамилией пройти мимо было невозможно. Место оправдало: душевный музей, вкусный обед и очень доброжелательная команда. Приведу подруг.</p>
+          <div class="rv-card__author">
+            <img class="rv-card__ava" src="assets/avatars/av20.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="rv-card__meta"><p class="rv-card__name">Людмила Пшеничникова</p><p class="rv-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <div class="rv-cta-row reveal">
+    <button class="rv-cta" type="button">Смотреть все отзывы</button>
+  </div>
+</section>
+
+<section class="s-contacts" id="contacts">
+  <div class="sc__head">
+    <h2 class="reveal">Как попасть в это место</h2>
+    <p class="sc__sub reveal">Мы находимся в&nbsp;историческом центре Челябинска</p>
+  </div>
+  <div class="sc-map reveal">
+    <iframe
+      src="https://yandex.ru/map-widget/v1/?ll=61.386200%2C55.168600&z=16&pt=61.386200,55.168600,pm2rdm&l=map"
+      allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+      title="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></iframe>
+  </div>
+</section>
+
+<script>
+(function(){
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) return; // статичный вид Block 1.3 без анимаций
+
+  // ИНТРО: 1) лого из прозрачности  2) лого выше+меньше, заголовок проявляется  3) +1c видео
+  addEventListener('load', () => {
+    setTimeout(() => document.body.classList.add('s1'),  150);
+    setTimeout(() => document.body.classList.add('s2'), 1250); // лого едет наверх (1c)
+    setTimeout(() => document.body.classList.add('s3'), 2100); // заголовок — когда лого уже наверху
+    setTimeout(() => document.body.classList.add('s4'), 3100); // видео — спустя секунду
+  });
+
+  const hero   = document.getElementById('hero');
+  const slogan = document.getElementById('heroSlogan');
+  const media  = document.getElementById('heroMedia');
+
+  const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+  const range = (p,a,b) => clamp((p-a)/(b-a), 0, 1);
+  const ease  = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+  const lerp  = (a,b,t) => a+(b-a)*t;
+
+  // СКРОЛЛ 1.2 -> 1.3: заголовок 44.7vh -> 7.4vh;
+  // видео 84vh -> 19.8vh и 55.1vw -> 83.3vw (scale 1.512), пропорции макета
+  function progress(){
+    const total = hero.offsetHeight - innerHeight;
+    if (total <= 0) return 0; // секция не выше окна — скрабить нечего, делить на ноль тем более
+    return clamp(-hero.getBoundingClientRect().top / total, 0, 1);
+  }
+
+  // размеры заголовка от прогресса не зависят (едет только translateY), поэтому меряем
+  // не покадрово, а при смене раскладки — иначе демпфер даёт forced reflow на каждом кадре
+  let sW = 0, sH = 0;
+  function measure(){ const r = slogan.getBoundingClientRect(); sW = r.width; sH = r.height; }
+  measure();
+
+  function render(p){
+    const pe = ease(range(p, 0, .85));
+    slogan.style.transform = `translateY(${lerp(0,-37.3,pe)}vh)`;
+    const ms = lerp(1,1.512,pe);
+    // зазор заголовок-видео как в макете: 64px в масштабе контейнера
+    const gapPx = sW / 1600 * 64;
+    const mediaFinalTopPx = 0.074 * innerHeight + sH + gapPx;
+    const shiftVh = (mediaFinalTopPx - 0.84 * innerHeight) / innerHeight * 100; // отрицательный
+    media.style.transform  =
+      `translateX(-50%) translateY(${lerp(0, shiftVh, pe)}vh) scale(${ms})`;
+    media.style.borderRadius = (16 / ms).toFixed(2) + 'px'; // видимый радиус держим 16px
+  }
+
+  const scrub = createScrub({ progress, render, tau:.12, maxSpeed:1.2 });
+  addEventListener('resize', () => { measure(); scrub.snap(); });
+  // шрифт грузится после первого кадра и меняет высоту заголовка — перемерить
+  if (document.fonts) document.fonts.ready.then(() => { measure(); scrub.snap(); });
+
+  // лого живёт отдельно от скраба: скролл только переключает порог, гасит его CSS за .55s
+  function logoGate(){
+    const p = progress();
+    if (p > 0.01) document.body.classList.add('s1','s2','s3','s4'); // скролл раньше интро
+    document.body.classList.toggle('hero-off', p > 0.015);
+  }
+  addEventListener('scroll', logoGate, { passive:true });
+  logoGate();
+})();
+</script>
+
+<script>
+(function(){
+  const vp = document.getElementById('car');
+  const cards = [...vp.children];
+  const N = cards.length, CARD = 382, GAP = 24, STEP = CARD + GAP;
+
+  let t = 0, target = 0, animating = false;
+
+  function render(){
+    for (let i = 0; i < N; i++){
+      // бесконечный цикл: позиция по модулю N, диапазон [-1, N-1)
+      let m = (((i - t) % N) + N) % N;
+      if (m > N - 1) m -= N;
+      let x, z, s = 1, o = 1;
+      if (m >= 0){ x = m * STEP; z = 10; }
+      else {
+        const k = -m; // 0..1 — стадия ухода
+        x = k * 48;                    // дрейф ЧУТЬ ВПРАВО — под приближающуюся карточку
+        z = 5;                         // ниже соседей — ныряет ПОД
+        s = 1 - k * 0.06;              // лёгкое сжатие
+        o = k < .55 ? 1 : Math.max(0, 1 - (k - .55) / .45); // растворяется уже накрытая
+      }
+      const c = cards[i];
+      c.style.transform = `translateX(${x}px) scale(${s})`;
+      c.style.zIndex = z;
+      c.style.opacity = o;
+    }
+  }
+  // пружина с сохранением скорости (critically damped):
+  // резкие перелистывания не перезапускают движение с нуля — скорость наследуется
+  let v = 0, lastNow = 0;
+  const SMOOTH = 0.46; // сек: отклик пружины
+  function animate(now){
+    if (!animating) return;
+    const dt = Math.min(0.033, (now - (lastNow || now)) / 1000) || 0.016;
+    lastNow = now;
+    const om = 2 / SMOOTH, k = om * dt;
+    const e = 1 / (1 + k + 0.48*k*k + 0.235*k*k*k);
+    const change = t - target;
+    const temp = (v + om * change) * dt;
+    v = (v - om * temp) * e;
+    t = target + (change + temp) * e;
+    render();
+    if (Math.abs(t - target) < 0.0006 && Math.abs(v) < 0.0006){
+      t = target; v = 0; animating = false; render(); return;
+    }
+    requestAnimationFrame(animate);
+  }
+  function go(to){ // без ограничений — карусель зациклена
+    target = to;
+    if (!animating){ animating = true; lastNow = 0; requestAnimationFrame(animate); }
+  }
+
+  // drag (мышь и тач) + скорость броска
+  let down = null, moved = 0, lastMove = null;
+  vp.addEventListener('pointerdown', e => {
+    if (!overCards(e)) return; // пустое поле слева — карусель не трогаем
+    down = { x: e.clientX, t }; moved = 0; v = 0; animating = false; // рука перехватывает пружину
+    lastMove = { x: e.clientX, time: performance.now() };
+    vp.classList.add('dragging'); vp.setPointerCapture(e.pointerId);
+  });
+  vp.addEventListener('pointermove', e => {
+    if (!down){ vp.classList.toggle('over-cards', overCards(e)); return; } // курсор по зоне
+    const dx = e.clientX - down.x; moved = Math.max(moved, Math.abs(dx));
+    t = down.t - dx / STEP; target = t; render();
+    const now = performance.now(), dt = (now - lastMove.time) / 1000;
+    if (dt > 0.012){ // скорость пальца в карточках/сек (сглаженная)
+      const inst = -(e.clientX - lastMove.x) / STEP / dt;
+      v = v * 0.6 + inst * 0.4;
+      lastMove = { x: e.clientX, time: now };
+    }
+  });
+  function up(e){
+    if (!down) return;
+    vp.classList.remove('dragging');
+    down = null;
+    // бросок: цель с учётом скорости, но не дальше двух карточек за раз
+    const fling = Math.max(-2, Math.min(2, v * 0.22));
+    go(Math.round(t + fling));
+  }
+  vp.addEventListener('pointerup', up);
+  vp.addEventListener('pointercancel', up);
+  vp.addEventListener('click', e => { if (moved > 6){ e.stopPropagation(); e.preventDefault(); } }, true);
+
+  // вьюпорт карусели во всю ширину окна, а карточки начинаются от левого поля контейнера.
+  // полоса левее — пустая: там колесо скроллит страницу, а не листает карусель
+  function overCards(e){
+    return e.clientX >= vp.getBoundingClientRect().left + cards[0].offsetLeft;
+  }
+
+  // колесо: без «замка» — тики накапливаются, пружина сглаживает очередь
+  let wheelAcc = 0, wheelTime = 0;
+  vp.addEventListener('wheel', e => {
+    if (!overCards(e)){ wheelAcc = 0; return; } // пустое поле слева — скролл отдаём странице
+    e.preventDefault();
+    const now = Date.now();
+    if (now - wheelTime > 240) wheelAcc = 0; // новая серия
+    wheelTime = now;
+    wheelAcc += Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    const THRESH = 90; // px колеса на одну карточку
+    if (Math.abs(wheelAcc) >= THRESH){
+      const steps = Math.trunc(wheelAcc / THRESH);
+      wheelAcc -= steps * THRESH;
+      go(Math.round(target) + steps);
+    }
+  }, { passive: false });
+
+  addEventListener('resize', render);
+  render();
+})();
+</script>
+<script>
+(function(){
+  const sec = document.querySelector('.s2-restaurant');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ sec.classList.add('in'); return; }
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.22 }).observe(sec);
+})();
+</script>
+<script>
+(function(){
+  const sec = document.querySelector('.s-kitchen');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced){ sec.classList.add('in'); return; }
+
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.22 }).observe(sec.querySelector('.sk__head'));
+
+  // стек карточек: скролл только триггерит порог, саму скорость въезда задаёт CSS-transition —
+  // так анимация не зависит от того, быстро или медленно крутят колесо
+  const stack = document.getElementById('skStack');
+  const cards = [...sec.querySelectorAll('.sk-card')];
+  const N = cards.length;
+  const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+  cards[0].classList.add('show'); // первая карточка всегда на месте, без входной анимации
+
+  let ticking = false;
+  function update(){
+    ticking = false;
+    const total = stack.offsetHeight - innerHeight;
+    const p = clamp(-stack.getBoundingClientRect().top / total, 0, 1);
+    const seg = 1 / N;
+    for (let i = 1; i < N; i++){
+      cards[i].classList.toggle('show', p >= i * seg);
+    }
+  }
+  function onScroll(){ if (!ticking){ ticking = true; requestAnimationFrame(update); } }
+  addEventListener('scroll', onScroll, { passive:true });
+  addEventListener('resize', onScroll);
+  update();
+})();
+</script>
+<script>
+(function(){
+  const zoom = document.getElementById('zoom');
+  const cta = document.getElementById('zoomCta');
+  const els = ['v','1','2','3','4','5','6'].map(s => document.querySelector('.zp--' + s));
+  const vbox = els[0].querySelector('.zp__box');
+  // геометрия раскладки в долях юнита: [cx, cy, w, h] (смещения центров от центра видео)
+  const F = [
+    [ 0,      0,      .3238, .2163], // видео
+    [ .0841, -.2872,  .4919, .3281],
+    [-.3384, -.0944,  .3231, .4050],
+    [ .3384,  0,      .3231, .2163],
+    [-.2534,  .2313,  .3244, .2163],
+    [ .0847,  .2594,  .3231, .2725],
+    [ .3809,  .2028,  .2394, .1594]
+  ];
+  // ширина контейнера = --cw: min(100vw - --margin*2, 1600px). Считаем из токена,
+  // а не меряем хедер: его вставляет chrome.js, к моменту первого update() его ещё нет
+  function containerWidth(){
+    const m = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin'));
+    return Math.min(innerWidth - m * 2, 1600);
+  }
+  function finalKs(){ // визуальные множители (DOM в 2x, вид = k/2)
+    const cw = containerWidth();
+    const visW = vbox.offsetWidth / 2;   // видимая базовая ширина видео
+    const zu = visW / F[0][2];           // видимый юнит композиции
+    const base = cw / visW;              // центр в финале = ровно ширина контейнера
+    // ЕДИНАЯ скорость всех фото: композиция масштабируется как целое (подобие),
+    // поэтому пересечения карточек невозможны в принципе; K = максимум из «гарантий выхода»
+    let K = base * 1.5;
+    for (let i = 1; i < F.length; i++){
+      const [fx, fy, w, h] = F[i];
+      const exitX = Math.abs(fx) - w/2 > 0.01 ? (innerWidth/2)  / (zu * (Math.abs(fx) - w/2)) : Infinity;
+      const exitY = Math.abs(fy) - h/2 > 0.01 ? (innerHeight/2) / (zu * (Math.abs(fy) - h/2)) : Infinity;
+      K = Math.max(K, 1.15 * Math.min(exitX, exitY));
+    }
+    return F.map((f, i) => i === 0 ? base : K);
+  }
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // reveal шапки блока
+  const sec = document.getElementById('s3');
+  if (reduced){ sec.classList.add('in'); }
+  else new IntersectionObserver((en, obs) => {
+    if (en[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.35 }).observe(sec.querySelector('.s3__head'));
+
+  if (reduced) return; // статичный финал из CSS
+
+  const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+
+  els.forEach((el, i) => el.style.zIndex = i === 0 ? 5 : 10); // фото поверх видео; между собой не пересекаются
+
+  // finalKs() читает offsetWidth — это forced reflow. От прогресса результат не зависит,
+  // поэтому держим кэш и пересчитываем только когда меняется раскладка
+  let ks = finalKs();
+
+  function progress(){
+    const total = zoom.offsetHeight - innerHeight;
+    if (total <= 0) return 0; // секция не выше окна — скрабить нечего, делить на ноль тем более
+    return clamp(-zoom.getBoundingClientRect().top / total, 0, 1);
+  }
+  function render(pz){
+    for (let i = 0; i < els.length; i++){
+      const k = 1 + (ks[i] - 1) * pz;          // визуальный масштаб
+      els[i].style.transform = `scale(${k / 2})`; // DOM в 2x
+      if (i === 0) vbox.style.borderRadius = (16 / k).toFixed(2) + 'px'; // видимый радиус 8px
+    }
+    cta.classList.toggle('show', pz >= 0.95);
+  }
+
+  const scrub = createScrub({ progress, render, tau:.12, maxSpeed:2 });
+  addEventListener('resize', () => { ks = finalKs(); scrub.snap(); });
+  addEventListener('load', () => { ks = finalKs(); scrub.snap(); }); // до загрузки медиа размеры вру́т
+})();
+</script>
+
+<script>
+(function(){
+  // Отзывы: три колонки-ленты. Скролл-триггер только на reveal шапки; сама лента едет
+  // бесконечно на CSS-анимации, скорость от скролла не зависит.
+  const sec = document.querySelector('.s-reviews');
+  if (!sec) return;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // reveal шапки и ленты
+  if (reduced){ sec.classList.add('in'); }
+  else new IntersectionObserver((en, obs) => {
+    if (en[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.25 }).observe(sec.querySelector('.rv__head'));
+
+  if (reduced) return; // без анимации: статичные колонки, клоны не добавляем
+
+  // бесшовный цикл: дублируем карточки колонки (клон помечаем .rv-dup + aria-hidden),
+  // трек едет на translateY(0 → -50%), т.е. ровно на одну копию
+  const durations = ['52s', '64s', '46s']; // разные скорости → лёгкий параллакс между колонками
+  sec.querySelectorAll('.rv-track').forEach((track, i) => {
+    track.style.setProperty('--rv-dur', durations[i] || '54s');
+    [...track.children].forEach(card => {
+      const clone = card.cloneNode(true);
+      clone.classList.add('rv-dup');
+      clone.setAttribute('aria-hidden', 'true');
+      track.appendChild(clone);
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  // Золотой шейдер-фон: тонкие волновые линии + бегущие по ним сигналы, лёгкий декор под всей страницей.
+  // Скорость течения плавно растёт и падает вместе со скоростью скролла (везде одинаковая непрозрачность).
+  const canvas = document.getElementById('gold-shader-bg');
+  if (!canvas) return;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // premultipliedAlpha:true — наш blend кладёт в буфер именно премноженный цвет (rgb*alpha);
+  // при false браузер при композите на страницу применял альфу ещё раз, и золото «выцветало» в серое
+  const gl = canvas.getContext('webgl', { alpha:true, premultipliedAlpha:true, antialias:false })
+          || canvas.getContext('experimental-webgl', { alpha:true, premultipliedAlpha:true });
+  if (!gl) return; // декор необязателен — без WebGL страница просто остаётся без фона
+
+  const VERT = `
+    attribute vec2 aPos;
+    void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }
+  `;
+  const FRAG = `
+    precision highp float;
+    uniform vec2 uResolution;
+    uniform float uTime;
+    uniform float uOpacity;
+
+    /* тонкое лёгкое ядро линии — без широкого ореола, чтобы не «замыливалось» в туман */
+    float lineCore(float d, float k){
+      return k / (d*d*1400.0 + k);
+    }
+
+    void main(){
+      vec2 uv = gl_FragCoord.xy / uResolution.xy;
+      float aspect = uResolution.x / uResolution.y;
+      vec2 p = vec2(uv.x * aspect, uv.y);
+
+      const int N = 10;
+      float x0    = aspect * 0.62; /* точка, где почти все нити сходятся в одну */
+      float base  = 0.5;
+      float amp   = 0.35;          /* p.y — доля высоты экрана (0..1): весь пучок вместе качается на ~70% высоты */
+      float speed = 0.12;          /* общая скорость — вся связка течёт как одно целое */
+
+      float lineTotal = 0.0;
+      float pulseTotal = 0.0;
+
+      for (int i = 0; i < N; i++){
+        float fi = float(i) - float(N - 1) * 0.5; /* центрированный индекс: -4.5..4.5 */
+        float freq    = 1.15 + fi * 0.05;          /* почти одна частота — нити идут почти вместе, не «лучами» */
+        float baseI   = base + fi * 0.01;          /* маленький сдвиг центра нити — точка схождения не в один пиксель */
+        float weight  = 0.4 + 0.6 * fract(sin(fi * 12.9898 + 4.1414) * 43758.5453); /* у каждой нити своя яркость */
+
+        float y = baseI + amp * sin(freq * (p.x - x0) + uTime * speed);
+        float d = abs(p.y - y);
+        lineTotal += lineCore(d, 0.00085) * weight;
+
+        /* золотой «сигнал», бегущий вдоль этой нити — чуть контрастнее и ярче линии */
+        float pulseSpeed = 0.22 + fract(fi * 0.37 + 0.5) * 0.18;
+        float pulsePhase = fi * 3.1;
+        float travel = fract(uTime * pulseSpeed + pulsePhase);
+        float px_ = travel * (aspect + 0.6) - 0.3;
+        float py_ = baseI + amp * sin(freq * (px_ - x0) + uTime * speed);
+        float dp = length(p - vec2(px_, py_));
+        float edgeFade = smoothstep(0.0, 0.08, travel) * smoothstep(1.0, 0.92, travel);
+        pulseTotal += (0.0009 / (dp*dp*2200.0 + 0.0009)) * edgeFade * weight;
+      }
+
+      vec3 lineColor  = vec3(0.941, 0.835, 0.655); /* gold-200 — тело линии, светлый фирменный оттенок */
+      vec3 pulseColor = vec3(0.992, 0.961, 0.902); /* gold-50 — едва светлее линии, мягкий акцент-сигнал */
+
+      float lineAlpha  = clamp(lineTotal, 0.0, 1.0) * 0.85;
+      float pulseAlpha = clamp(pulseTotal, 0.0, 1.0) * 0.9;
+
+      vec3 color = mix(lineColor, pulseColor, clamp(pulseTotal, 0.0, 1.0));
+      float alpha = clamp(lineAlpha + pulseAlpha, 0.0, 1.0) * uOpacity;
+
+      gl_FragColor = vec4(color, alpha);
+    }
+  `;
+
+  function compile(type, src){
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+      console.warn('gold-shader-bg:', gl.getShaderInfoLog(s));
+      gl.deleteShader(s);
+      return null;
+    }
+    return s;
+  }
+  const vs = compile(gl.VERTEX_SHADER, VERT);
+  const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return;
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+    console.warn('gold-shader-bg:', gl.getProgramInfoLog(prog));
+    return;
+  }
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'aPos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes = gl.getUniformLocation(prog, 'uResolution');
+  const uTimeLoc = gl.getUniformLocation(prog, 'uTime');
+  const uOpacityLoc = gl.getUniformLocation(prog, 'uOpacity');
+
+  gl.enable(gl.BLEND);
+  // цвет — обычный alpha-over; альфа — своя формула (иначе она «схлопывается» в квадрат
+  // и вдобавок кадры накапливаются друг на друге без gl.clear)
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  gl.clearColor(0, 0, 0, 0);
+
+  const dpr = Math.min(devicePixelRatio || 1, 1.5);
+  function resize(){
+    const w = Math.max(1, Math.round(innerWidth * dpr));
+    const h = Math.max(1, Math.round(innerHeight * dpr));
+    if (canvas.width !== w || canvas.height !== h){
+      canvas.width = w; canvas.height = h;
+      gl.viewport(0, 0, w, h);
+    }
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  function draw(time, opacity){
+    resize();
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uTimeLoc, time);
+    gl.uniform1f(uOpacityLoc, opacity);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  if (reduced){
+    draw(0.6, 1); // статичный кадр без анимации
+    return;
+  }
+
+  const IDLE_SPEED  = 0.11;  // базовая скорость течения (без скролла)
+  const BOOST_SCALE = 0.006; // вклад скорости скролла (px/сек) в ускорение волн
+  const BOOST_MAX   = 1.4;
+  const BOOST_TAU   = 0.35;  // сек — симметричная плавность разгона и торможения
+
+  let flowTime = 0, lastNow = 0, lastScrollY = scrollY, scrollSpeed = 0, raf = 0;
+  draw(flowTime, 1); // первый кадр сразу, не дожидаясь rAF
+  function frame(now){
+    const dt = Math.min(0.05, (now - (lastNow || now)) / 1000) || 0.016;
+    lastNow = now;
+
+    const instSpeed = Math.abs(scrollY - lastScrollY) / dt; // px/сек
+    lastScrollY = scrollY;
+    const k = 1 - Math.exp(-dt / BOOST_TAU); // одна и та же плавность что на разгон, что на затухание
+    scrollSpeed += (instSpeed - scrollSpeed) * k;
+    const boost = Math.min(BOOST_MAX, scrollSpeed * BOOST_SCALE);
+    flowTime += dt * (IDLE_SPEED + boost);
+
+    draw(flowTime, 1); // без затухания над контентом — везде одинаково
+    raf = requestAnimationFrame(frame);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden){ cancelAnimationFrame(raf); }
+    else { lastNow = 0; raf = requestAnimationFrame(frame); }
+  });
+  raf = requestAnimationFrame(frame);
+})();
+</script>
+<script>
+(function(){
+  const sec = document.querySelector('.s-contacts');
+  if (!sec) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ sec.classList.add('in'); return; }
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.22 }).observe(sec.querySelector('.sc__head'));
+})();
+</script>
+</body>
+</html>

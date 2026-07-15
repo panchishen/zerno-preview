@@ -1,0 +1,92 @@
+/* ===== Зерно · сквозные хедер и футер =====
+   Макеты: Header 63:257, Footer 171:595.
+   Подключение на любой странице:
+     <link rel="stylesheet" href="assets/chrome.css">
+     <script src="assets/chrome.js" defer></script>
+   Разметку вставляет chrome.js — в HTML страницы ничего писать не нужно.
+
+   Токены берутся со страницы; значения в var(...) вторым аргументом — фолбэк,
+   чтобы компоненты не разъезжались на странице без :root-токенов. */
+
+/* ===== ХЕДЕР ===== */
+.site-header{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:#FFFFFF;
+  padding-block:20px; /* 20 + 48 логотип + 20 = 88px */
+}
+/* режим главной: хедер выезжает сверху после первого экрана */
+.site-header--reveal{
+  transform:translateY(-100%);
+  transition:transform .45s cubic-bezier(.22,.61,.21,1);
+}
+.site-header--reveal.show{ transform:none }
+
+.hd__in{
+  width:var(--cw, min(100vw - 320px, 1600px)); margin-inline:auto;
+  display:flex; align-items:center; justify-content:space-between; gap:48px;
+}
+.hd__logo{ flex:none; display:block; line-height:0 }
+.hd__logo img{ width:200px; height:48px; display:block }
+
+.hd__nav, .hd__right{ display:flex; align-items:center; gap:48px; flex:none }
+.hd__nav a, .hd__nav span,
+.hd__right a, .hd__right span{
+  font:600 16px/1.3 var(--font-body, 'Manrope', system-ui, sans-serif);
+  letter-spacing:.08em; text-transform:uppercase;
+  color:var(--graphite-800, #2B2A29);
+  white-space:nowrap; text-decoration:none;
+}
+.hd__nav a:hover, .hd__right a:hover{ color:var(--gold-600, #A97C19) }
+.hd__nav a:focus-visible, .hd__right a:focus-visible, .hd__logo:focus-visible{
+  outline:2px solid var(--gold-600, #A97C19); outline-offset:4px; border-radius:2px;
+}
+
+/* ===== ФУТЕР ===== */
+.site-footer{
+  background:#FFFFFF;
+  border-top:1px solid var(--sand-300, #E4D8BD);
+}
+.ft__in{
+  width:var(--cw, min(100vw - 320px, 1600px)); margin-inline:auto;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:48px;
+  padding:32px 0 48px;
+}
+.ft__logo{ flex:none; display:block; line-height:0 }
+.ft__logo img{ width:245px; height:59px; display:block }
+
+.ft__col{
+  flex:none; display:flex; flex-direction:column; gap:8px;
+  padding-top:21px; /* по макету: строки колонок выровнены ниже верха логотипа */
+}
+.ft__col a, .ft__col span{
+  font:400 16px/1.52 var(--font-body, 'Manrope', system-ui, sans-serif);
+  color:var(--graphite-800, #2B2A29);
+  white-space:nowrap; text-decoration:none;
+}
+.ft__col a:hover{ color:var(--gold-600, #A97C19) }
+.ft__col a:focus-visible, .ft__logo:focus-visible{
+  outline:2px solid var(--gold-600, #A97C19); outline-offset:4px; border-radius:2px;
+}
+.ft__soc{ display:flex; gap:12px }
+
+/* ===== адаптив: макет десктопный, ниже — чтобы ничего не разъезжалось ===== */
+@media (max-width:1199px){
+  .hd__in{ gap:32px }
+  .hd__nav, .hd__right{ gap:32px }
+  .ft__in{ gap:32px }
+}
+@media (max-width:1023px){
+  .hd__right{ display:none }
+  .ft__in{ flex-wrap:wrap; row-gap:40px }
+  .ft__logo{ flex:1 0 100% }
+  .ft__col{ padding-top:0 }
+}
+@media (max-width:767px){
+  .hd__nav{ display:none } /* мобильное меню — отдельная задача */
+  .ft__in{ flex-direction:column; row-gap:32px; padding-bottom:40px }
+  .ft__col a, .ft__col span{ white-space:normal }
+  .ft__logo img{ width:200px; height:48px }
+}
+@media (prefers-reduced-motion: reduce){
+  .site-header--reveal{ transition:none }
+}
