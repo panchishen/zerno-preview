@@ -16,7 +16,7 @@
 /* ===== Зерно · токены (из зерно-цвета.tokens.json) ===== */
 :root{
   --sand-50:#FDFAF1; --sand-100:#F9F3E4; --sand-200:#F0E6CE; --sand-300:#E4D8BD;
-  --gold-500:#CB9C3F; --gold-600:#A97C19; --gold-700:#896100;
+  --gold-100:#FAEACF; --gold-500:#CB9C3F; --gold-600:#A97C19; --gold-700:#896100;
   --graphite-600:#5C5A59; --graphite-800:#2B2A29; --graphite-900:#1A1918;
   --font-heading:'Prosto One', system-ui, sans-serif;
   --font-body:'Manrope', system-ui, sans-serif;
@@ -119,7 +119,7 @@ body{
   position:absolute; left:50%; top:50vh; width:27vw;
   transform:translate(-50%,-50%);
   opacity:0; will-change:transform,opacity;
-  transition:opacity .9s ease, transform 1s cubic-bezier(.22,.61,.21,1);
+  transition:opacity .6s ease, transform .7s cubic-bezier(.22,.61,.21,1);
 }
 .hero__logo svg{ width:100%; height:auto; display:block }
 body.s1 .hero__logo{ opacity:1 }
@@ -134,7 +134,7 @@ body.hero-off .hero__logo{ opacity:0; transition:opacity .55s ease }
   font-family:var(--font-heading); font-weight:400;
   font-size:calc(var(--cw) * 0.04); line-height:1.1; letter-spacing:.08em; text-transform:uppercase;
   color:var(--gold-600); text-align:center;
-  opacity:0; transition:opacity .8s ease;
+  opacity:0; transition:opacity .5s ease;
   will-change:transform,opacity;
 }
 body.s3 .hero__slogan{ opacity:1 }
@@ -148,7 +148,7 @@ body.s3 .hero__slogan{ opacity:1 }
   height:min(calc(var(--cw) * 0.3224), 48.9vh);
   transform:translateX(-50%); transform-origin:top center;
   border-radius:16px; corner-shape:squircle; overflow:hidden; background:var(--graphite-900);
-  opacity:0; transition:opacity .8s ease;
+  opacity:0; transition:opacity .5s ease;
   will-change:transform,opacity;
 }
 body.s4 .hero__media{ opacity:1 }
@@ -1363,14 +1363,6 @@ body.s4 .hero__media{ opacity:1 }
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced) return; // статичный вид Block 1.3 без анимаций
 
-  // ИНТРО: 1) лого из прозрачности  2) лого выше+меньше, заголовок проявляется  3) +1c видео
-  addEventListener('load', () => {
-    setTimeout(() => document.body.classList.add('s1'),  150);
-    setTimeout(() => document.body.classList.add('s2'), 1250); // лого едет наверх (1c)
-    setTimeout(() => document.body.classList.add('s3'), 2100); // заголовок — когда лого уже наверху
-    setTimeout(() => document.body.classList.add('s4'), 3100); // видео — спустя секунду
-  });
-
   const hero   = document.getElementById('hero');
   const slogan = document.getElementById('heroSlogan');
   const media  = document.getElementById('heroMedia');
@@ -1380,9 +1372,21 @@ body.s4 .hero__media{ opacity:1 }
   const ease  = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
   const lerp  = (a,b,t) => a+(b-a)*t;
 
+  // ИНТРО неприкосновенно: пока оно идёт, прокрутка физически заперта на нуле. Прежде скролл
+  // просто игнорировался, но копился, и скраб потом отыгрывал накрученное второпях —
+  // видео утаскивало в морфинг ровно в тот кадр, когда оно только домерцало до видимости.
+  // Копиться нечему — значит, морфинг всегда идёт с нуля и в темпе человека.
+  const INTRO_END = 2900; // видео видимо на 2500 (s4 2000 + переход .5s), дальше пауза «постоять» в 1.2
+  const FAILSAFE  = 12000; // load может не прийти — страница не должна остаться запертой навсегда
+
+  // страница открыта не с самого верха (браузер вернул позицию после F5) — интро неуместно
+  let introDone = scrollY > 4;
+  if (introDone) document.body.classList.add('s1','s2','s3','s4');
+
   // СКРОЛЛ 1.2 -> 1.3: заголовок 44.7vh -> 7.4vh;
   // видео 84vh -> 19.8vh и 55.1vw -> 83.3vw (scale 1.512), пропорции макета
   function progress(){
+    if (!introDone) return 0; // интро ещё идёт — скраб молчит, где бы ни стоял скролл
     const total = hero.offsetHeight - innerHeight;
     if (total <= 0) return 0; // секция не выше окна — скрабить нечего, делить на ноль тем более
     return clamp(-hero.getBoundingClientRect().top / total, 0, 1);
@@ -1412,14 +1416,57 @@ body.s4 .hero__media{ opacity:1 }
   // шрифт грузится после первого кадра и меняет высоту заголовка — перемерить
   if (document.fonts) document.fonts.ready.then(() => { measure(); scrub.snap(); });
 
-  // лого живёт отдельно от скраба: скролл только переключает порог, гасит его CSS за .55s
-  function logoGate(){
-    const p = progress();
-    if (p > 0.01) document.body.classList.add('s1','s2','s3','s4'); // скролл раньше интро
-    document.body.classList.toggle('hero-off', p > 0.015);
-  }
+  // Лого гасит CSS за фиксированные .55s по классу, а не покадрово от позиции скролла.
+  // Порог берём из progress(), поэтому во время интро гейт молчит сам собой.
+  function logoGate(){ document.body.classList.toggle('hero-off', progress() > 0.015); }
   addEventListener('scroll', logoGate, { passive:true });
   logoGate();
+
+  // ЗАМОК НА ВРЕМЯ ИНТРО.
+  // wheel и touchmove гасим через preventDefault — для этого слушатели обязаны быть
+  // не-passive. Перетаскивание скроллбара так не отменить, поэтому на scroll ещё и
+  // возвращаем страницу на ноль: это страховка, а не основной механизм.
+  const SCROLL_KEYS = new Set(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' ','Spacebar']);
+  const eat     = e => e.preventDefault();
+  const eatKey  = e => { if (SCROLL_KEYS.has(e.key)) e.preventDefault(); };
+  const pinTop  = () => { if (scrollY !== 0) scrollTo(0, 0); };
+
+  function lockScroll(){
+    addEventListener('wheel',     eat, { passive:false });
+    addEventListener('touchmove', eat, { passive:false });
+    addEventListener('keydown',   eatKey);
+    addEventListener('scroll',    pinTop, { passive:true });
+  }
+  function unlockScroll(){
+    removeEventListener('wheel',     eat);
+    removeEventListener('touchmove', eat);
+    removeEventListener('keydown',   eatKey);
+    removeEventListener('scroll',    pinTop);
+  }
+
+  let released = false, failsafe = 0;
+  function release(){ // интро отыграло: отпускаем страницу и передаём скрабу эстафету
+    if (released) return;
+    released = true;
+    clearTimeout(failsafe);
+    unlockScroll();
+    introDone = true;
+    logoGate();
+    scrub.sync();
+  }
+
+  // ИНТРО: 1) лого из прозрачности  2) лого выше+меньше, заголовок проявляется  3) +1c видео
+  if (!introDone){
+    lockScroll();
+    failsafe = setTimeout(release, FAILSAFE);
+    addEventListener('load', () => {
+      setTimeout(() => document.body.classList.add('s1'),  100); // лого проявляется (.6s)
+      setTimeout(() => document.body.classList.add('s2'),  800); // лого едет наверх (.7s)
+      setTimeout(() => document.body.classList.add('s3'), 1400); // заголовок — лого почти наверху (.5s)
+      setTimeout(() => document.body.classList.add('s4'), 2000); // видео — следом за заголовком (.5s)
+      setTimeout(release, INTRO_END);
+    });
+  }
 })();
 </script>
 

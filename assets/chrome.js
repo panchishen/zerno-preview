@@ -3,8 +3,10 @@
 
    Подключение на любой странице (в <head>):
      <link rel="stylesheet" href="assets/chrome.css">
+     <script src="assets/scrub.js"></script>       <!-- нужен полосе прогресса, без defer -->
      <script src="assets/chrome.js" defer></script>
-   Разметку скрипт вставляет сам: хедер — в начало <body>, футер — в конец.
+   Разметку скрипт вставляет сам: хедер — в начало <body>, футер — в конец,
+   полоса прогресса — отдельным элементом рядом с хедером (не внутри него).
 
    Режим хедера:
      data-header="reveal" на <body> — выезжает после первого экрана (главная);
@@ -19,7 +21,7 @@
   // пути считаем от самого скрипта — работает и из подпапок
   var BASE = new URL('.', document.currentScript.src);
   var LOGO = new URL('logo_hor.svg', BASE).href;
-  var HOME = new URL('../home.html', BASE).href;
+  var HOME = new URL('../index.html', BASE).href; // страница переименована из home.html
 
   var NAV = [
     { label:'Ресторан',       id:'restaurant' },
@@ -57,19 +59,26 @@
     return '<header class="site-header" id="siteHeader">' +
       '<div class="hd__in">' +
         logo +
-          '<img src="' + LOGO + '" alt="Зерно — на главную" width="200" height="48">' +
+          '<img src="' + LOGO + '" alt="Зерно — на главную" width="234" height="56">' +
         '</a>' +
         '<nav class="hd__nav" aria-label="Основное меню">' + links(NAV) + '</nav>' +
-        '<div class="hd__right">' + stubs(SOCIAL) + phone() + '</div>' +
+        // соцсети из хедера временно убраны (макет 63:257) — в футере (171:595) пока остаются
+        '<div class="hd__right">' + phone() + '</div>' +
       '</div>' +
     '</header>';
+  }
+
+  // Полоса прогресса — отдельный элемент, не часть шапки: она поверх шапки и не зависит
+  // от того, показана та или нет. aria-hidden — то же самое сообщает нативный скроллбар.
+  function progressHTML(){
+    return '<div class="scroll-progress" id="scrollProgress" aria-hidden="true"><i></i></div>';
   }
 
   function footerHTML(){
     return '<footer class="site-footer">' +
       '<div class="ft__in">' +
         '<a class="ft__logo" href="' + HOME + '" title="Зерно — на главную">' +
-          '<img src="' + LOGO + '" alt="Зерно" width="245" height="59">' +
+          '<img src="' + LOGO + '" alt="Зерно" width="234" height="56">' +
         '</a>' +
         '<nav class="ft__col" aria-label="Разделы сайта">' + links(NAV) + '</nav>' +
         '<div class="ft__col">' +
@@ -87,7 +96,7 @@
   }
 
   function init(){
-    document.body.insertAdjacentHTML('afterbegin', headerHTML());
+    document.body.insertAdjacentHTML('afterbegin', headerHTML() + progressHTML());
     document.body.insertAdjacentHTML('beforeend', footerHTML());
 
     var header = document.getElementById('siteHeader');
@@ -117,6 +126,28 @@
       scrollTo(0, 0);
       location.reload();
     });
+
+    // Прогресс прокрутки: 0 — верх страницы, 1 — низ (макет 187:441).
+    // Сглажен тем же демпфером, что и hero: рисуем не позицию скролла, а значение, которое
+    // её догоняет. Сближение экспоненциальное — скорость сама нарастает и сама гаснет у цели.
+    // Идёт последним в init: если на странице забыли scrub.js, упадёт только полоса.
+    var bar  = document.getElementById('scrollProgress');
+    var fill = bar.querySelector('i');
+    createScrub({
+      progress: function(){
+        var total = document.documentElement.scrollHeight - innerHeight;
+        return total > 0 ? Math.min(1, Math.max(0, scrollY / total)) : 0; // короткая страница — делить нельзя
+      },
+      render: function(p){ fill.style.transform = 'scaleX(' + p + ')'; },
+      tau: .15 // «время догона»: больше — мягче и ватнее, меньше — резче и точнее
+      // maxSpeed намеренно не задаём: потолок скорости — это про «доиграть до конца», а полосе
+      // надо про «плавно нагнать». Экспонента и так тормозит у цели, потолок лишь добавил бы отставания.
+    });
+
+    // показ — по «сырому» скроллу, а не по сглаженному: появляться полоса опаздывать не должна
+    var showBar = function(){ bar.classList.toggle('show', scrollY > 0); };
+    addEventListener('scroll', showBar, { passive:true });
+    showBar();
   }
 
   if (document.readyState === 'loading') addEventListener('DOMContentLoaded', init);
