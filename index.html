@@ -189,12 +189,18 @@ body.s4 .hero__media{ opacity:1 }
   border-radius:16px; corner-shape:squircle; overflow:hidden;
   background:var(--graphite-100,#E8E8E7); will-change:transform;
 }
+.car__card.is-wide{ width:720px } /* широкие карточки макета (меню, событие, фото) */
 .car__card img, .car__card video{
   position:absolute; inset:0; width:100%; height:100%; object-fit:cover; pointer-events:none;
 }
+/* градиент под наклоном: тёмный угол слева-сверху → к центру-низу (текст в левом верхнем углу читается).
+   угол — от геометрии «угол→центр-низ», а она зависит от ширины: 382 → 158.3°, 720 → 143.13° */
 .car__card .shade{
   position:absolute; inset:0;
-  background:linear-gradient(180deg, rgba(73,50,0,1) 0%, rgba(73,50,0,.4) 100%);
+  background:linear-gradient(158.3deg, rgba(73,50,0,1) 0%, rgba(73,50,0,.4) 87.97%);
+}
+.car__card.is-wide .shade{
+  background:linear-gradient(143.13deg, rgba(73,50,0,1) 0%, rgba(73,50,0,.4) 73.53%);
 }
 .car__card .inner{ position:absolute; inset:0; padding:32px; display:flex; flex-direction:column }
 .car__label{
@@ -205,6 +211,10 @@ body.s4 .hero__media{ opacity:1 }
   font-family:var(--font-heading); font-weight:400; font-size:24px; line-height:1.36;
   letter-spacing:.06em; text-transform:uppercase; color:#FFFFFF; margin:0;
 }
+.car__desc{ margin:8px 0 0; font:400 20px/1.6 var(--font-body); color:#FFFFFF }
+/* в широких карточках текст занимает 400px, а не всю ширину — как в макете */
+.car__card.is-wide .car__title,
+.car__card.is-wide .car__desc{ max-width:400px }
 .car__btn{
   margin-top:auto; align-self:flex-start;
   font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
@@ -230,14 +240,17 @@ body.s4 .hero__media{ opacity:1 }
 .s-kitchen.in .reveal{ opacity:1; transform:none }
 .s-kitchen.in .sk__sub{ transition-delay:.3s }
 
-/* стек: один sticky-пин на всю секцию (4 карты × 100vh скролл-трека), каждая карточка
-   выезжает снизу и накрывает предыдущую — та остаётся на месте, просто оказывается под ней */
-.sk-stack{ position:relative; margin-top:80px; height:400vh }
+/* стек: один sticky-пин на всю секцию, каждая карточка выезжает снизу и накрывает
+   предыдущую — та остаётся на месте, просто оказывается под ней.
+   высота = высота пина + 100px «посадочной» зоны: пин успевает залипнуть и подержать блок
+   у якоря, пока JS-скролл-джек листает карточки по одной. само листание к длине трека уже
+   не привязано — им управляет колесо (см. скрипт), поэтому трек короткий */
+.sk-stack{ position:relative; margin-top:80px; height:calc(min(70vh, 700px) + 300px) }
 .sk-pin{ position:sticky; top:128px; height:calc(min(70vh, 700px) + 200px); overflow:hidden } /* 88px хедер + 40px зазор; +200px запаса — виден въезд снизу, а не проявление на месте */
 .sk-card{
   position:absolute; inset:0; display:flex; align-items:flex-start; justify-content:center;
   transform:translateY(100%); will-change:transform;
-  transition:transform .7s cubic-bezier(.22,.61,.21,1); /* фиксированная скорость входа, не зависит от скорости скролла */
+  transition:transform .85s cubic-bezier(.22,.61,.21,1); /* фиксированная скорость входа, не зависит от скорости скролла */
 }
 .sk-card.show{ transform:translateY(0) }
 .sk-card__box{
@@ -1092,38 +1105,40 @@ body.s4 .hero__media{ opacity:1 }
     <h2 class="reveal">Место, где историю можно попробовать на&nbsp;вкус</h2>
     <p class="s2__sub reveal">Зерно, мука, хлеб — в&nbsp;блюдах, которые готовили на&nbsp;Урале сто лет назад,<br>и&nbsp;в&nbsp;тех, что придумали вчера.</p>
   </div>
-  <div class="car reveal" id="car" aria-label="Карусель: ресторан, открытая кухня и события. Листайте перетаскиванием или колесом мыши">
+  <div class="car reveal" id="car" aria-label="Карусель: меню, ресторан и события. Листайте перетаскиванием или колесом мыши">
+    <article class="car__card is-wide">
+      <img src="assets/car-menu.jpg" alt="Паста на столе ресторана">
+      <div class="shade"></div>
+      <div class="inner">
+        <p class="car__label">Меню</p>
+        <h3 class="car__title">Италия, замешанная на&nbsp;уральской муке</h3>
+        <p class="car__desc">Тальятелле, равиоли, карбонара — пасту для&nbsp;этих блюд мы&nbsp;раскатываем сами, из&nbsp;муки собственного помола. Каждое утро, как&nbsp;в&nbsp;маленькой траттории.</p>
+        <button class="car__btn" type="button">Смотреть меню</button>
+      </div>
+    </article>
+    <article class="car__card"><img src="assets/car-couple.jpg" alt="Официант разливает вино паре за столом"></article>
     <article class="car__card">
-      <video src="assets/hero.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <video src="assets/car-restaurant.mp4" autoplay muted loop playsinline preload="metadata"></video>
       <div class="shade"></div>
       <div class="inner">
         <p class="car__label">Ресторан</p>
-        <h3 class="car__title">Кухня без лишней сложности, но&nbsp;с&nbsp;вниманием к&nbsp;тому, из&nbsp;чего всё сделано</h3>
+        <h3 class="car__title">Кухня без лишней сложности</h3>
+        <p class="car__desc">Но&nbsp;с&nbsp;вниманием к&nbsp;тому, из&nbsp;чего всё сделано</p>
         <button class="car__btn" type="button">Бронировать стол</button>
       </div>
     </article>
-    <article class="car__card"><img src="assets/card2.jpg" alt="Стол ресторана с сервировкой"></article>
-    <article class="car__card">
-      <video src="assets/kitchen.mp4" autoplay muted loop playsinline preload="metadata"></video>
+    <article class="car__card"><img src="assets/car-photo2.jpg" alt="Рыбное блюдо и морепродукты на столе ресторана"></article>
+    <article class="car__card is-wide">
+      <img src="assets/car-events.jpg" alt="Гости за ужином тёплым вечером">
       <div class="shade"></div>
       <div class="inner">
-        <p class="car__label">Открытая кухня</p>
-        <h3 class="car__title">Мастер-классы от&nbsp;именитого шеф-повара</h3>
-        <button class="car__btn" type="button">Записаться</button>
+        <p class="car__label">21 августа</p>
+        <h3 class="car__title">Музыка позднего лета</h3>
+        <p class="car__desc">Живая музыка, приглушённый свет и&nbsp;бокал вина — провожаем август не&nbsp;спеша. Столики у&nbsp;окна разбирают первыми, торопитесь!</p>
+        <button class="car__btn" type="button">Бронировать стол</button>
       </div>
     </article>
-    <article class="car__card"><img src="assets/card3.jpg" alt="Интерьер ресторана"></article>
-    <article class="car__card">
-      <video src="assets/hero.mp4" autoplay muted loop playsinline preload="metadata"></video>
-      <div class="shade"></div>
-      <div class="inner">
-        <p class="car__label">События</p>
-        <h3 class="car__title">Уютный вечер и&nbsp;живая музыка</h3>
-        <button class="car__btn" type="button">Подробнее</button>
-      </div>
-    </article>
-    <article class="car__card"><img src="assets/card5.jpg" alt="Зал ресторана"></article>
-    <article class="car__card"><img src="assets/card6.jpg" alt="Кафе и пекарня"></article>
+    <article class="car__card is-wide"><img src="assets/car-photo3.jpg" alt="Светлый зал ресторана с гостями"></article>
   </div>
 </section>
 
@@ -1146,7 +1161,7 @@ body.s4 .hero__media{ opacity:1 }
     </div>
   </div>
   <div class="zoom__cta-row">
-      <button class="zoom__cta" id="zoomCta" type="button">Записаться на экскурсию</button>
+      <button class="zoom__cta" id="zoomCta" type="button">Больше о музее</button>
   </div>
 </section>
 
@@ -1350,12 +1365,10 @@ body.s4 .hero__media{ opacity:1 }
     <h2 class="reveal">Как попасть в это место</h2>
     <p class="sc__sub reveal">Мы находимся в&nbsp;историческом центре Челябинска</p>
   </div>
-  <div class="sc-map reveal">
-    <iframe
-      src="https://yandex.ru/map-widget/v1/?ll=61.386200%2C55.168600&z=16&pt=61.386200,55.168600,pm2rdm&l=map"
-      allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-      title="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></iframe>
-  </div>
+  <!-- карта строится через JS API (зум колесом отключён, только кнопки);
+       если API не загрузится — скрипт ниже подставит обычный iframe-виджет -->
+  <div class="sc-map reveal" id="scMap" role="application"
+       aria-label="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></div>
 </section>
 
 <script>
@@ -1474,111 +1487,94 @@ body.s4 .hero__media{ opacity:1 }
 (function(){
   const vp = document.getElementById('car');
   const cards = [...vp.children];
-  const N = cards.length, CARD = 382, GAP = 24, STEP = CARD + GAP;
+  const N = cards.length, GAP = 24;
+  const clamp = (val, a, b) => Math.min(b, Math.max(a, val));
 
-  let t = 0, target = 0, animating = false;
+  // карточки разной ширины (382/720) — раскладка по кумулятивным смещениям
+  let baseX = [], total = 0, maxOff = 0;
+  let off = 0, target = 0, v = 0, animating = false, lastNow = 0;
+  const SMOOTH = 0.42; // сек: отклик пружины
 
-  function render(){
-    for (let i = 0; i < N; i++){
-      // бесконечный цикл: позиция по модулю N, диапазон [-1, N-1)
-      let m = (((i - t) % N) + N) % N;
-      if (m > N - 1) m -= N;
-      let x, z, s = 1, o = 1;
-      if (m >= 0){ x = m * STEP; z = 10; }
-      else {
-        const k = -m; // 0..1 — стадия ухода
-        x = k * 48;                    // дрейф ЧУТЬ ВПРАВО — под приближающуюся карточку
-        z = 5;                         // ниже соседей — ныряет ПОД
-        s = 1 - k * 0.06;              // лёгкое сжатие
-        o = k < .55 ? 1 : Math.max(0, 1 - (k - .55) / .45); // растворяется уже накрытая
-      }
-      const c = cards[i];
-      c.style.transform = `translateX(${x}px) scale(${s})`;
-      c.style.zIndex = z;
-      c.style.opacity = o;
-    }
+  function containerWidth(){
+    const m = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin'));
+    return Math.min(innerWidth - m * 2, 1600);
   }
-  // пружина с сохранением скорости (critically damped):
-  // резкие перелистывания не перезапускают движение с нуля — скорость наследуется
-  let v = 0, lastNow = 0;
-  const SMOOTH = 0.46; // сек: отклик пружины
+  function measure(){
+    let x = 0;
+    for (let i = 0; i < N; i++){ baseX[i] = x; x += cards[i].offsetWidth + GAP; }
+    total = x - GAP;                                 // ширина полосы без последнего зазора
+    maxOff = Math.max(0, total - containerWidth());  // предел: правый край последней карточки = правый край контейнера
+    off = clamp(off, 0, maxOff); target = clamp(target, 0, maxOff);
+    render();
+  }
+  function render(){
+    for (let i = 0; i < N; i++) cards[i].style.transform = `translateX(${(baseX[i] - off).toFixed(2)}px)`;
+  }
+
+  // пружина с сохранением скорости (critically damped): резкие движения не рвут инерцию
   function animate(now){
     if (!animating) return;
     const dt = Math.min(0.033, (now - (lastNow || now)) / 1000) || 0.016;
     lastNow = now;
     const om = 2 / SMOOTH, k = om * dt;
     const e = 1 / (1 + k + 0.48*k*k + 0.235*k*k*k);
-    const change = t - target;
+    const change = off - target;
     const temp = (v + om * change) * dt;
     v = (v - om * temp) * e;
-    t = target + (change + temp) * e;
+    off = target + (change + temp) * e;
     render();
-    if (Math.abs(t - target) < 0.0006 && Math.abs(v) < 0.0006){
-      t = target; v = 0; animating = false; render(); return;
-    }
+    if (Math.abs(off - target) < 0.4 && Math.abs(v) < 0.4){ off = target; v = 0; animating = false; render(); return; }
     requestAnimationFrame(animate);
   }
-  function go(to){ // без ограничений — карусель зациклена
-    target = to;
-    if (!animating){ animating = true; lastNow = 0; requestAnimationFrame(animate); }
-  }
+  function go(to){ target = clamp(to, 0, maxOff); if (!animating){ animating = true; lastNow = 0; requestAnimationFrame(animate); } }
 
-  // drag (мышь и тач) + скорость броска
+  // вьюпорт во всю ширину окна, карточки начинаются от левого поля контейнера.
+  // полоса левее пустая: там колесо/тач отдаём странице, а не карусели
+  function overCards(e){ return e.clientX >= vp.getBoundingClientRect().left + cards[0].offsetLeft; }
+
+  // drag (мышь и тач) + инерция броска
   let down = null, moved = 0, lastMove = null;
   vp.addEventListener('pointerdown', e => {
-    if (!overCards(e)) return; // пустое поле слева — карусель не трогаем
-    down = { x: e.clientX, t }; moved = 0; v = 0; animating = false; // рука перехватывает пружину
+    if (maxOff <= 0 || !overCards(e)) return; // всё влезло или пустое поле слева — не трогаем
+    down = { x: e.clientX, off }; moved = 0; v = 0; animating = false; // рука перехватывает пружину
     lastMove = { x: e.clientX, time: performance.now() };
     vp.classList.add('dragging'); vp.setPointerCapture(e.pointerId);
   });
   vp.addEventListener('pointermove', e => {
-    if (!down){ vp.classList.toggle('over-cards', overCards(e)); return; } // курсор по зоне
+    if (!down){ vp.classList.toggle('over-cards', maxOff > 0 && overCards(e)); return; } // курсор по зоне
     const dx = e.clientX - down.x; moved = Math.max(moved, Math.abs(dx));
-    t = down.t - dx / STEP; target = t; render();
+    off = clamp(down.off - dx, 0, maxOff); target = off; render();
     const now = performance.now(), dt = (now - lastMove.time) / 1000;
-    if (dt > 0.012){ // скорость пальца в карточках/сек (сглаженная)
-      const inst = -(e.clientX - lastMove.x) / STEP / dt;
+    if (dt > 0.012){ // скорость пальца в px/сек (сглаженная)
+      const inst = -(e.clientX - lastMove.x) / dt;
       v = v * 0.6 + inst * 0.4;
       lastMove = { x: e.clientX, time: now };
     }
   });
-  function up(e){
+  function up(){
     if (!down) return;
-    vp.classList.remove('dragging');
-    down = null;
-    // бросок: цель с учётом скорости, но не дальше двух карточек за раз
-    const fling = Math.max(-2, Math.min(2, v * 0.22));
-    go(Math.round(t + fling));
+    vp.classList.remove('dragging'); down = null;
+    go(off + v * 0.12); // бросок с инерцией, ограниченный краями
   }
   vp.addEventListener('pointerup', up);
   vp.addEventListener('pointercancel', up);
   vp.addEventListener('click', e => { if (moved > 6){ e.stopPropagation(); e.preventDefault(); } }, true);
 
-  // вьюпорт карусели во всю ширину окна, а карточки начинаются от левого поля контейнера.
-  // полоса левее — пустая: там колесо скроллит страницу, а не листает карусель
-  function overCards(e){
-    return e.clientX >= vp.getBoundingClientRect().left + cards[0].offsetLeft;
-  }
-
-  // колесо: без «замка» — тики накапливаются, пружина сглаживает очередь
-  let wheelAcc = 0, wheelTime = 0;
+  // колесо: горизонтальная прокрутка полосы в пределах [0, maxOff].
+  // карусель БОЛЬШЕ НЕ бесконечная: докрутил до последней карточки (или назад до первой) —
+  // на краю прокрутку не перехватываем, дальше листается страница
   vp.addEventListener('wheel', e => {
-    if (!overCards(e)){ wheelAcc = 0; return; } // пустое поле слева — скролл отдаём странице
+    if (maxOff <= 0 || !overCards(e)) return;
+    const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    const next = clamp(target + d, 0, maxOff);
+    if (Math.abs(next - target) < 0.5) return; // уже у края — отдаём прокрутку странице
     e.preventDefault();
-    const now = Date.now();
-    if (now - wheelTime > 240) wheelAcc = 0; // новая серия
-    wheelTime = now;
-    wheelAcc += Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    const THRESH = 90; // px колеса на одну карточку
-    if (Math.abs(wheelAcc) >= THRESH){
-      const steps = Math.trunc(wheelAcc / THRESH);
-      wheelAcc -= steps * THRESH;
-      go(Math.round(target) + steps);
-    }
+    go(next);
   }, { passive: false });
 
-  addEventListener('resize', render);
-  render();
+  addEventListener('resize', measure);
+  measure();
+  addEventListener('load', measure); // после загрузки медиа ширины уточняются
 })();
 </script>
 <script>
@@ -1600,28 +1596,94 @@ body.s4 .hero__media{ opacity:1 }
     if (entries[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
   }, { threshold: 0.22 }).observe(sec.querySelector('.sk__head'));
 
-  // стек карточек: скролл только триггерит порог, саму скорость въезда задаёт CSS-transition —
-  // так анимация не зависит от того, быстро или медленно крутят колесо
+  // стек карточек: одна карточка выезжает снизу и накрывает предыдущую. Скорость въезда
+  // задаёт CSS-transition (не зависит от скорости колеса), а листание — скролл-джек ниже.
   const stack = document.getElementById('skStack');
+  const pin = sec.querySelector('.sk-pin');
   const cards = [...sec.querySelectorAll('.sk-card')];
   const N = cards.length;
   const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
-  cards[0].classList.add('show'); // первая карточка всегда на месте, без входной анимации
 
-  let ticking = false;
-  function update(){
-    ticking = false;
-    const total = stack.offsetHeight - innerHeight;
-    const p = clamp(-stack.getBoundingClientRect().top / total, 0, 1);
-    const seg = 1 / N;
-    for (let i = 1; i < N; i++){
-      cards[i].classList.toggle('show', p >= i * seg);
-    }
+  let idx = 0; // сколько карточек показано сверх первой (0..N-1)
+  const apply = () => cards.forEach((c,i) => c.classList.toggle('show', i <= idx));
+  apply(); // первая карточка всегда на месте
+
+  const travel = () => stack.offsetHeight - pin.offsetHeight; // «посадочная» зона, пока пин залип
+  const topOf  = () => stack.getBoundingClientRect().top;
+  const ANCHOR = parseFloat(getComputedStyle(pin).top) || 0;  // sticky-top пина
+  const inZone = () => { const t = topOf(); return t <= ANCHOR + 2 && t >= ANCHOR - travel() - 2; };
+
+  // ТАЧ: без замка (палец легко «запереть») — просто раскрываем карточки по позиции в зоне
+  if (matchMedia('(pointer: coarse)').matches){
+    let ticking = false;
+    const upd = () => { ticking = false;
+      const tr = travel();
+      const p = tr > 0 ? clamp((ANCHOR - topOf()) / tr, 0, 1) : 0;
+      idx = clamp(Math.floor(p * N), 0, N - 1); apply();
+    };
+    addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(upd); } }, { passive:true });
+    addEventListener('resize', upd); upd();
+    return;
   }
-  function onScroll(){ if (!ticking){ ticking = true; requestAnimationFrame(update); } }
-  addEventListener('scroll', onScroll, { passive:true });
-  addEventListener('resize', onScroll);
-  update();
+
+  // МЫШЬ/ТРЕКПАД: скролл-джек. Пока блок «на якоре» и показаны не все карточки — держим
+  // страницу (preventDefault) и открываем по ОДНОЙ карточке на жест колеса; кулдаун гасит
+  // инерцию и «быстрый флик», поэтому блок нельзя пролистнуть одним махом (как в интро,
+  // только по требованию и с короткими таймингами). Показал все — прокрутка идёт странице.
+  // Вверх не держим — уводим свободно.
+  const STEP_MS = 700; // пауза между карточками ≈ длительность въезда
+  let cooling = false;
+  function stepDown(){
+    if (idx >= N - 1 || cooling) return;
+    cooling = true; setTimeout(() => { cooling = false; }, STEP_MS);
+    idx++; apply();
+  }
+  let lastJack = -1e9; // отметка последнего «джек»-жеста (колесо/клавиши): пока он свежий,
+                       // нативный скролл ползунком не вмешивается в раскрытие карточек
+  addEventListener('wheel', e => {
+    lastJack = performance.now();
+    const d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (d <= 0) return;      // вверх/ноль — не мешаем
+    if (!inZone()) return;   // блок не на якоре — обычный скролл
+    if (idx >= N - 1) return; // всё показано — дальше странице
+    e.preventDefault();
+    stepDown();
+  }, { passive:false });
+  addEventListener('keydown', e => {
+    if (!['ArrowDown','PageDown',' ','Spacebar'].includes(e.key)) return;
+    lastJack = performance.now();
+    if (!inZone() || idx >= N - 1) return;
+    e.preventDefault(); stepDown();
+  });
+
+  // Нативный скролл (перетаскивание ползунка, клавиши, программный переход) не шлёт wheel —
+  // скролл-джек его не держит. Раньше тут была «страховка» со scrollTo назад к якорю, но при
+  // перетаскивании ползунка она дралась с пользователем и картинки мелькали. Теперь без scrollTo:
+  //  • не идёт джек-жест и блок в зоне — раскрываем карточки по позиции (как на тач-устройствах);
+  //  • блок вышел из зоны вниз, а карточки не все — до-раскрываем остаток на месте;
+  //  • блок ушёл под экран — сбрасываем стопку, чтобы при возврате открылась заново.
+  let prevT = topOf(), ticking = false;
+  addEventListener('scroll', () => {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      const t = topOf(), edge = ANCHOR - travel();
+      const jacking = performance.now() - lastJack < 200; // идёт жест колеса/клавиш — не вмешиваемся
+      if (!jacking && inZone()){
+        const tr = travel();
+        const p = tr > 0 ? clamp((ANCHOR - t) / tr, 0, 1) : 0;
+        idx = Math.max(idx, clamp(Math.floor(p * N), 0, N - 1)); // только вперёд — без обратного мелькания
+        apply();
+      }
+      if (prevT > edge && t < edge && idx < N - 1){
+        idx = N - 1; apply(); // проскочили зону вниз — до-раскрываем остаток (без scrollTo)
+      } else if (t >= innerHeight && idx !== 0){
+        idx = 0; apply();
+      }
+      prevT = topOf();
+    });
+  }, { passive:true });
+  addEventListener('resize', () => { prevT = topOf(); });
 })();
 </script>
 <script>
@@ -1912,6 +1974,48 @@ body.s4 .hero__media{ opacity:1 }
   new IntersectionObserver((entries, obs) => {
     if (entries[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
   }, { threshold: 0.22 }).observe(sec.querySelector('.sc__head'));
+})();
+</script>
+<script>
+(function(){
+  // Карта: Яндекс JS API вместо iframe-виджета — только так можно отключить зум колесом,
+  // оставив кнопки «+/−». behaviors без scrollZoom/dblClickZoom: колесо над картой
+  // прокручивает страницу, а не масштабирует карту. drag и пинч на таче сохранены.
+  const box = document.getElementById('scMap');
+  if (!box) return;
+  const COORDS = [55.1686, 61.3862]; // Свердловский просп., 40А (JS API: [широта, долгота])
+
+  function fallbackIframe(){ // страховка: API недоступен — прежний виджет (с зумом колесом)
+    box.innerHTML = '<iframe src="https://yandex.ru/map-widget/v1/?ll=61.386200%2C55.168600&z=16&pt=61.386200,55.168600,pm2rdm&l=map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></iframe>';
+  }
+
+  function init(){
+    ymaps.ready(function(){
+      try {
+        const map = new ymaps.Map(box, {
+          center: COORDS, zoom: 16,
+          controls: ['zoomControl'],
+          behaviors: ['drag', 'multiTouch']
+        }, { suppressMapOpenBlock: true });
+        map.geoObjects.add(new ymaps.Placemark(COORDS, {
+          hintContent: 'Зерно',
+          balloonContent: 'Свердловский проспект, 40А'
+        }, { preset: 'islands#redIcon' }));
+      } catch(e){ fallbackIframe(); }
+    });
+  }
+
+  function load(){ // API подгружается, когда секция уже близко — аналог loading="lazy"
+    const s = document.createElement('script');
+    s.src = 'https://api-maps.yandex.ru/2.1/?lang=ru_RU';
+    s.onload = function(){ window.ymaps ? init() : fallbackIframe(); };
+    s.onerror = fallbackIframe;
+    document.head.appendChild(s);
+  }
+
+  new IntersectionObserver(function(entries, obs){
+    if (entries[0].isIntersecting){ obs.disconnect(); load(); }
+  }, { rootMargin: '600px' }).observe(box);
 })();
 </script>
 </body>
