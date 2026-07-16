@@ -226,7 +226,7 @@ body.s4 .hero__media{ opacity:1 }
 .car__btn:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
 
 /* ===== БЛОК 2.5: открытая кухня — стек карточек со scroll-driven перелистыванием ===== */
-.s-kitchen{ padding-top:0; padding-bottom:0 } /* сверху — margin-bottom кнопки музея (200px); снизу 200px даёт запас хода .sk-pin (без него — свои 200px); фон прозрачный, просвечивает золотой шейдер */
+.s-kitchen{ padding-top:0; padding-bottom:0 } /* сверху — margin-bottom кнопки музея (200px); снизу зазор даёт нижняя половина 100vh-слота последней карточки; фон прозрачный, просвечивает золотой шейдер */
 .s-kitchen .sk__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
 .s-kitchen h2{
   font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
@@ -240,19 +240,15 @@ body.s4 .hero__media{ opacity:1 }
 .s-kitchen.in .reveal{ opacity:1; transform:none }
 .s-kitchen.in .sk__sub{ transition-delay:.3s }
 
-/* стек: один sticky-пин на всю секцию, каждая карточка выезжает снизу и накрывает
-   предыдущую — та остаётся на месте, просто оказывается под ней.
-   высота = высота пина + 100px «посадочной» зоны: пин успевает залипнуть и подержать блок
-   у якоря, пока JS-скролл-джек листает карточки по одной. само листание к длине трека уже
-   не привязано — им управляет колесо (см. скрипт), поэтому трек короткий */
-.sk-stack{ position:relative; margin-top:80px; height:calc(min(70vh, 700px) + 300px) }
-.sk-pin{ position:sticky; top:128px; height:calc(min(70vh, 700px) + 200px); overflow:hidden } /* 88px хедер + 40px зазор; +200px запаса — виден въезд снизу, а не проявление на месте */
+/* стек «живой кухни» — по мотивам референса 21st.dev/scroll-cards: каждая карточка ростом
+   в экран липнет к верху, следующая наезжает снизу и накрывает предыдущую. Чистый CSS-sticky,
+   без JS-перехвата скролла — поэтому одинаково работает и колесом, и полосой прокрутки, и тачем.
+   Плавность входа задаёт scroll-driven анимация (animation-timeline: view()) ниже. */
+.sk-stack{ position:relative; margin-top:80px }
 .sk-card{
-  position:absolute; inset:0; display:flex; align-items:flex-start; justify-content:center;
-  transform:translateY(100%); will-change:transform;
-  transition:transform .85s cubic-bezier(.22,.61,.21,1); /* фиксированная скорость входа, не зависит от скорости скролла */
+  height:100vh; position:sticky; top:128px; /* 88px шапка + 40px зазор — прилипают под хедером */
+  display:flex; align-items:flex-start; justify-content:center; /* бокс у верха слота → отступ до текста = margin-top стека (80px) */
 }
-.sk-card.show{ transform:translateY(0) }
 .sk-card__box{
   position:relative; width:min(1058px, var(--cw)); height:min(70vh, 700px);
   border-radius:16px; corner-shape:squircle; overflow:hidden;
@@ -260,11 +256,26 @@ body.s4 .hero__media{ opacity:1 }
 }
 .sk-card__box img, .sk-card__box video{ width:100%; height:100%; object-fit:cover; display:block }
 
+/* плавный вход: пока карточка поднимается снизу в кадр — слегка проявляется и подрастает.
+   scroll-driven, поэтому идёт ровно по скроллу без всякого JS и без мельканий */
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion: no-preference){
+    .sk-card__box{
+      animation: skCardIn linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 82%;
+    }
+    @keyframes skCardIn{
+      from{ opacity:.4; transform:scale(.955) }
+      to  { opacity:1; transform:none }
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce){
   .s-kitchen .reveal{ opacity:1; transform:none; transition:none }
-  .sk-stack{ height:auto }
-  .sk-pin{ position:static; height:auto; display:flex; flex-direction:column; align-items:center; gap:24px; overflow:visible }
-  .sk-card{ position:static; transform:none; transition:none }
+  .sk-card{ height:auto; position:static; margin-top:24px }
+  .sk-card:first-child{ margin-top:0 }
   .sk-card__box{ height:min(60vh, 600px) }
 }
 
@@ -1171,21 +1182,19 @@ body.s4 .hero__media{ opacity:1 }
     <p class="sk__sub reveal">На открытой кухне шеф-повар делится тем, что обычно остаётся за&nbsp;дверями ресторана: рецептами, приёмами и&nbsp;мелочами, из&nbsp;которых складывается вкус</p>
   </div>
   <div class="sk-stack" id="skStack">
-    <div class="sk-pin">
-      <div class="sk-card" style="z-index:1"><div class="sk-card__box">
-        <img src="assets/recipe1.jpg" alt="Открытая кухня: рабочая зона с разделочными досками и ножами">
-      </div></div>
-      <div class="sk-card" style="z-index:2"><div class="sk-card__box">
-        <img src="assets/recipe2.jpg" alt="Открытая кухня: кухонный остров и рабочая зона">
-      </div></div>
-      <div class="sk-card" style="z-index:3"><div class="sk-card__box">
-        <img src="assets/recipe3.jpg" alt="Открытая кухня: общий план зала для мастер-классов">
-      </div></div>
-      <div class="sk-card" style="z-index:4"><div class="sk-card__box">
-        <video src="assets/kitchen.mp4" autoplay muted loop playsinline preload="metadata"
-               aria-label="Видео: шеф-повар готовит на открытой кухне"></video>
-      </div></div>
-    </div>
+    <div class="sk-card" style="z-index:1"><div class="sk-card__box">
+      <img src="assets/recipe1.jpg" alt="Открытая кухня: рабочая зона с разделочными досками и ножами">
+    </div></div>
+    <div class="sk-card" style="z-index:2"><div class="sk-card__box">
+      <img src="assets/recipe2.jpg" alt="Открытая кухня: кухонный остров и рабочая зона">
+    </div></div>
+    <div class="sk-card" style="z-index:3"><div class="sk-card__box">
+      <img src="assets/recipe3.jpg" alt="Открытая кухня: общий план зала для мастер-классов">
+    </div></div>
+    <div class="sk-card" style="z-index:4"><div class="sk-card__box">
+      <video src="assets/kitchen.mp4" autoplay muted loop playsinline preload="metadata"
+             aria-label="Видео: шеф-повар готовит на открытой кухне"></video>
+    </div></div>
   </div>
 </section>
 
@@ -1596,94 +1605,9 @@ body.s4 .hero__media{ opacity:1 }
     if (entries[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
   }, { threshold: 0.22 }).observe(sec.querySelector('.sk__head'));
 
-  // стек карточек: одна карточка выезжает снизу и накрывает предыдущую. Скорость въезда
-  // задаёт CSS-transition (не зависит от скорости колеса), а листание — скролл-джек ниже.
-  const stack = document.getElementById('skStack');
-  const pin = sec.querySelector('.sk-pin');
-  const cards = [...sec.querySelectorAll('.sk-card')];
-  const N = cards.length;
-  const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
-
-  let idx = 0; // сколько карточек показано сверх первой (0..N-1)
-  const apply = () => cards.forEach((c,i) => c.classList.toggle('show', i <= idx));
-  apply(); // первая карточка всегда на месте
-
-  const travel = () => stack.offsetHeight - pin.offsetHeight; // «посадочная» зона, пока пин залип
-  const topOf  = () => stack.getBoundingClientRect().top;
-  const ANCHOR = parseFloat(getComputedStyle(pin).top) || 0;  // sticky-top пина
-  const inZone = () => { const t = topOf(); return t <= ANCHOR + 2 && t >= ANCHOR - travel() - 2; };
-
-  // ТАЧ: без замка (палец легко «запереть») — просто раскрываем карточки по позиции в зоне
-  if (matchMedia('(pointer: coarse)').matches){
-    let ticking = false;
-    const upd = () => { ticking = false;
-      const tr = travel();
-      const p = tr > 0 ? clamp((ANCHOR - topOf()) / tr, 0, 1) : 0;
-      idx = clamp(Math.floor(p * N), 0, N - 1); apply();
-    };
-    addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(upd); } }, { passive:true });
-    addEventListener('resize', upd); upd();
-    return;
-  }
-
-  // МЫШЬ/ТРЕКПАД: скролл-джек. Пока блок «на якоре» и показаны не все карточки — держим
-  // страницу (preventDefault) и открываем по ОДНОЙ карточке на жест колеса; кулдаун гасит
-  // инерцию и «быстрый флик», поэтому блок нельзя пролистнуть одним махом (как в интро,
-  // только по требованию и с короткими таймингами). Показал все — прокрутка идёт странице.
-  // Вверх не держим — уводим свободно.
-  const STEP_MS = 700; // пауза между карточками ≈ длительность въезда
-  let cooling = false;
-  function stepDown(){
-    if (idx >= N - 1 || cooling) return;
-    cooling = true; setTimeout(() => { cooling = false; }, STEP_MS);
-    idx++; apply();
-  }
-  let lastJack = -1e9; // отметка последнего «джек»-жеста (колесо/клавиши): пока он свежий,
-                       // нативный скролл ползунком не вмешивается в раскрытие карточек
-  addEventListener('wheel', e => {
-    lastJack = performance.now();
-    const d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    if (d <= 0) return;      // вверх/ноль — не мешаем
-    if (!inZone()) return;   // блок не на якоре — обычный скролл
-    if (idx >= N - 1) return; // всё показано — дальше странице
-    e.preventDefault();
-    stepDown();
-  }, { passive:false });
-  addEventListener('keydown', e => {
-    if (!['ArrowDown','PageDown',' ','Spacebar'].includes(e.key)) return;
-    lastJack = performance.now();
-    if (!inZone() || idx >= N - 1) return;
-    e.preventDefault(); stepDown();
-  });
-
-  // Нативный скролл (перетаскивание ползунка, клавиши, программный переход) не шлёт wheel —
-  // скролл-джек его не держит. Раньше тут была «страховка» со scrollTo назад к якорю, но при
-  // перетаскивании ползунка она дралась с пользователем и картинки мелькали. Теперь без scrollTo:
-  //  • не идёт джек-жест и блок в зоне — раскрываем карточки по позиции (как на тач-устройствах);
-  //  • блок вышел из зоны вниз, а карточки не все — до-раскрываем остаток на месте;
-  //  • блок ушёл под экран — сбрасываем стопку, чтобы при возврате открылась заново.
-  let prevT = topOf(), ticking = false;
-  addEventListener('scroll', () => {
-    if (ticking) return; ticking = true;
-    requestAnimationFrame(() => {
-      ticking = false;
-      const t = topOf(), edge = ANCHOR - travel();
-      const jacking = performance.now() - lastJack < 200; // идёт жест колеса/клавиш — не вмешиваемся
-      if (!jacking && inZone()){
-        const tr = travel();
-        const p = tr > 0 ? clamp((ANCHOR - t) / tr, 0, 1) : 0;
-        idx = Math.max(idx, clamp(Math.floor(p * N), 0, N - 1)); // только вперёд — без обратного мелькания
-        apply();
-      }
-      if (prevT > edge && t < edge && idx < N - 1){
-        idx = N - 1; apply(); // проскочили зону вниз — до-раскрываем остаток (без scrollTo)
-      } else if (t >= innerHeight && idx !== 0){
-        idx = 0; apply();
-      }
-      prevT = topOf();
-    });
-  }, { passive:true });
-  addEventListener('resize', () => { prevT = topOf(); });
+  // Перелистывание стека — целиком на CSS (position:sticky у каждой .sk-card + scroll-driven
+  // вход .sk-card__box, см. стили). JS для скролла больше не нужен: мы ничего не перехватываем,
+  // поэтому блок одинаково ведёт себя и колесом, и полосой прокрутки, и на тач-устройствах.
 })();
 </script>
 <script>
