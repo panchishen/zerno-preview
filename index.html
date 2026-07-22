@@ -22,7 +22,7 @@
 /* ===== Зерно · токены (из зерно-цвета.tokens.json) ===== */
 :root{
   --sand-50:#FDFAF1; --sand-100:#F9F3E4; --sand-200:#F0E6CE; --sand-300:#E4D8BD;
-  --gold-100:#FAEACF; --gold-500:#CB9C3F; --gold-600:#A97C19; --gold-700:#896100;
+  --gold-50:#FDF5E6; --gold-100:#FAEACF; --gold-400:#D3A856; --gold-500:#CB9C3F; --gold-600:#A97C19; --gold-700:#896100; --gold-800:#674800;
   --graphite-600:#5C5A59; --graphite-800:#2B2A29; --graphite-900:#1A1918;
   --font-heading:'Prosto One', system-ui, sans-serif;
   --font-body:'Manrope', system-ui, sans-serif;
@@ -42,6 +42,32 @@ body{
 }
 .container{ width:var(--cw); margin-inline:auto }
 
+/* ===== Кнопки — компонент Button L из макета (47:86): Primary заливкой, Secondary обводкой ===== */
+.btn-row{ display:flex; justify-content:center; flex-wrap:wrap; gap:16px; position:relative; z-index:5 }
+.btn{
+  display:inline-flex; align-items:center; text-decoration:none; /* и для <button>, и для <a> */
+  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
+  white-space:nowrap; /* лейбл не ломается на строки — на узком экране кнопки переносятся целиком (wrap у ряда) */
+  border-radius:8px; corner-shape:squircle; cursor:pointer;
+  transition:background .2s ease, border-color .2s ease, transform .3s cubic-bezier(.22,.61,.21,1);
+}
+.btn:hover{ transform:translateY(-4px) }
+.btn:active{ transform:none } /* нажатие «прижимает» кнопку обратно */
+.btn--primary{ color:#FFFFFF; background:var(--gold-600); border:0; padding:17px 32px }
+.btn--primary:hover{ background:var(--gold-700) }
+.btn--primary:active{ background:var(--gold-800) }
+.btn--secondary{
+  color:var(--gold-600); background:transparent; border:1px solid var(--gold-400);
+  padding:16px 31px; /* -1px на обводку: та же высота 56px, что у primary */
+}
+.btn--secondary:hover{ background:var(--gold-50); border-color:var(--gold-500) }
+.btn--secondary:active{ background:var(--gold-100); border-color:var(--gold-600) }
+.btn:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+@media (prefers-reduced-motion: reduce){
+  .btn, .rv-platform{ transition:none }
+  .btn:hover, .rv-platform:hover{ transform:none }
+}
+
 /* ===== Золотой шейдер-фон: лёгкий декор на всю страницу, z-index:-1 не задевает верстку ===== */
 #gold-shader-bg{
   position:fixed; inset:0; width:100%; height:100%;
@@ -49,72 +75,6 @@ body{
 }
 
 /* Хедер и футер — сквозные компоненты: assets/chrome.css + assets/chrome.js */
-
-/* ===== БЛОК 3: музей — zoom parallax ===== */
-.s3-museum{ padding-top:0 } /* 200px даёт padding-bottom карусельного блока; фон прозрачный — просвечивает золотой шейдер */
-.s3-museum .s3__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
-.s3-museum h2{
-  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
-  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
-}
-.s3-museum .s3__sub{ font-size:20px; line-height:1.6; color:var(--graphite-800); margin:32px 0 0 }
-.s3-museum .reveal{
-  opacity:0; transform:translateY(24px);
-  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
-}
-.s3-museum.in .reveal{ opacity:1; transform:none }
-.s3-museum.in .s3__sub{ transition-delay:.3s }
-
-.zoom{ height:300vh; position:relative; margin-top:64px;
-  /* композиция целиком в кадре, как в макете: масштаб по ширине контейнера,
-     но с потолком по высоте (коллаж = 0.847 юнита, поля по 48px сверху/снизу).
-     Юнит удвоен (2x пре-скейл), базовый transform scale(.5): текстуры карточек
-     растеризуются вдвое плотнее — без пикселизации при зуме */
-  --zu:calc(min(var(--cw), calc((100vh - 96px) / 0.847)) * 2);
-}
-.zoom__stage{ position:sticky; top:0; height:100vh; overflow:clip }
-.zp{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; will-change:transform; transform:scale(.5) }
-.zp__box{ position:relative; border-radius:8px; corner-shape:squircle; overflow:hidden; background:var(--sand-100) }
-.zp__box img, .zp__box video{ width:100%; height:100%; object-fit:cover; display:block }
-/* раскладка из мокапа (доли контейнера 1600, смещения центров от центра видео) */
-.zp--v .zp__box{ width:calc(var(--zu)*.3238); height:calc(var(--zu)*.2163) }
-.zp--1 .zp__box{ width:calc(var(--zu)*.4919); height:calc(var(--zu)*.3281); left:calc(var(--zu)*.0841);  top:calc(var(--zu)*-.2872) }
-.zp--2 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.4050); left:calc(var(--zu)*-.3384); top:calc(var(--zu)*-.0944) }
-.zp--3 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.2163); left:calc(var(--zu)*.3384);  top:0 }
-.zp--4 .zp__box{ width:calc(var(--zu)*.3244); height:calc(var(--zu)*.2163); left:calc(var(--zu)*-.2534); top:calc(var(--zu)*.2313) }
-.zp--5 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.2725); left:calc(var(--zu)*.0847);  top:calc(var(--zu)*.2594) }
-.zp--6 .zp__box{ width:calc(var(--zu)*.2394); height:calc(var(--zu)*.1594); left:calc(var(--zu)*.3809);  top:calc(var(--zu)*.2028) }
-.zoom__cta-row{
-  display:flex; justify-content:center; position:relative; z-index:5;
-  /* 64px (в масштабе контейнера) от ВИДИМОГО низа видео:
-     если видео целиком в сцене — от его настоящего низа (0.334cw - 50vh < 0),
-     если низ обрезан сценой — от нижнего края сцены (слагаемое зануляется) */
-  margin-top:calc(min(var(--cw)*0.334 - 50vh, 0px) + var(--cw)*0.04);
-  margin-bottom:200px;
-}
-.zoom__cta{
-  opacity:0; transform:translateY(14px); pointer-events:none;
-  transition:opacity .5s ease, transform .5s cubic-bezier(.22,.61,.21,1);
-  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
-  color:#FFFFFF; background:var(--gold-600); border:0; border-radius:8px; corner-shape:squircle;
-  padding:17px 32px; cursor:pointer;
-}
-.zoom__cta:hover{ background:var(--gold-700) }
-.zoom__cta.show{ opacity:1; transform:none; pointer-events:auto }
-.zoom__cta:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
-
-@media (prefers-reduced-motion: reduce){
-  .s3-museum .reveal{ opacity:1; transform:none; transition:none }
-  .zoom{ height:auto }
-  .zoom__stage{ position:static; height:auto; padding-block:40px;
-    display:flex; align-items:center; justify-content:center }
-  .zp{ display:none }
-  .zp--v{ display:flex; position:relative }
-  .zp--v .zp__box{ width:var(--cw) }
-  .zp--v{ transform:none }
-  .zoom__cta-row{ margin-top:64px; margin-bottom:120px }
-  .zoom__cta{ opacity:1; transform:none; pointer-events:auto }
-}
 
 /* ===== HERO: интро 1.1 → 1.2, скролл 1.2 → 1.3 ===== */
 .hero{ height:260vh; position:relative }
@@ -221,18 +181,10 @@ body.s4 .hero__media{ opacity:1 }
 /* в широких карточках текст занимает 400px, а не всю ширину — как в макете */
 .car__card.is-wide .car__title,
 .car__card.is-wide .car__desc{ max-width:400px }
-.car__btn{
-  margin-top:auto; align-self:flex-start;
-  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
-  color:#FFFFFF; background:var(--gold-600); border:0; border-radius:8px; corner-shape:squircle;
-  padding:17px 32px; cursor:pointer; transition:background .2s ease;
-}
-.car__btn:hover{ background:var(--gold-700) }
-.car__btn:active{ background:#674800 }
-.car__btn:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+.car__btn{ margin-top:auto; align-self:flex-start } /* остальное — общий .btn .btn--primary */
 
 /* ===== БЛОК 2.5: открытая кухня — стек карточек со scroll-driven перелистыванием ===== */
-.s-kitchen{ padding-top:0; padding-bottom:0 } /* сверху — margin-bottom кнопки музея (200px); снизу зазор даёт нижняя половина 100vh-слота последней карточки; фон прозрачный, просвечивает золотой шейдер */
+.s-kitchen{ padding-top:0; padding-bottom:0 } /* сверху — margin-bottom кнопок музея (200px); снизу — margin-bottom ряда кнопок; фон прозрачный, просвечивает золотой шейдер */
 .s-kitchen .sk__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
 .s-kitchen h2{
   font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
@@ -278,11 +230,20 @@ body.s4 .hero__media{ opacity:1 }
   }
 }
 
+.sk-cta-row{
+  /* 80px (макет 157:365) от низа последней карточки. Последний слот не липнет
+     (его низ совпадает с низом стека), бокс стоит в его верху — под боксом
+     остаётся пустой хвост слота 100vh - высота бокса; компенсируем его */
+  margin-top:calc(min(70vh, 700px) + 80px - 100vh);
+  margin-bottom:200px;
+}
+
 @media (prefers-reduced-motion: reduce){
   .s-kitchen .reveal{ opacity:1; transform:none; transition:none }
   .sk-card{ height:auto; position:static; margin-top:24px }
   .sk-card:first-child{ margin-top:0 }
   .sk-card__box{ height:min(60vh, 600px) }
+  .sk-cta-row{ margin-top:80px } /* карточки в потоке — остатка слота нет */
 }
 
 /* ===== БЛОК 3: музей — zoom parallax ===== */
@@ -320,23 +281,15 @@ body.s4 .hero__media{ opacity:1 }
 .zp--5 .zp__box{ width:calc(var(--zu)*.3231); height:calc(var(--zu)*.2725); left:calc(var(--zu)*.0847);  top:calc(var(--zu)*.2594) }
 .zp--6 .zp__box{ width:calc(var(--zu)*.2394); height:calc(var(--zu)*.1594); left:calc(var(--zu)*.3809);  top:calc(var(--zu)*.2028) }
 .zoom__cta-row{
-  display:flex; justify-content:center; position:relative; z-index:5;
+  opacity:0; transform:translateY(14px); pointer-events:none;
+  transition:opacity .5s ease, transform .5s cubic-bezier(.22,.61,.21,1);
   /* 64px (в масштабе контейнера) от ВИДИМОГО низа видео:
      если видео целиком в сцене — от его настоящего низа (0.334cw - 50vh < 0),
      если низ обрезан сценой — от нижнего края сцены (слагаемое зануляется) */
   margin-top:calc(min(var(--cw)*0.334 - 50vh, 0px) + var(--cw)*0.04);
   margin-bottom:200px;
 }
-.zoom__cta{
-  opacity:0; transform:translateY(14px); pointer-events:none;
-  transition:opacity .5s ease, transform .5s cubic-bezier(.22,.61,.21,1);
-  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
-  color:#FFFFFF; background:var(--gold-600); border:0; border-radius:8px; corner-shape:squircle;
-  padding:17px 32px; cursor:pointer;
-}
-.zoom__cta:hover{ background:var(--gold-700) }
-.zoom__cta.show{ opacity:1; transform:none; pointer-events:auto }
-.zoom__cta:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+.zoom__cta-row.show{ opacity:1; transform:none; pointer-events:auto }
 
 @media (prefers-reduced-motion: reduce){
   .s3-museum .reveal{ opacity:1; transform:none; transition:none }
@@ -347,8 +300,7 @@ body.s4 .hero__media{ opacity:1 }
   .zp--v{ display:flex; position:relative }
   .zp--v .zp__box{ width:var(--cw) }
   .zp--v{ transform:none }
-  .zoom__cta-row{ margin-top:64px; margin-bottom:120px }
-  .zoom__cta{ opacity:1; transform:none; pointer-events:auto }
+  .zoom__cta-row{ opacity:1; transform:none; pointer-events:auto; margin-top:64px; margin-bottom:120px }
   .s2-restaurant .reveal{ opacity:1; transform:none; transition:none }
   .hero{ height:auto }
   .hero__stage{ position:static; height:auto; padding-block:64px;
@@ -384,6 +336,7 @@ body.s4 .hero__media{ opacity:1 }
   background:var(--sand-100);
 }
 .sc-map iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; display:block }
+.sc-cta-row{ margin-top:80px } /* макет 157:364: itemSpacing 80 */
 /* на узких экранах карта выше — плоская 8:3 неудобна для тача */
 @media (max-width:767px){
   .s-contacts{ padding-bottom:120px }
@@ -450,15 +403,22 @@ body.s4 .hero__media{ opacity:1 }
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 
-.rv-cta-row{ display:flex; justify-content:center; margin-top:80px } /* макет 157:363: itemSpacing 80 */
-.rv-cta{
-  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
-  color:#FFFFFF; background:var(--gold-600); border:0; border-radius:8px; corner-shape:squircle;
-  padding:17px 32px; cursor:pointer; transition:background .2s ease;
+/* CTA отзывов (макет 229:380): подпись + пилюли-ссылки на площадки с отзывами.
+   Пилюли перекрываются на 16px, Яндекс сверху; ховер — как у secondary-кнопки
+   (фон gold-50) + подъём на 4px, задняя пилюля при ховере встаёт на передний план (230:450) */
+.rv-cta{ display:flex; flex-direction:column; align-items:center; gap:16px; margin-top:80px } /* макет 157:363: itemSpacing 80 */
+.rv-cta__note{ margin:0; font:400 20px/1.6 var(--font-body); color:#727070 } /* Text/Muted */
+.rv-platforms{ display:flex; isolation:isolate }
+.rv-platform{
+  display:flex; align-items:center; padding:8px 24px; position:relative;
+  background:#FFFFFF; border:1px solid var(--gold-500); border-radius:100px;
+  transition:background .3s ease, transform .3s cubic-bezier(.22,.61,.21,1);
 }
-.rv-cta:hover{ background:var(--gold-700) }
-.rv-cta:active{ background:#674800 }
-.rv-cta:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+.rv-platform img{ display:block; height:40px; width:auto }
+.rv-platform--front{ z-index:2; margin-right:-16px }
+.rv-platform--back{ z-index:1 }
+.rv-platform:hover{ background:var(--gold-50); transform:translateY(-4px); z-index:3 }
+.rv-platform:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
 
 /* адаптив: на планшете прячем 3-ю колонку, на телефоне — и 2-ю */
 @media (max-width:1023px){ .rv-col:nth-child(3){ display:none } }
@@ -466,6 +426,7 @@ body.s4 .hero__media{ opacity:1 }
 
 @media (prefers-reduced-motion: reduce){
   .s-reviews .reveal{ opacity:1; transform:none; transition:none }
+  .rv-platform{ transition:none }
   .rv-marquee{ height:auto; overflow:visible; -webkit-mask-image:none; mask-image:none }
   .rv-track{ animation:none }
   .rv-track .rv-dup{ display:none } /* без анимации клоны не нужны */
@@ -1130,7 +1091,7 @@ body.s4 .hero__media{ opacity:1 }
         <p class="car__label">Меню</p>
         <h3 class="car__title">Италия, замешанная на&nbsp;уральской муке</h3>
         <p class="car__desc">Тальятелле, равиоли, карбонара — пасту для&nbsp;этих блюд мы&nbsp;раскатываем сами, из&nbsp;муки собственного помола. Каждое утро, как&nbsp;в&nbsp;маленькой траттории.</p>
-        <button class="car__btn" type="button">Смотреть меню</button>
+        <button class="btn btn--primary car__btn" type="button">Смотреть меню</button>
       </div>
     </article>
     <article class="car__card"><img src="assets/car-couple.jpg" alt="Официант разливает вино паре за столом"></article>
@@ -1141,7 +1102,7 @@ body.s4 .hero__media{ opacity:1 }
         <p class="car__label">Ресторан</p>
         <h3 class="car__title">Кухня без лишней сложности</h3>
         <p class="car__desc">Но&nbsp;с&nbsp;вниманием к&nbsp;тому, из&nbsp;чего всё сделано</p>
-        <button class="car__btn" type="button">Бронировать стол</button>
+        <button class="btn btn--primary car__btn" type="button">Бронировать стол</button>
       </div>
     </article>
     <article class="car__card"><img src="assets/car-photo2.jpg" alt="Рыбное блюдо и морепродукты на столе ресторана"></article>
@@ -1152,7 +1113,7 @@ body.s4 .hero__media{ opacity:1 }
         <p class="car__label">21 августа</p>
         <h3 class="car__title">Музыка позднего лета</h3>
         <p class="car__desc">Живая музыка, приглушённый свет и&nbsp;бокал вина — провожаем август не&nbsp;спеша. Столики у&nbsp;окна разбирают первыми, торопитесь!</p>
-        <button class="car__btn" type="button">Бронировать стол</button>
+        <button class="btn btn--primary car__btn" type="button">Бронировать стол</button>
       </div>
     </article>
     <article class="car__card is-wide"><img src="assets/car-photo3.jpg" alt="Светлый зал ресторана с гостями"></article>
@@ -1177,8 +1138,9 @@ body.s4 .hero__media{ opacity:1 }
       <div class="zp zp--6"><div class="zp__box"><img src="assets/z6.jpg" alt="Устройство мельницы"></div></div>
     </div>
   </div>
-  <div class="zoom__cta-row">
-      <button class="zoom__cta" id="zoomCta" type="button">Больше о музее</button>
+  <div class="btn-row zoom__cta-row" id="zoomCtaRow">
+      <button class="btn btn--primary" type="button">Записаться на&nbsp;экскурсию</button>
+      <button class="btn btn--secondary" type="button">Больше о&nbsp;музее</button>
   </div>
 </section>
 
@@ -1201,6 +1163,10 @@ body.s4 .hero__media{ opacity:1 }
       <video src="assets/kitchen.mp4" autoplay muted loop playsinline preload="metadata"
              aria-label="Видео: шеф-повар готовит на открытой кухне"></video>
     </div></div>
+  </div>
+  <div class="btn-row sk-cta-row">
+      <button class="btn btn--primary" type="button">Записаться на&nbsp;мастер-класс</button>
+      <button class="btn btn--secondary" type="button">Больше об&nbsp;открытой кухне</button>
   </div>
 </section>
 
@@ -1370,8 +1336,16 @@ body.s4 .hero__media{ opacity:1 }
     </div>
   </div>
 
-  <div class="rv-cta-row reveal">
-    <button class="rv-cta" type="button">Смотреть все отзывы</button>
+  <div class="rv-cta reveal">
+    <p class="rv-cta__note">Оставьте ваш отзыв или посмотрите 250+ отзывов других людей</p>
+    <div class="rv-platforms">
+      <a class="rv-platform rv-platform--front" href="https://yandex.ru/maps/?text=Зерно%20Челябинск%20Свердловский%20проспект%2040А" target="_blank" rel="noopener" aria-label="Отзывы о Зерне на Яндекс Картах">
+        <img src="assets/yamap-logo.png" alt="Яндекс Карты" width="218" height="40">
+      </a>
+      <a class="rv-platform rv-platform--back" href="https://2gis.ru/chelyabinsk/search/Зерно%20Свердловский%20проспект%2040А" target="_blank" rel="noopener" aria-label="Отзывы о Зерне на 2ГИС">
+        <img src="assets/2gis-logo.png" alt="2ГИС" width="110" height="40">
+      </a>
+    </div>
   </div>
 </section>
 
@@ -1384,6 +1358,11 @@ body.s4 .hero__media{ opacity:1 }
        если API не загрузится — скрипт ниже подставит обычный iframe-виджет -->
   <div class="sc-map reveal" id="scMap" role="application"
        aria-label="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></div>
+  <!-- rtext=~точка — маршрут «от моего местоположения»; на телефоне universal/app link
+       сам откроет приложение Яндекс Карт, без приложения — веб-версию в браузере -->
+  <div class="btn-row sc-cta-row reveal">
+    <a class="btn btn--primary" href="https://yandex.ru/maps/?rtext=~55.168600,61.386200" target="_blank" rel="noopener">Построить маршрут</a>
+  </div>
 </section>
 
 <script>
@@ -1619,7 +1598,7 @@ body.s4 .hero__media{ opacity:1 }
 <script>
 (function(){
   const zoom = document.getElementById('zoom');
-  const cta = document.getElementById('zoomCta');
+  const cta = document.getElementById('zoomCtaRow');
   const els = ['v','1','2','3','4','5','6'].map(s => document.querySelector('.zp--' + s));
   const vbox = els[0].querySelector('.zp__box');
   // геометрия раскладки в долях юнита: [cx, cy, w, h] (смещения центров от центра видео)
