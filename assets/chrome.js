@@ -13,8 +13,8 @@
      data-header="static" — виден сразу (внутренние страницы).
    Без атрибута режим определяется автоматически: есть #hero → reveal, иначе static.
 
-   Пункты меню ведут на якорь текущей страницы, если такая секция на ней есть,
-   иначе — на главную с якорем. Поэтому на внутренних страницах меню работает само. */
+   Пункты меню — заглушки без переходов (якорная навигация убрана): ховер и курсор
+   работают, клик ничего не делает. Реальные ссылки появятся вместе с внутренними страницами. */
 (function(){
   'use strict';
 
@@ -23,24 +23,9 @@
   var LOGO = new URL('logo_hor.svg', BASE).href;
   var HOME = new URL('../index.html', BASE).href; // страница переименована из home.html
 
-  var NAV = [
-    { label:'Ресторан',       id:'restaurant' },
-    { label:'Музей',          id:'s3'         },
-    { label:'Открытая кухня', id:'kitchen'    },
-    { label:'Контакты',       id:'contacts'   }
-  ];
+  var NAV = ['Ресторан', 'Музей', 'Открытая кухня', 'Контакты'];
   var PHONE = { label:'8 800 550 1898', href:'tel:+78005501898' };
   var SOCIAL = ['VK', 'MAX', 'Telegram']; // реальные ссылки добавим, когда будут
-
-  // якорь своей страницы, если секция здесь есть; иначе — переход на главную
-  function href(id){
-    return document.getElementById(id) ? '#' + id : HOME + '#' + id;
-  }
-  function links(items){
-    return items.map(function(i){
-      return '<a href="' + href(i.id) + '">' + i.label + '</a>';
-    }).join('');
-  }
   // заглушки: адреса ещё не известны, но это полноценные <a> — работают hover, фокус и курсор.
   // data-soon — клик по такой ссылке ничего не делает (иначе href="#" бросает страницу наверх)
   function stubs(items){
@@ -61,7 +46,7 @@
         logo +
           '<img src="' + LOGO + '" alt="Зерно — на главную" width="234" height="56">' +
         '</a>' +
-        '<nav class="hd__nav" aria-label="Основное меню">' + links(NAV) + '</nav>' +
+        '<nav class="hd__nav" aria-label="Основное меню">' + stubs(NAV) + '</nav>' +
         // соцсети из хедера временно убраны (макет 63:257) — в футере (171:595) пока остаются
         '<div class="hd__right">' + phone() + '</div>' +
       '</div>' +
@@ -80,7 +65,7 @@
         '<a class="ft__logo" href="' + HOME + '" title="Зерно — на главную">' +
           '<img src="' + LOGO + '" alt="Зерно" width="234" height="56">' +
         '</a>' +
-        '<nav class="ft__col" aria-label="Разделы сайта">' + links(NAV) + '</nav>' +
+        '<nav class="ft__col" aria-label="Разделы сайта">' + stubs(NAV) + '</nav>' +
         '<div class="ft__col">' +
           phone() +
           '<div class="ft__soc">' + stubs(SOCIAL) + '</div>' +
