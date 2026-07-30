@@ -48,12 +48,17 @@
 
 .hd__in{
   width:var(--cw, min(100vw - 320px, 1600px)); margin-inline:auto;
-  display:flex; align-items:center; justify-content:space-between; gap:32px;
+  display:flex; align-items:center; gap:32px;
 }
-.hd__logo{ flex:none; display:block; line-height:0 }
+/* Меню строго по центру контейнера (макет 63:257). Приём тот же, что в макете: боковые
+   блоки равны по ширине, и меню оказывается ровно посередине. В Figma это сделано фиксированной
+   шириной 234px у header-contacts (как у логотипа); в CSS берём flex:1 1 0 — обе стороны получают
+   поровну независимо от длины номера, поэтому центр не съедет, если телефон когда-нибудь изменится */
+.hd__logo{ flex:1 1 0; display:block; line-height:0 }
 .hd__logo img{ width:234px; height:56px; display:block }
 
-.hd__nav, .hd__right{ display:flex; align-items:center; gap:32px; flex:none }
+.hd__nav{ display:flex; align-items:center; gap:32px; flex:none }
+.hd__right{ display:flex; align-items:center; gap:32px; flex:1 1 0; justify-content:flex-end }
 /* макет 63:257: меню и телефон набраны Body/Base Medium 18/160 — без капса и разрядки,
    какими они были раньше (UI/Label 16). Medium = 500, чуть плотнее обычного текста */
 .hd__nav a, .hd__nav span,
@@ -115,7 +120,11 @@
   .ft__in{ gap:32px }
 }
 @media (max-width:1023px){
+  /* контакты скрыты — центрировать больше не от чего, возвращаем логотип к своей ширине,
+     иначе flex:1 растянул бы его и вытолкнул меню вправо */
   .hd__right{ display:none }
+  .hd__logo{ flex:none }
+  .hd__in{ justify-content:space-between }
   .ft__in{ flex-wrap:wrap; row-gap:40px }
   .ft__logo{ flex:1 0 100% }
   .ft__col{ padding-top:0 }
