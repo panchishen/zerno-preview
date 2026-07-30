@@ -54,22 +54,29 @@
 .hd__logo img{ width:234px; height:56px; display:block }
 
 .hd__nav, .hd__right{ display:flex; align-items:center; gap:32px; flex:none }
+/* макет 63:257: меню и телефон набраны Body/Base Medium 18/160 — без капса и разрядки,
+   какими они были раньше (UI/Label 16). Medium = 500, чуть плотнее обычного текста */
 .hd__nav a, .hd__nav span,
 .hd__right a, .hd__right span{
-  font:600 16px/1.3 var(--font-body, 'Manrope', system-ui, sans-serif);
-  letter-spacing:.08em; text-transform:uppercase;
-  color:var(--graphite-800, #2B2A29);
+  font:500 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif);
+  color:var(--text-primary, #474134);
   white-space:nowrap; text-decoration:none;
 }
-.hd__nav a:hover, .hd__right a:hover{ color:var(--gold-600, #A97C19) }
+/* Наведение — пункт становится золотым (стиль Link/Default). Именно gold/700:
+   он и читается на фоне шапки (5.3:1), и заметно отличается от текста (1.8:1).
+   Более тёмные золотые формально контрастнее к фону, но сливаются с текстом — проверено */
+.hd__nav a:hover, .hd__right a:hover{ color:var(--link-default, #896100) }
+/* пункт текущей страницы — тот же Link/Default (макет: «Главная» на главной) */
+.hd__nav a[aria-current="page"]{ color:var(--link-default, #896100) }
 .hd__nav a:focus-visible, .hd__right a:focus-visible, .hd__logo:focus-visible{
   outline:2px solid var(--gold-600, #A97C19); outline-offset:4px; border-radius:2px;
 }
 
 /* ===== ФУТЕР ===== */
 .site-footer{
-  background:linear-gradient(180deg, var(--sand-50, #FDFAF1) 0%, #FFFFFF 100%);
-  border-top:1px solid var(--sand-300, #E4D8BD);
+  /* тёмный футер (макет 257:383): вертикальный градиент graphite-900 → sand-900 к середине */
+  background:linear-gradient(180deg, var(--graphite-900, #1D1911) 0%, var(--sand-900, #3D372A) 50%);
+  border-top:2px solid var(--gold-500, #CB9C3F); /* макет 171:595: обводка сверху 2px, gold-500 */
 }
 .ft__in{
   width:var(--cw, min(100vw - 320px, 1600px)); margin-inline:auto;
@@ -84,11 +91,18 @@
   padding-top:21px; /* по макету: строки колонок выровнены ниже верха логотипа */
 }
 .ft__col a, .ft__col span{
-  font:400 16px/1.52 var(--font-body, 'Manrope', system-ui, sans-serif);
-  color:var(--graphite-800, #2B2A29);
+  font:500 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif); /* макет 171:595: Body/Base Medium 18/160 */
+  color:var(--text-inverse, #F9F3E4); /* Text/Primary (on dark) */
   white-space:nowrap; text-decoration:none;
 }
-.ft__col a:hover{ color:var(--gold-600, #A97C19) }
+/* правая колонка (политика, копирайт, разработчик) — Text/Secondary (on dark).
+   Контраст 5.6:1 на светлом конце градиента футера — проходит AA для основного текста */
+.ft__col--secondary a, .ft__col--secondary span{ color:var(--text-secondary-dark, #BDB194) }
+/* Наведение на тёмном — стиль Link/Hover (on dark), gold/300. Не gold/highlight:
+   тот стоит на тоне 48°, тогда как вся золотая шкала бренда — 38-41°, и на глаз он
+   читается жёлтым, а не золотым. gold/300 втрое насыщеннее песочного цвета ссылки,
+   поэтому переход виден, хотя формальный контраст по яркости всего 1.2 */
+.ft__col a:hover{ color:var(--link-hover-dark, #E2BF7E) }
 .ft__col a:focus-visible, .ft__logo:focus-visible{
   outline:2px solid var(--gold-600, #A97C19); outline-offset:4px; border-radius:2px;
 }

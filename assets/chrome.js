@@ -41,12 +41,15 @@
     var logo = isHome
       ? '<a class="hd__logo" href="#" title="Зерно — на главную" data-restart>'
       : '<a class="hd__logo" href="' + HOME + '" title="Зерно — на главную">';
+    // «Главная» — единственный рабочий пункт меню (макет 63:257). На самой главной
+    // помечен aria-current="page": и подсветка Link/Default, и подсказка для скринридера
+    var home = '<a href="' + HOME + '"' + (isHome ? ' aria-current="page"' : '') + '>Главная</a>';
     return '<header class="site-header" id="siteHeader">' +
       '<div class="hd__in">' +
         logo +
           '<img src="' + LOGO + '" alt="Зерно — на главную" width="234" height="56">' +
         '</a>' +
-        '<nav class="hd__nav" aria-label="Основное меню">' + stubs(NAV) + '</nav>' +
+        '<nav class="hd__nav" aria-label="Основное меню">' + home + stubs(NAV) + '</nav>' +
         // соцсети из хедера временно убраны (макет 63:257) — в футере (171:595) пока остаются
         '<div class="hd__right">' + phone() + '</div>' +
       '</div>' +
@@ -70,8 +73,10 @@
           phone() +
           '<div class="ft__soc">' + stubs(SOCIAL) + '</div>' +
           '<span>Свердловский проспект, 40А</span>' +
+          '<span>Время работы: 8:00–22:00</span>' +
         '</div>' +
-        '<div class="ft__col">' +
+        // правый блок — вторичным цветом (макет 171:595)
+        '<div class="ft__col ft__col--secondary">' +
           '<a href="#" data-soon>Политика обработки персональных данных</a>' +
           '<span>2026 © ООО «Объединение «Союзпищепром»</span>' +
           '<span>Комплексное продвижение — <a href="#" data-soon>Алькон</a></span>' +
