@@ -84,9 +84,9 @@
         '<nav class="ft__col" aria-label="Разделы сайта">' + stubs(NAV) + '</nav>' +
         '<div class="ft__col">' +
           phone() +
-          '<div class="ft__soc">' + socialButtons() + '</div>' +
           '<span>Свердловский проспект, 40А</span>' +
           '<span>Время работы: 8:00–22:00</span>' +
+          '<div class="ft__soc">' + socialButtons() + '</div>' +  // соцсети внизу колонки (макет 159:422: y=132, ниже времени работы)
         '</div>' +
         // правый блок — вторичным цветом (макет 171:595)
         '<div class="ft__col ft__col--secondary">' +
