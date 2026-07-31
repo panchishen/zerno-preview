@@ -111,7 +111,29 @@
 .ft__col a:focus-visible, .ft__logo:focus-visible{
   outline:2px solid var(--gold-600, #A97C19); outline-offset:4px; border-radius:2px;
 }
-.ft__soc{ display:flex; gap:12px }
+.ft__soc{ display:flex; gap:8px }   /* макет: шаг 40 при кнопке 32 */
+/* Кнопка-иконка соцсети (макет Icon button 352:474). Плашка намеренно тихая:
+   золото у нас — цвет главного действия, и на сплошной заливке 32×32 оно перетягивало
+   внимание с контактов. Золото включается на наведении — как отклик, а не как фон */
+/* Селектор с .ft__col не для красоты: правило .ft__col a выше по специфичности и
+   перекрашивало иконку — на наведении она становилась золотой на золотом фоне и пропадала */
+.ft__col .ft__soc-btn{
+  width:32px; height:32px; flex:none;
+  display:grid; place-items:center;
+  border-radius:8px; corner-shape:squircle;      /* как у всех кнопок, см. РЕШЕНИЯ.md */
+  background:var(--dark-surface-raised, #474134);
+  color:var(--button-primary-label, #FFFFFF);    /* иконка наследует через currentColor */
+  transition:background .2s ease;
+}
+/* меняется только фон — иконка остаётся белой в обоих состояниях */
+.ft__col .ft__soc-btn:hover{
+  background:var(--button-primary-bg, #A97C19);
+  color:var(--button-primary-label, #FFFFFF);
+}
+.ft__soc-btn svg{ width:24px; height:24px; display:block; fill:currentColor }
+.ft__soc-btn:focus-visible{
+  outline:2px solid var(--gold-400, #D3A856); outline-offset:3px;
+}
 
 /* ===== адаптив: макет десктопный, ниже — чтобы ничего не разъезжалось ===== */
 @media (max-width:1199px){
