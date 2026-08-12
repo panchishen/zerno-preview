@@ -10,7 +10,9 @@
 
    Режим хедера:
      data-header="reveal" на <body> — выезжает после первого экрана (главная);
-     data-header="static" — виден сразу (внутренние страницы).
+     data-header="static" — виден сразу (внутренние страницы);
+     data-header="v2" — второй вариант главной: прозрачная шапка на первом экране
+       плюс стики-шапка, которая выезжает после него (макет 430:1292).
    Без атрибута режим определяется автоматически: есть #hero → reveal, иначе static.
 
    Пункты меню — заглушки без переходов (якорная навигация убрана): ховер и курсор
@@ -21,10 +23,13 @@
   // пути считаем от самого скрипта — работает и из подпапок
   var BASE = new URL('.', document.currentScript.src);
   var LOGO = new URL('logo_hor.svg', BASE).href;
-  var HOME = new URL('../index.html', BASE).href; // страница переименована из home.html
+  var HOME = new URL('../index-v1.html', BASE).href; // главная существует в двух вариантах, «домом» считаем первый
 
+  var LOGO_VERT = new URL('logo_vert.svg', BASE).href; // вертикальный знак — только в шапке на тёмном
   var NAV = ['Ресторан', 'Музей', 'Конференц-зал', 'Контакты'];
+  var NAV_V2 = ['Ресторан', 'Музей', 'Мастер-классы', 'Контакты']; // во втором варианте макета вместо конференц-зала
   var PHONE = { label:'8 (922) 711-09-40', href:'tel:+79227110940' };
+  var ADDRESS = 'Свердловский проспект, 40А';
   // Соцсети — кнопки-иконки (макет Icon button 352:474). Контуры встроены прямо сюда:
   // так они наследуют цвет через currentColor, чего <img src=".svg"> не умеет.
   // Исходники тех же путей — assets/icons/*.svg, там же нормализация глифа в 20×20.
@@ -69,22 +74,85 @@
     '</header>';
   }
 
+  // ===== Шапки второго варианта главной (макет 430:1292) =====
+  // «2 (on dark)»: прозрачная, лежит на видео первого экрана. Логотип вертикальный и по центру,
+  // меню и контакты — по краям. Уезжает вместе с первым экраном, поэтому position:absolute.
+  function heroHeaderHTML(){
+    return '<header class="hero-header">' +
+      '<nav class="hero-header__nav" aria-label="Основное меню">' +
+        '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV_V2) +
+      '</nav>' +
+      '<a class="hero-header__brand" href="#" data-top title="Зерно — наверх">' +
+        '<img src="' + LOGO_VERT + '" alt="Зерно" width="205" height="100">' +
+        '<span class="hero-header__tagline">Еда. Развитие. Инновации.</span>' +
+      '</a>' +
+      '<div class="hero-header__contacts"><span>' + ADDRESS + '</span>' + phone() + '</div>' +
+    '</header>';
+  }
+  // «2»: стики-шапка. От первого варианта отличается раскладкой и кнопкой брони,
+  // механика появления общая — класс .site-header--reveal и проверка в init()
+  function headerV2HTML(){
+    return '<header class="site-header site-header--v2" id="siteHeader">' +
+      '<div class="hd__in">' +
+        '<a class="hd__logo" href="#" data-top title="Зерно — наверх">' +
+          '<img src="' + LOGO + '" alt="Зерно" width="234" height="56">' +
+        '</a>' +
+        '<nav class="hd__nav" aria-label="Основное меню">' +
+          '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV_V2) +
+        '</nav>' +
+        '<div class="hd__right">' +
+          '<span>' + ADDRESS + '</span>' + phone() +
+          '<button class="hd__btn" type="button">Забронировать</button>' +
+        '</div>' +
+      '</div>' +
+    '</header>';
+  }
+
+  // ===== Переключалка вариантов главной (макет 445:1733) =====
+  // Служебная плашка прототипа: заказчик сравнивает два варианта главной. Ссылки
+  // относительные — работает и локально, и на GitHub Pages. Перед сдачей в продакшн
+  // убирается отсюда и из chrome.css вместе с вызовом в init().
+  var VARIANTS = [
+    { label:'1', file:'index-v1.html' },
+    { label:'2', file:'index-v2.html' }
+  ];
+  function variantsHTML(){
+    var here = location.pathname.split('/').pop();
+    return '<nav class="variants" aria-label="Вариант главной страницы">' +
+      VARIANTS.map(function(v){
+        // текущий вариант — не ссылка: нажимать некуда, мы уже здесь
+        return here === v.file
+          ? '<span class="variants__btn is-active" aria-current="page">' + v.label + '</span>'
+          : '<a class="variants__btn" href="' + v.file + '" title="Вариант ' + v.label + ' главной">' + v.label + '</a>';
+      }).join('') +
+    '</nav>';
+  }
+
   // Полоса прогресса — отдельный элемент, не часть шапки: она поверх шапки и не зависит
   // от того, показана та или нет. aria-hidden — то же самое сообщает нативный скроллбар.
   function progressHTML(){
     return '<div class="scroll-progress" id="scrollProgress" aria-hidden="true"><i></i></div>';
   }
 
-  function footerHTML(){
-    return '<footer class="site-footer">' +
+  // isV2: во втором варианте главной под логотипом появился слоган (макет 430:1451),
+  // в остальном футер тот же. Логотип там же ведёт наверх, а не перезагружает страницу
+  function footerHTML(isV2){
+    var logo = isV2
+      ? '<a class="ft__logo" href="#" data-top title="Зерно — наверх">'
+      : '<a class="ft__logo" href="' + HOME + '" title="Зерно — на главную">';
+    var brand =
+      logo +
+        '<img src="' + LOGO + '" alt="Зерно" width="234" height="56">' +
+      '</a>';
+    if (isV2) brand = '<div class="ft__brand">' + brand +
+      '<span class="ft__tagline">Еда. Развитие. Инновации.</span></div>';
+    return '<footer class="site-footer' + (isV2 ? ' site-footer--v2' : '') + '">' +
       '<div class="ft__in">' +
-        '<a class="ft__logo" href="' + HOME + '" title="Зерно — на главную">' +
-          '<img src="' + LOGO + '" alt="Зерно" width="234" height="56">' +
-        '</a>' +
+        brand +
         '<nav class="ft__col" aria-label="Разделы сайта">' + stubs(NAV) + '</nav>' +
         '<div class="ft__col">' +
           phone() +
-          '<span>Свердловский проспект, 40А</span>' +
+          '<span>' + ADDRESS + '</span>' +
           '<span>Время работы: 8:00–22:00</span>' +
           '<div class="ft__soc">' + socialButtons() + '</div>' +  // соцсети внизу колонки (макет 159:422: y=132, ниже времени работы)
         '</div>' +
@@ -99,14 +167,17 @@
   }
 
   function init(){
-    document.body.insertAdjacentHTML('afterbegin', headerHTML() + progressHTML());
-    document.body.insertAdjacentHTML('beforeend', footerHTML());
-
-    var header = document.getElementById('siteHeader');
     var hero = document.getElementById('hero');
     var mode = document.body.dataset.header || (hero ? 'reveal' : 'static');
+    var isV2 = mode === 'v2';
 
-    if (mode === 'reveal' && hero){
+    document.body.insertAdjacentHTML('afterbegin',
+      (isV2 ? heroHeaderHTML() + headerV2HTML() : headerHTML()) + progressHTML());
+    document.body.insertAdjacentHTML('beforeend', footerHTML(isV2) + variantsHTML());
+
+    var header = document.getElementById('siteHeader');
+
+    if ((mode === 'reveal' || isV2) && hero){
       header.classList.add('site-header--reveal');
       var check = function(){
         header.classList.toggle('show', hero.getBoundingClientRect().bottom <= 0);
@@ -116,10 +187,15 @@
       check();
     }
 
-    // href="#" у заглушек нужен только ради hover/фокуса — прыгать наверх по клику незачем
+    // href="#" у заглушек нужен только ради hover/фокуса — прыгать наверх по клику незачем.
+    // data-top — наоборот, наверх и надо: так ведут себя логотипы и «Главная» на самой главной
     document.addEventListener('click', function(e){
-      var stub = e.target.closest && e.target.closest('[data-soon]');
-      if (stub) e.preventDefault();
+      if (!e.target.closest) return;
+      if (e.target.closest('[data-soon]')) { e.preventDefault(); return; }
+      if (e.target.closest('[data-top]')) {
+        e.preventDefault();
+        scrollTo({ top:0, behavior:'smooth' });
+      }
     });
 
     var restart = header.querySelector('[data-restart]');

@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зерно — ресторан и музей · Главная (вариант 2)</title>
+<!-- фавикон: .ico (16/32/48) для поисковиков и старых браузеров, .svg — для современных -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prosto+One&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- сквозные хедер и футер: разметку вставляет chrome.js -->
+<link rel="stylesheet" href="assets/chrome.css">
+<script src="assets/chrome.js" defer></script>
+<!-- демпфер scroll-driven анимаций; без defer — инлайн-скрипты страницы зовут createScrub при парсинге -->
+<script src="assets/scrub.js"></script>
+<style>
+/* ===== Зерно · токены (из зерно-цвета.tokens.json) ===== */
+:root{
+  --sand-50:#FDFAF1; --sand-100:#F9F3E4; --sand-200:#F0E6CE; --sand-300:#E4D8BD;
+  --gold-50:#FDF5E6; --gold-100:#FAEACF; --gold-400:#D3A856; --gold-500:#CB9C3F; --gold-600:#A97C19; --gold-700:#896100; --gold-800:#674800;
+  /* текст на кремовом фоне — тёплые нейтрали (макет 257:259): primary/secondary */
+  --graphite-600:#5F5A52; --graphite-700:#474134; --graphite-800:#2E2A22; --graphite-900:#1D1911;
+  --text-primary:var(--graphite-700); /* Text/Primary — основной текст (роль, а не примитив) */
+  --gold-200:#F0D5A7; --gold-300:#E2BF7E; --gold-900:#493200; --gold-highlight:#F0D878;
+  /* Ссылки. Две пары: тёмное золото читается только на светлом, светлое — только на тёмном.
+     Правило: наведение всегда усиливает контраст (на светлом темнеет, на тёмном светлеет). */
+  --link-default:var(--gold-700);        /* 5.3:1 к фону и 1.8:1 к тексту — читается и не сливается */
+  --link-hover:var(--gold-900);          /* 9.7:1 */
+  --link-default-dark:var(--gold-400);   /* 5.4:1 на светлом конце градиента футера */
+  --dark-surface-raised:var(--graphite-700); /* тихая плашка на тёмном — светлее обоих концов градиента футера */
+  --button-primary-bg:var(--gold-600);       /* фон кнопки Primary; он же — наведение кнопок соцсетей */
+  --button-primary-label:#FFFFFF;            /* надпись/иконка на фирменном фоне */
+  --link-hover-dark:var(--gold-300);     /* 6.7:1; gold/highlight не берём — тон 48°, вне золотой шкалы (38-41°) */
+  --surface-page:#FDFAF1;   /* общий фон страницы */
+  --sand-900:#3D372A; --text-inverse:#F9F3E4; /* тёмный футер и текст на нём */
+  --sand-500:#BDB194; --text-secondary-dark:#BDB194; /* Text/Secondary (on dark) — правый блок футера */
+  --font-heading:'Prosto One', system-ui, sans-serif;
+  --font-body:'Onest', system-ui, sans-serif;
+  /* сетка: поля по брейкпоинтам, контент не шире 1600px, по центру */
+  --margin:160px;
+  --cw:min(100vw - var(--margin)*2, 1600px);   /* ширина контейнера */
+  --pad:calc((100vw - var(--cw)) / 2);         /* от края окна до контейнера */
+}
+@media (max-width:1439px){ :root{ --margin:80px } }
+@media (max-width:1199px){ :root{ --margin:48px } }
+@media (max-width:1023px){ :root{ --margin:40px } }
+@media (max-width:767px){ :root{ --margin:16px } }
+*{ box-sizing:border-box }
+body{
+  margin:0; background:var(--surface-page); color:var(--text-primary);
+  font-family:var(--font-body); font-size:18px; line-height:1.6; /* Body/Base 18/160 */
+}
+.container{ width:var(--cw); margin-inline:auto }
+
+/* ===== Кнопки — компонент Button L из макета (47:86): Primary заливкой, Secondary обводкой ===== */
+/* ряд кнопок: ширина по сетке (кнопки и так по центру, но коробка не должна вылезать за 1600) */
+.btn-row{
+  display:flex; justify-content:center; flex-wrap:wrap; gap:16px;
+  width:var(--cw); margin-inline:auto; position:relative; z-index:5;
+}
+.btn{
+  display:inline-flex; align-items:center; text-decoration:none; /* и для <button>, и для <a> */
+  font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
+  white-space:nowrap; /* лейбл не ломается на строки — на узком экране кнопки переносятся целиком (wrap у ряда) */
+  border-radius:8px; corner-shape:squircle; cursor:pointer;
+  transition:background .2s ease, border-color .2s ease, transform .3s cubic-bezier(.22,.61,.21,1);
+}
+.btn:hover{ transform:translateY(-4px) }
+.btn:active{ transform:none } /* нажатие «прижимает» кнопку обратно */
+.btn--primary{ color:#FFFFFF; background:var(--gold-600); border:0; padding:17px 32px }
+.btn--primary:hover{ background:var(--gold-700) }
+.btn--primary:active{ background:var(--gold-800) }
+.btn--secondary{
+  color:var(--gold-600); background:transparent; border:1px solid var(--gold-400);
+  padding:16px 31px; /* -1px на обводку: та же высота 56px, что у primary */
+}
+.btn--secondary:hover{ background:var(--gold-50); border-color:var(--gold-500) }
+.btn--secondary:active{ background:var(--gold-100); border-color:var(--gold-600) }
+.btn:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+@media (prefers-reduced-motion: reduce){
+  .btn, .reviews-platform{ transition:none }
+  .btn:hover, .reviews-platform:hover{ transform:none }
+}
+
+/* ===== Золотой шейдер-фон: лёгкий декор на всю страницу, рисует золотые линии поверх кремового фона ===== */
+#gold-shader-bg{
+  position:fixed; inset:0; width:100%; height:100%;
+  z-index:-1; pointer-events:none; display:block;
+}
+
+/* Хедер и футер — сквозные компоненты: assets/chrome.css + assets/chrome.js */
+
+/* ===== HERO (вариант 2, макет 430:1325) =====
+   Видео на весь экран под затемнением, заголовок по центру, стрелка-подсказка внизу.
+   Интро и скраб первого варианта здесь не нужны: страница листается сразу, а элементы
+   просто появляются по очереди — за очередь отвечают animation-delay ниже. */
+.hero2{ position:relative; height:100vh; overflow:clip; background:var(--graphite-900) }
+.hero2__video{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
+  animation:hero2-fade .9s ease .1s both;
+}
+/* затемнение: в макете кадр перекрыт чёрным на 60% — иначе светлый зал не держит светлый текст */
+.hero2__shade{ position:absolute; inset:0; background:rgba(0,0,0,.6) }
+/* центрируем заголовок обёрткой, а не его собственным transform — тот занят анимацией */
+.hero2__inner{ position:absolute; inset:0; display:grid; place-items:center }
+.hero2__title{
+  width:var(--cw); margin:0;
+  font-family:var(--font-heading); font-weight:400;
+  font-size:calc(var(--cw) * 0.04); line-height:1.1; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-inverse); text-align:center; text-wrap:balance;
+  animation:hero2-rise .8s cubic-bezier(.22,.61,.21,1) .8s both;
+}
+/* Стрелка — подсказка «страницу можно листать»: дважды быстро тянется вниз с 40 до 48px,
+   потом три секунды покоя — и снова. Тянем не высотой, а scaleY у линии и сдвигом у уголка:
+   это считает композитор, раскладка не пересчитывается. Такт у обоих один, разъехаться нечем. */
+.hero2__arrow{
+  position:absolute; left:50%; bottom:56px; margin-left:-1px; width:2px; height:40px;
+  color:var(--text-secondary-dark);
+  animation:hero2-fade .6s ease 1.3s both;
+}
+.hero2__arrow-stem{
+  position:absolute; inset:0; background:currentColor; transform-origin:top center;
+  animation:hero2-arrow-stem 4s ease-in-out 2s infinite;
+}
+.hero2__arrow-tip{  /* уголок — квадрат с двумя сторонами, повёрнутый на 45° */
+  position:absolute; left:50%; bottom:0; width:9px; height:9px;
+  border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+  /* -2.3px поднимает уголок так, чтобы его вершина села точно на конец линии */
+  transform:translate(-50%,-2.3px) rotate(45deg);
+  animation:hero2-arrow-tip 4s ease-in-out 2s infinite;
+}
+@keyframes hero2-fade{ from{ opacity:0 } }
+@keyframes hero2-rise{ from{ opacity:0; transform:translateY(16px) } }
+/* такт цикла 4с: выпад 0.25с, назад 0.25с, ещё раз то же — и 3 секунды покоя до 100% */
+@keyframes hero2-arrow-stem{
+  6.25%, 18.75%{ transform:scaleY(1.2) }  /* 40px -> 48px */
+  12.5%, 25%{ transform:scaleY(1) }
+}
+@keyframes hero2-arrow-tip{               /* уголок идёт ровно за концом линии */
+  6.25%, 18.75%{ transform:translate(-50%,5.7px) rotate(45deg) }
+  12.5%, 25%{ transform:translate(-50%,-2.3px) rotate(45deg) }
+}
+
+/* Обе шапки варианта 2 (макет 430:1292) размечает и оформляет сквозной компонент —
+   assets/chrome.js и assets/chrome.css. Здесь только очередь появления: она часть
+   интро первого экрана, а не самого компонента. */
+.hero-header__brand{ animation:hero2-rise .7s cubic-bezier(.22,.61,.21,1) .3s both }
+.hero-header__nav, .hero-header__contacts{ animation:hero2-rise .7s cubic-bezier(.22,.61,.21,1) .5s both }
+
+/* ===== БЛОК 2: ресторан (макет 83:186) ===== */
+.s-restaurant{ padding-top:200px; padding-bottom:200px } /* фон прозрачный — просвечивает золотой шейдер */
+.s-restaurant .restaurant__head{
+  width:min(1058px, var(--cw)); margin:0 auto; text-align:center;
+}
+.s-restaurant h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600);
+  margin:0; text-wrap:balance;
+}
+.s-restaurant .restaurant__sub{
+  font-weight:500; font-size:24px; line-height:1.6; color:var(--text-primary); margin:32px 0 0; /* Body/Lead Medium 24/160 */
+}
+/* поэтапное появление блока: заголовок -> текст -> карточки */
+.s-restaurant .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s-restaurant.in .reveal{ opacity:1; transform:none }
+.s-restaurant.in .restaurant__sub{ transition-delay:.3s }
+.s-restaurant.in .restaurant-car{ transition-delay:.65s }
+
+/* карусель: вьюпорт от левого поля, обрезка по контейнеру */
+.restaurant-car{
+  position:relative; height:480px; margin-top:64px;
+  overflow:hidden; cursor:default; touch-action:pan-y; user-select:none;
+}
+/* «рука» только над полосой карточек — слева пустое поле, там курсор обычный (класс вешает JS) */
+.restaurant-car.over-cards{ cursor:grab }
+.restaurant-car.dragging{ cursor:grabbing }
+.restaurant-card{
+  position:absolute; top:0; left:calc((100% - var(--cw)) / 2); width:382px; height:480px;
+  border-radius:16px; corner-shape:squircle; overflow:hidden;
+  background:var(--graphite-100,#E8E8E7); will-change:transform;
+}
+.restaurant-card.restaurant-card--wide{ width:720px } /* широкие карточки макета (меню, событие, фото) */
+.restaurant-card img, .restaurant-card video{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; pointer-events:none;
+}
+/* градиент под наклоном: тёмный угол слева-сверху → к центру-низу (текст в левом верхнем углу читается).
+   угол — от геометрии «угол→центр-низ», а она зависит от ширины: 382 → 158.3°, 720 → 143.13° */
+.restaurant-card .restaurant-card__shade{
+  position:absolute; inset:0;
+  background:linear-gradient(158.3deg, rgba(73,50,0,1) 0%, rgba(73,50,0,.4) 87.97%);
+}
+.restaurant-card.restaurant-card--wide .restaurant-card__shade{
+  background:linear-gradient(143.13deg, rgba(73,50,0,1) 0%, rgba(73,50,0,.4) 73.53%);
+}
+.restaurant-card .restaurant-card__inner{ position:absolute; inset:0; padding:32px; display:flex; flex-direction:column }
+.restaurant-card__label{
+  font:600 16px/1.3 var(--font-body); letter-spacing:.08em; text-transform:uppercase;
+  color:#FFFFFF; margin:0 0 16px;
+}
+.restaurant-card__title{
+  font-family:var(--font-heading); font-weight:400; font-size:24px; line-height:1.36;
+  letter-spacing:.06em; text-transform:uppercase; color:#FFFFFF; margin:0;
+}
+.restaurant-card__desc{ margin:8px 0 0; font:400 18px/1.6 var(--font-body); color:#FFFFFF }
+/* Во втором варианте текст в широких карточках занимает всю ширину (656px = 720 − 32×2),
+   а от наползания на кнопку его держит ограничение по строкам: 4 у заголовка, 5 у текста
+   (так задано в макете 428:829). Лишнее обрезается многоточием. */
+.restaurant-card__title{
+  display:-webkit-box; -webkit-box-orient:vertical;
+  -webkit-line-clamp:4; line-clamp:4; overflow:hidden;
+}
+.restaurant-card__desc{
+  display:-webkit-box; -webkit-box-orient:vertical;
+  -webkit-line-clamp:5; line-clamp:5; overflow:hidden;
+}
+.restaurant-card__btn{ margin-top:auto; align-self:flex-start } /* остальное — общий .btn .btn--primary */
+
+/* ===== БЛОК 2.5: конференц-зал (макет 428:887) =====
+   Во втором варианте вместо стека карточек — текст, видео под ним и кнопка.
+   Появление такое же простое, как в блоках выше: элементы проступают друг за другом. */
+.s-conference{ padding-top:0; padding-bottom:0 } /* сверху — margin-bottom кнопок музея (200px); снизу — margin-bottom ряда кнопок; фон прозрачный, просвечивает золотой шейдер */
+.s-conference .conference__head{ width:var(--cw); margin:0 auto; text-align:center } /* в макете шапка на всю ширину сетки */
+.s-conference h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.s-conference .conference__sub{ font-weight:500; font-size:24px; line-height:1.6; color:var(--text-primary); margin:32px 0 0 } /* Body/Lead Medium 24/160 */
+.s-conference .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s-conference.in .reveal{ opacity:1; transform:none }
+.s-conference.in .conference__sub{ transition-delay:.3s }
+
+/* видео: ширина по сетке, пропорции макета 1600x960 (5:3), скругление как у остальных медиа */
+.conference-video{
+  position:relative; width:var(--cw); margin:80px auto 0;
+  aspect-ratio:1600 / 960;
+  border-radius:8px; corner-shape:squircle; overflow:hidden; background:var(--sand-100);
+}
+.conference-video video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block }
+
+.conference-cta-row{ margin-top:80px; margin-bottom:200px }
+
+/* Видео и кнопка проявляются каждое по своему въезду в экран, а не вместе с шапкой:
+   кадр 5:3 высокий, и на невысоком экране их появление иначе прошло бы за кадром */
+.conference-video, .conference-cta-row{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.conference-video.in, .conference-cta-row.in{ opacity:1; transform:none }
+
+@media (prefers-reduced-motion: reduce){
+  .s-conference .reveal,
+  .conference-video, .conference-cta-row{ opacity:1; transform:none; transition:none }
+}
+
+/* ===== БЛОК 3: музей — бенто-сетка (макет 428:872) =====
+   Вместо зума первого варианта: сетка 3 колонки на 6 рядов, ячейка 517x344 при контейнере 1600,
+   промежуток 24. Медиа и текстовые карточки чередуются, два кадра занимают по 2x2 ячейки. */
+.s-museum{ padding-top:0 } /* 200px даёт padding-bottom карусельного блока; фон прозрачный — просвечивает золотой шейдер */
+.s-museum .museum__head{ width:var(--cw); margin:0 auto; text-align:center } /* в макете шапка на всю ширину сетки */
+.s-museum h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0;
+}
+.s-museum .museum__sub{ font-weight:500; font-size:24px; line-height:1.6; color:var(--text-primary); margin:32px 0 0 } /* Body/Lead Medium 24/160 */
+.s-museum .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s-museum.in .reveal{ opacity:1; transform:none }
+.s-museum.in .museum__sub{ transition-delay:.3s }
+
+.museum-bento{
+  display:grid; gap:24px; width:var(--cw); margin:80px auto 0;
+  grid-template-columns:repeat(3, 1fr);
+  /* Высота ряда — из пропорции ячейки макета (517x344), поэтому сетка тянется вместе с
+     контейнером. minmax(..., auto): если на узком экране текст карточки перерастает ячейку,
+     ряд подрастает под него, а не обрезает текст. Кадры при этом просто становятся выше. */
+  grid-auto-rows:minmax(calc((var(--cw) - 48px) / 3 * 344 / 517), auto);
+}
+/* Порядок в разметке совпадает с порядком заполнения сетки, поэтому раскладывать элементы
+   вручную не нужно: широкие кадры сами занимают 2x2, остальное встаёт в свободные ячейки */
+.museum-bento__cell{
+  position:relative; border-radius:8px; corner-shape:squircle; overflow:hidden;
+  background:var(--sand-100);
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.museum-bento__cell.in{ opacity:1; transform:none }
+.museum-bento__cell--wide{ grid-column:span 2; grid-row:span 2 }
+/* кадры вне потока: тогда высоту ряда задаёт только текст карточек, а не размер картинки */
+.museum-bento__cell img, .museum-bento__cell video{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
+}
+
+/* текстовая карточка бенто: песочная плашка, текст по центру, ширина текста 470 из 517 */
+.museum-bento__cell--card{ background:var(--sand-200); display:grid; place-items:center; padding:24px }
+.museum-card{ width:min(470px, 100%); text-align:center }
+.museum-card h3{
+  font-family:var(--font-heading); font-weight:400; font-size:24px; line-height:1.36;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--gold-800); margin:0;
+}
+.museum-card p{ font:400 18px/1.6 var(--font-body); color:var(--text-primary); margin:10px 0 0 }
+
+.museum-cta-row{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+  margin-top:80px; margin-bottom:200px; /* снизу — отступ до блока конференц-зала */
+}
+.museum-cta-row.in{ opacity:1; transform:none }
+
+/* Адаптив сетки: макет десктопный, ниже ячейка становится слишком мелкой для текста.
+   dense нужен из-за широких кадров: в две колонки они занимают всю строку, и без
+   плотной укладки после них оставались бы дырки. */
+@media (max-width:1023px){
+  .museum-bento{
+    grid-template-columns:repeat(2, 1fr); grid-auto-flow:dense;
+    grid-auto-rows:minmax(calc((var(--cw) - 24px) / 2 * 344 / 517), auto);
+  }
+}
+@media (max-width:767px){
+  .museum-bento{ grid-template-columns:1fr; grid-auto-rows:auto; margin-top:48px }
+  .museum-bento__cell{ aspect-ratio:517 / 344 }
+  .museum-bento__cell--wide{ grid-column:span 1; grid-row:span 1; aspect-ratio:1059 / 712 }
+  .museum-bento__cell--card{ aspect-ratio:auto; padding:32px 24px } /* текст сам задаёт высоту */
+  .museum-cta-row{ margin-top:48px; margin-bottom:120px }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .s-museum .reveal{ opacity:1; transform:none; transition:none }
+  .museum-bento__cell, .museum-cta-row{ opacity:1; transform:none; transition:none }
+  .museum-cta-row{ margin-bottom:120px }
+  .s-restaurant .reveal{ opacity:1; transform:none; transition:none }
+  /* первый экран варианта 2 — статичный: гасим и появление, и цикл стрелки */
+  .hero2__video, .hero2__title, .hero2__arrow, .hero2__arrow-stem, .hero2__arrow-tip,
+  .hero-header__brand, .hero-header__nav, .hero-header__contacts{ animation:none }
+}
+
+/* ===== БЛОК: контакты — «Как попасть в это место» (макет 144:357 заголовок + 144:360 карта) ===== */
+.s-contacts{ padding-top:0; padding-bottom:200px } /* сверху — 200px отзывов, снизу — свои 200px; фон прозрачный, просвечивает золотой шейдер */
+.s-contacts .contacts__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
+.s-contacts h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.s-contacts .contacts__sub{ font-weight:500; font-size:24px; line-height:1.6; color:var(--text-primary); margin:32px 0 0 } /* Body/Lead Medium 24/160 */
+.s-contacts .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s-contacts.in .reveal{ opacity:1; transform:none }
+.s-contacts.in .contacts__sub{ transition-delay:.3s }
+.s-contacts.in .contacts-map{ transition-delay:.5s }
+
+/* карта: ширина по сетке, пропорции макета 1600×600 (8:3), squircle-скругление как у остальных медиа */
+.contacts-map{
+  position:relative; width:var(--cw); margin:64px auto 0;
+  aspect-ratio:1600 / 600;
+  border-radius:16px; corner-shape:squircle; overflow:hidden;
+  background:var(--sand-100);
+}
+.contacts-map iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; display:block }
+.contacts-cta-row{ margin-top:80px } /* макет 157:364: itemSpacing 80 */
+/* на узких экранах карта выше — плоская 8:3 неудобна для тача */
+@media (max-width:767px){
+  .s-contacts{ padding-bottom:120px }
+  .contacts-map{ aspect-ratio:auto; height:min(70vh, 460px) }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .s-contacts .reveal{ opacity:1; transform:none; transition:none }
+}
+
+/* ===== БЛОК ОТЗЫВЫ (макет 141:205): три колонки-бегущие ленты ===== */
+.s-reviews{ padding-top:0; padding-bottom:200px } /* сверху — 200px кухни, снизу — свои 200px до контактов; фон прозрачный, просвечивает золотой шейдер */
+.s-reviews .reviews__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
+.s-reviews h2{
+  font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.s-reviews .reviews__sub{ font-weight:500; font-size:24px; line-height:1.6; color:var(--text-primary); margin:32px 0 0 } /* Body/Lead Medium 24/160 */
+.s-reviews .reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.s-reviews.in .reveal{ opacity:1; transform:none }
+.s-reviews.in .reviews__sub{ transition-delay:.3s }
+
+/* окно ленты: три колонки, обрезка по высоте + мягкие маски сверху/снизу */
+.reviews-marquee{
+  width:var(--cw); margin:80px auto 0; /* макет 157:363: автолейаут блока, itemSpacing 80 */
+  height:clamp(560px, 76vh, 800px);
+  display:flex; gap:24px; justify-content:center; align-items:flex-start;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+          mask-image:linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+}
+.reviews-col{ flex:1 1 0; min-width:0; max-width:520px }
+/* трек бесконечно едет вверх; клоны карточек добавляет скрипт → на -50% шов бесшовный */
+.reviews-track{
+  display:flex; flex-direction:column; will-change:transform;
+  animation:rv-scroll var(--rv-dur, 54s) linear infinite;
+}
+.reviews-col:hover .reviews-track{ animation-play-state:paused } /* пауза колонки под курсором — удобно читать */
+@keyframes rv-scroll{ from{ transform:translateY(0) } to{ transform:translateY(-50%) } }
+
+.reviews-card{
+  background:#FFFFFF; border:1px solid var(--sand-300);
+  border-radius:8px; corner-shape:squircle;
+  box-shadow:0 8px 8px rgba(169,124,25,.08); /* gold-600 8% */
+  padding:40px 48px; margin-bottom:24px; /* margin, а не gap — чтобы период трека был ровным */
+  display:flex; flex-direction:column; gap:24px;
+}
+.reviews-card__text{ margin:0; font:400 18px/1.6 var(--font-body); color:var(--text-primary); overflow-wrap:break-word }
+.reviews-card__author{ display:flex; align-items:center; gap:16px }
+.reviews-card__ava{
+  flex:none; width:56px; height:56px; border-radius:50%;
+  object-fit:cover; background:var(--sand-200); display:block;
+}
+.reviews-card__meta{ min-width:0; flex:1 }
+.reviews-card__name{
+  margin:0; font:700 18px/1.6 var(--font-body); color:var(--text-primary); /* Body/Base Bold 18 */
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.reviews-card__role{
+  margin:0; font:400 16px/1.52 var(--font-body); color:var(--graphite-600);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* CTA отзывов (макет 229:380): подпись + пилюли-ссылки на площадки с отзывами.
+   Пилюли перекрываются на 16px, Яндекс сверху; ховер — как у secondary-кнопки
+   (фон gold-50) + подъём на 4px, задняя пилюля при ховере встаёт на передний план (230:450) */
+.reviews-cta{
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  width:var(--cw); margin:80px auto 0; /* макет 157:363: itemSpacing 80 */
+}
+.reviews-cta__note{ margin:0; font:400 18px/1.6 var(--font-body); color:var(--graphite-600) } /* Text/Secondary (макет 257:370) */
+.reviews-platforms{ display:flex; isolation:isolate }
+.reviews-platform{
+  display:flex; align-items:center; padding:8px 24px; position:relative;
+  background:var(--surface-page); border:1px solid var(--gold-500); border-radius:100px; /* фон под кремовую страницу (макет 257:373) */
+  transition:background .3s ease, transform .3s cubic-bezier(.22,.61,.21,1);
+}
+.reviews-platform img{ display:block; height:40px; width:auto }
+.reviews-platform--front{ z-index:2; margin-right:-16px }
+.reviews-platform--back{ z-index:1 }
+.reviews-platform:hover{ background:var(--gold-50); transform:translateY(-4px); z-index:3 }
+.reviews-platform:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+
+/* адаптив: на планшете прячем 3-ю колонку, на телефоне — и 2-ю */
+@media (max-width:1023px){ .reviews-col:nth-child(3){ display:none } }
+@media (max-width:639px){ .reviews-col:nth-child(2){ display:none } }
+
+@media (prefers-reduced-motion: reduce){
+  .s-reviews .reveal{ opacity:1; transform:none; transition:none }
+  .reviews-platform{ transition:none }
+  .reviews-marquee{ height:auto; overflow:visible; -webkit-mask-image:none; mask-image:none }
+  .reviews-track{ animation:none }
+  .reviews-track .rv-dup{ display:none } /* без анимации клоны не нужны */
+}
+</style>
+</head>
+<body data-header="v2">
+<canvas id="gold-shader-bg" aria-hidden="true"></canvas>
+
+
+<section class="hero2" id="hero">
+  <video class="hero2__video" src="assets/hero.mp4" autoplay muted loop playsinline preload="auto"
+         fetchpriority="high" aria-label="Видео: зал ресторана Зерно"></video>
+  <div class="hero2__shade" aria-hidden="true"></div>
+  <div class="hero2__inner">
+    <h1 class="hero2__title">Наша миссия&nbsp;— возрождение традиций здорового питания для&nbsp;будущих поколений</h1>
+  </div>
+  <div class="hero2__arrow" aria-hidden="true">
+    <span class="hero2__arrow-stem"></span>
+    <span class="hero2__arrow-tip"></span>
+  </div>
+</section>
+
+<section class="s-restaurant" id="restaurant">
+  <div class="restaurant__head">
+    <h2 class="reveal">Афиша мероприятий</h2>
+    <p class="restaurant__sub reveal">Зерно, мука, хлеб — в&nbsp;блюдах, которые готовили на&nbsp;Урале сто лет назад,<br>и&nbsp;в&nbsp;тех, что придумали вчера.</p>
+  </div>
+  <div class="restaurant-car reveal" id="restaurant-car" aria-label="Карусель: меню, ресторан и события. Листайте перетаскиванием или колесом мыши">
+    <article class="restaurant-card">
+      <video src="assets/car-restaurant.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="restaurant-card__shade"></div>
+      <div class="restaurant-card__inner">
+        <p class="restaurant-card__label">Ресторан</p>
+        <h3 class="restaurant-card__title">Здоровые привычки внедряем каждый день</h3>
+        <p class="restaurant-card__desc">Вам не&nbsp;нужно думать о&nbsp;пользе блюда&nbsp;— мы&nbsp;сделали это за&nbsp;вас. Позвольте себе открыть уральскую кухню заново.</p>
+        <button class="btn btn--primary restaurant-card__btn" type="button">Бронировать стол</button>
+      </div>
+    </article>
+    <article class="restaurant-card"><img src="assets/car-couple.jpg" alt="Официант разливает вино паре за столом"></article>
+    <article class="restaurant-card restaurant-card--wide">
+      <video src="assets/car-masterclass.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="restaurant-card__shade"></div>
+      <div class="restaurant-card__inner">
+        <p class="restaurant-card__label">18 сентября</p>
+        <h3 class="restaurant-card__title">Мастер-класс</h3>
+        <p class="restaurant-card__desc">С&nbsp;шеф-поваром ресторана «Зерно» вы&nbsp;научитесь не&nbsp;просто готовить, вы&nbsp;проживёте историю: от&nbsp;выбора ингредиентов до&nbsp;финального приготовления. Бронируйте место заранее.</p>
+        <button class="btn btn--primary restaurant-card__btn" type="button">Записаться</button>
+      </div>
+    </article>
+    <article class="restaurant-card"><img src="assets/car-photo2.jpg" alt="Рыбное блюдо и морепродукты на столе ресторана"></article>
+    <article class="restaurant-card restaurant-card--wide">
+      <img src="assets/car-menu.jpg" alt="Паста на столе ресторана">
+      <div class="restaurant-card__shade"></div>
+      <div class="restaurant-card__inner">
+        <p class="restaurant-card__label">Меню</p>
+        <h3 class="restaurant-card__title">Уральское блюдо на&nbsp;вашей тарелке&nbsp;— это история, в&nbsp;которой вековые традиции сочетаются с&nbsp;заботой о&nbsp;вашем здоровье</h3>
+        <p class="restaurant-card__desc">Мы&nbsp;бережно храним наследие предков и&nbsp;культивируем здоровое питание. Наше меню создано с&nbsp;учётом уральских традиций и&nbsp;полезного сочетания ингредиентов.</p>
+        <button class="btn btn--primary restaurant-card__btn" type="button">Смотреть меню</button>
+      </div>
+    </article>
+    <article class="restaurant-card restaurant-card--wide"><img src="assets/car-photo3.jpg" alt="Светлый зал ресторана с гостями"></article>
+    <article class="restaurant-card restaurant-card--wide">
+      <img src="assets/car-events.jpg" alt="Гости за ужином тёплым вечером">
+      <div class="restaurant-card__shade"></div>
+      <div class="restaurant-card__inner">
+        <p class="restaurant-card__label">21 августа</p>
+        <h3 class="restaurant-card__title">Музыка позднего лета</h3>
+        <p class="restaurant-card__desc">Живая музыка, приглушённый свет и&nbsp;бокал вина — провожаем август не&nbsp;спеша. Столики у&nbsp;окна разбирают первыми, торопитесь!</p>
+        <button class="btn btn--primary restaurant-card__btn" type="button">Бронировать стол</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="s-museum" id="museum">
+  <div class="museum__head">
+    <h2 class="reveal">Первый в&nbsp;России музей,<br>посвящённый полному циклу жизни зерна: от&nbsp;поля до&nbsp;стола</h2>
+    <p class="museum__sub reveal">Каждый зал музея&nbsp;— это временной отрезок, который переносит гостя в&nbsp;эпоху прошлого, настоящего и&nbsp;будущего</p>
+  </div>
+  <div class="museum-bento" id="museum-bento">
+    <div class="museum-bento__cell"><img src="assets/z1.jpg" alt="Вход в музей: знак «Зерно» и сухие колосья"></div>
+    <div class="museum-bento__cell museum-bento__cell--card">
+      <div class="museum-card">
+        <h3>Не только про комбинат</h3>
+        <p>Зерно, город и&nbsp;век, который они прожили вместе. Челябинску здесь отведён отдельный зал.</p>
+      </div>
+    </div>
+    <div class="museum-bento__cell"><img src="assets/z2.jpg" alt="Зал «Челябинскъ»: вывеска и макет хлебной биржи"></div>
+    <div class="museum-bento__cell museum-bento__cell--wide">
+      <video src="assets/museum.mp4" autoplay muted loop playsinline preload="metadata"
+             aria-label="Видео: зал музея «Личности времени»"></video>
+    </div>
+    <div class="museum-bento__cell museum-bento__cell--card">
+      <div class="museum-card">
+        <h3>Личности времени</h3>
+        <p>Пять эпох от&nbsp;1898 года. Революции, войны, большие стройки&nbsp;— а&nbsp;зерно всё равно мололи.</p>
+      </div>
+    </div>
+    <div class="museum-bento__cell"><img src="assets/z3.jpg" alt="Изба с русской печью и прялкой"></div>
+    <div class="museum-bento__cell museum-bento__cell--card">
+      <div class="museum-card">
+        <h3>География урожая</h3>
+        <p>На&nbsp;карте&nbsp;— хозяйства, откуда приходит урожай. У&nbsp;каждого зёрнышка есть район, где оно выросло.</p>
+      </div>
+    </div>
+    <div class="museum-bento__cell"><img src="assets/z6.jpg" alt="Светящаяся карта Челябинской области с производственными площадками"></div>
+    <div class="museum-bento__cell museum-bento__cell--card">
+      <div class="museum-card">
+        <h3>Как жили раньше</h3>
+        <p>Вырастить, обмолотить, смолоть&nbsp;— через это проходила каждая семья. Потом работу взял на&nbsp;себя комбинат.</p>
+      </div>
+    </div>
+    <div class="museum-bento__cell"><img src="assets/z5.jpg" alt="Зал музея: экраны «Личности времени» и карта региона"></div>
+    <div class="museum-bento__cell museum-bento__cell--wide"><img src="assets/z4.jpg" alt="Широкий зал музея с экранами и колосьями"></div>
+    <div class="museum-bento__cell museum-bento__cell--card">
+      <div class="museum-card">
+        <h3>Профессиональный гид</h3>
+        <p>Проведёт по&nbsp;залам и&nbsp;добавит то, чего нет на&nbsp;экранах. Для&nbsp;школьных групп&nbsp;— отдельная программа.</p>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row museum-cta-row" id="museumCtaRow">
+      <button class="btn btn--primary" type="button">Записаться на&nbsp;экскурсию</button>
+      <button class="btn btn--secondary" type="button">Больше о&nbsp;музее</button>
+  </div>
+</section>
+
+<section class="s-conference" id="conference">
+  <div class="conference__head">
+    <h2 class="reveal">Конференц-зал</h2>
+    <p class="conference__sub reveal">Лекции от&nbsp;топовых спикеров в&nbsp;сфере Horeca</p>
+  </div>
+  <div class="conference-video">
+    <video src="assets/conference.mp4" autoplay muted loop playsinline preload="metadata"
+           aria-label="Видео: конференц-зал"></video>
+  </div>
+  <div class="btn-row conference-cta-row">
+      <button class="btn btn--primary" type="button">Смотреть мероприятия</button>
+  </div>
+</section>
+
+<section class="s-reviews" id="reviews">
+  <div class="reviews__head">
+    <h2 class="reveal">Место, о&nbsp;котором говорят</h2>
+    <p class="reviews__sub reveal">К нам часто приходят по&nbsp;совету — а&nbsp;уходя, советуют сами</p>
+  </div>
+
+  <div class="reviews-marquee reveal" aria-label="Отзывы гостей">
+    <!-- Колонка 1 -->
+    <div class="reviews-col">
+      <div class="reviews-track">
+        <article class="reviews-card">
+          <p class="reviews-card__text">Пришли пообедать, а ушли через четыре часа: между горячим и десертом успели обойти весь музей. Теперь знаю про мелькомбинат больше, чем про собственную работу. Хлеб взяли с собой домой.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av01.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Анна Черепанова</p><p class="reviews-card__role">Знаток города 3 уровня</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Светлое, продуманное пространство, колосья в интерьере. Меню построено вокруг зерна, но без занудства: каши, выпечка и вполне современные блюда. Порции честные.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av02.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Игорь Вахрушев</p><p class="reviews-card__role">Знаток города 5 уровня</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Я челябинец, про мелькомбинат слышал всю жизнь, но только здесь понял, какая за ним история. Музей сделан с уважением к людям, которые его строили. После экскурсии пообедали — правильное завершение.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av03.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Андрей Щербинин</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Муж подарил сертификат на мастер-класс — лучший подарок за годы. Шеф без пафоса: объясняет, шутит, поправляет. Тесто теперь получается и дома.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av04.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Светлана Ромашова</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Возил сюда деловых партнёров из Москвы: удивить их сложно, а здесь получилось. Сначала экскурсия по музею, потом ужин. Уехали с хлебом и впечатлениями.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av05.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Константин Зыков</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Отмечали день рождения мамы. Она печёт всю жизнь — на мастер-классе спорила с шефом о тесте, а он слушал и смеялся. Лучший её праздник за долгое время.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av06.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Дарья Огнева</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Были на мастер-классе вдвоём с сыном-подростком. Впервые видел, чтобы он три часа не смотрел в телефон. Приготовили ужин, съели его тут же — и записались ещё раз.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av07.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Роман Дегтярёв</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Колонка 2 -->
+    <div class="reviews-col">
+      <div class="reviews-track">
+        <article class="reviews-card">
+          <p class="reviews-card__text">Водил родителей, им за семьдесят. Мама полмузея вспоминала своё деревенское детство, отец рассказывал про завод. Потом сидели в ресторане и разговаривали так хорошо, как давно не получалось.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av08.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Дмитрий Санников</p><p class="reviews-card__role">12 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Заглянули случайно, по дороге, а оказалось — целый мир: ресторан, музей и кухня, где учат готовить. За один визит всё не успели. Вернёмся за мастер-классом.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av09.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Наталья Козлова</p><p class="reviews-card__role">Знаток города 1 уровня</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Отмечали здесь годовщину свадьбы. Брали блюда по старым уральским рецептам и кое-что из нового меню — вкусно и то, и другое. Вечером в зале очень тёплый свет.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av10.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Екатерина Малозёмова</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Обедаю здесь по будням, офис рядом. Кухня стабильная, обслуживание быстрое, и приятно, что даже простая каша здесь со смыслом. Привёл коллег — теперь ходим вместе.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av11.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Виктор Плотников</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Моя бабушка работала на мелькомбинате, и в музее я будто встретилась с её молодостью. Спасибо тем, кто собрал эти истории. Посидели потом в ресторане — уходить не хотелось.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av12.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Татьяна Ведерникова</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Зашли с женой на час, ушли под закрытие. Пока ждали горячее, посмотрели часть экспозиции — удобно, что всё в одном месте. Кухня достойная, хлеб забрали с собой.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av13.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Михаил Кравцов</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Люблю места, где за красивой картинкой есть содержание. Здесь оно есть: история мелькомбината, уральский хлеб, живая кухня. Ушла с ощущением, что город стал мне понятнее.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av14.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Вера Лазарева</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Колонка 3 -->
+    <div class="reviews-col">
+      <div class="reviews-track">
+        <article class="reviews-card">
+          <p class="reviews-card__text">Была на мастер-классе на открытой кухне. Боялась, что буду мешаться, но шеф объясняет так, что получилось даже у меня. Дома повторила — не поверили, что готовила сама.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av15.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Ольга Меньшикова</p><p class="reviews-card__role">Знаток города 5 уровня</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Редкое место, куда можно прийти всей семьёй и никому не скучно. Сын залип на старых механизмах в музее, дочь попросилась готовить с шефом. Обед прошёл без капризов — у нас это событие.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av16.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Марина Полозова</p><p class="reviews-card__role">68 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Приезжали из Екатеринбурга специально ради музея — не пожалели. История о том, как на Урале растили хлеб, рассказана через судьбы конкретных людей. Обратно везли свежий хлеб и план вернуться.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av17.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Павел Ерохин</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Пришла ради красивых фотографий, осталась из-за еды. Интерьер действительно фотогеничный, но хлеб и десерты — главное открытие. В музей заглянула на десять минут, зависла на час.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av18.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Юлия Стрельцова</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">Скептически отношусь к местам «с концепцией», но тут всё по-настоящему. В музее интересно, в ресторане вкусно, на кухне шеф действительно учит, а не показывает шоу. Редкое сочетание.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av19.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Алексей Мурзин</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+        <article class="reviews-card">
+          <p class="reviews-card__text">С моей фамилией пройти мимо было невозможно. Место оправдало: душевный музей, вкусный обед и очень доброжелательная команда. Приведу подруг.</p>
+          <div class="reviews-card__author">
+            <img class="reviews-card__ava" src="assets/avatars/av20.jpg" alt="" width="56" height="56" loading="lazy">
+            <div class="reviews-card__meta"><p class="reviews-card__name">Людмила Пшеничникова</p><p class="reviews-card__role">8 отзывов</p></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <div class="reviews-cta reveal">
+    <p class="reviews-cta__note">Оставьте ваш отзыв или посмотрите 250+ отзывов других людей</p>
+    <div class="reviews-platforms">
+      <a class="reviews-platform reviews-platform--front" href="https://yandex.ru/maps/?text=Зерно%20Челябинск%20Свердловский%20проспект%2040А" target="_blank" rel="noopener" aria-label="Отзывы о Зерне на Яндекс Картах">
+        <img src="assets/yamap-logo.png" alt="Яндекс Карты" width="218" height="40">
+      </a>
+      <a class="reviews-platform reviews-platform--back" href="https://2gis.ru/chelyabinsk/search/Зерно%20Свердловский%20проспект%2040А" target="_blank" rel="noopener" aria-label="Отзывы о Зерне на 2ГИС">
+        <img src="assets/2gis-logo.png" alt="2ГИС" width="110" height="40">
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="s-contacts" id="contacts">
+  <div class="contacts__head">
+    <h2 class="reveal">Как попасть в это место</h2>
+    <p class="contacts__sub reveal">Мы находимся в&nbsp;историческом центре Челябинска</p>
+  </div>
+  <!-- карта строится через JS API (зум колесом отключён, только кнопки);
+       если API не загрузится — скрипт ниже подставит обычный iframe-виджет -->
+  <div class="contacts-map reveal" id="scMap" role="application"
+       aria-label="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></div>
+  <!-- rtext=~точка — маршрут «от моего местоположения»; на телефоне universal/app link
+       сам откроет приложение Яндекс Карт, без приложения — веб-версию в браузере -->
+  <div class="btn-row contacts-cta-row reveal">
+    <a class="btn btn--primary" href="https://yandex.ru/maps/?rtext=~55.168600,61.386200" target="_blank" rel="noopener">Построить маршрут</a>
+  </div>
+</section>
+
+<script>
+(function(){
+  const vp = document.getElementById('restaurant-car');
+  const cards = [...vp.children];
+  const N = cards.length, GAP = 24;
+  const clamp = (val, a, b) => Math.min(b, Math.max(a, val));
+
+  // карточки разной ширины (382/720) — раскладка по кумулятивным смещениям
+  let baseX = [], total = 0, maxOff = 0;
+  let off = 0, target = 0, v = 0, animating = false, lastNow = 0;
+  const SMOOTH = 0.42; // сек: отклик пружины
+
+  function containerWidth(){
+    const m = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--margin'));
+    return Math.min(innerWidth - m * 2, 1600);
+  }
+  function measure(){
+    let x = 0;
+    for (let i = 0; i < N; i++){ baseX[i] = x; x += cards[i].offsetWidth + GAP; }
+    total = x - GAP;                                 // ширина полосы без последнего зазора
+    maxOff = Math.max(0, total - containerWidth());  // предел: правый край последней карточки = правый край контейнера
+    off = clamp(off, 0, maxOff); target = clamp(target, 0, maxOff);
+    render();
+  }
+  function render(){
+    for (let i = 0; i < N; i++) cards[i].style.transform = `translateX(${(baseX[i] - off).toFixed(2)}px)`;
+  }
+
+  // пружина с сохранением скорости (critically damped): резкие движения не рвут инерцию
+  function animate(now){
+    if (!animating) return;
+    const dt = Math.min(0.033, (now - (lastNow || now)) / 1000) || 0.016;
+    lastNow = now;
+    const om = 2 / SMOOTH, k = om * dt;
+    const e = 1 / (1 + k + 0.48*k*k + 0.235*k*k*k);
+    const change = off - target;
+    const temp = (v + om * change) * dt;
+    v = (v - om * temp) * e;
+    off = target + (change + temp) * e;
+    render();
+    if (Math.abs(off - target) < 0.4 && Math.abs(v) < 0.4){ off = target; v = 0; animating = false; render(); return; }
+    requestAnimationFrame(animate);
+  }
+  function go(to){ target = clamp(to, 0, maxOff); if (!animating){ animating = true; lastNow = 0; requestAnimationFrame(animate); } }
+
+  // вьюпорт во всю ширину окна, карточки начинаются от левого поля контейнера.
+  // полоса левее пустая: там колесо/тач отдаём странице, а не карусели
+  function overCards(e){ return e.clientX >= vp.getBoundingClientRect().left + cards[0].offsetLeft; }
+
+  // drag (мышь и тач) + инерция броска
+  let down = null, moved = 0, lastMove = null;
+  vp.addEventListener('pointerdown', e => {
+    if (maxOff <= 0 || !overCards(e)) return; // всё влезло или пустое поле слева — не трогаем
+    down = { x: e.clientX, off }; moved = 0; v = 0; animating = false; // рука перехватывает пружину
+    lastMove = { x: e.clientX, time: performance.now() };
+    vp.classList.add('dragging'); vp.setPointerCapture(e.pointerId);
+  });
+  vp.addEventListener('pointermove', e => {
+    if (!down){ vp.classList.toggle('over-cards', maxOff > 0 && overCards(e)); return; } // курсор по зоне
+    const dx = e.clientX - down.x; moved = Math.max(moved, Math.abs(dx));
+    off = clamp(down.off - dx, 0, maxOff); target = off; render();
+    const now = performance.now(), dt = (now - lastMove.time) / 1000;
+    if (dt > 0.012){ // скорость пальца в px/сек (сглаженная)
+      const inst = -(e.clientX - lastMove.x) / dt;
+      v = v * 0.6 + inst * 0.4;
+      lastMove = { x: e.clientX, time: now };
+    }
+  });
+  function up(){
+    if (!down) return;
+    vp.classList.remove('dragging'); down = null;
+    go(off + v * 0.12); // бросок с инерцией, ограниченный краями
+  }
+  vp.addEventListener('pointerup', up);
+  vp.addEventListener('pointercancel', up);
+  vp.addEventListener('click', e => { if (moved > 6){ e.stopPropagation(); e.preventDefault(); } }, true);
+
+  // колесо: горизонтальная прокрутка полосы в пределах [0, maxOff].
+  // карусель БОЛЬШЕ НЕ бесконечная: докрутил до последней карточки (или назад до первой) —
+  // на краю прокрутку не перехватываем, дальше листается страница
+  vp.addEventListener('wheel', e => {
+    if (maxOff <= 0 || !overCards(e)) return;
+    const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    const next = clamp(target + d, 0, maxOff);
+    if (Math.abs(next - target) < 0.5) return; // уже у края — отдаём прокрутку странице
+    e.preventDefault();
+    go(next);
+  }, { passive: false });
+
+  addEventListener('resize', measure);
+  measure();
+  addEventListener('load', measure); // после загрузки медиа ширины уточняются
+})();
+</script>
+<script>
+(function(){
+  const sec = document.querySelector('.s-restaurant');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ sec.classList.add('in'); return; }
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.22 }).observe(sec);
+})();
+</script>
+<script>
+(function(){
+  // Конференц-зал: ни стека, ни прокруточной механики — только плавное появление.
+  const sec = document.querySelector('.s-conference');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced){ sec.classList.add('in'); return; } // статичный вид собран в CSS
+
+  // шапка блока: заголовок, за ним текст
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.22 }).observe(sec.querySelector('.conference__head'));
+
+  // видео и кнопка — каждое по своему въезду в экран
+  const io = new IntersectionObserver((entries, obs) => {
+    entries.filter(e => e.isIntersecting).forEach(e => {
+      e.target.classList.add('in');
+      obs.unobserve(e.target);
+    });
+  }, { threshold: 0.15 });
+  sec.querySelectorAll('.conference-video, .conference-cta-row').forEach(el => io.observe(el));
+})();
+</script>
+<script>
+(function(){
+  // Музей: никакой прокруточной механики — только плавное появление элементов друг за другом.
+  const sec = document.getElementById('museum');
+  const items = [...document.querySelectorAll('#museum-bento > *'), document.getElementById('museumCtaRow')];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reduced){ sec.classList.add('in'); return; } // статичный вид собран в CSS
+
+  // reveal шапки блока
+  new IntersectionObserver((en, obs) => {
+    if (en[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.35 }).observe(sec.querySelector('.museum__head'));
+
+  // Каждая ячейка появляется, когда до неё доходит прокрутка. Те, что въезжают в экран
+  // одной пачкой, получают лестницу задержек — отсюда «друг за другом», а не разом.
+  const order = new Map(items.map((el, i) => [el, i]));
+  const io = new IntersectionObserver((entries, obs) => {
+    entries.filter(e => e.isIntersecting)
+      .sort((a, b) => order.get(a.target) - order.get(b.target))
+      .forEach((e, n) => {
+        e.target.style.transitionDelay = (n * 0.09).toFixed(2) + 's';
+        e.target.classList.add('in');
+        obs.unobserve(e.target);
+      });
+  }, { threshold: 0.15 });
+  items.forEach(el => io.observe(el));
+})();
+</script>
+
+<script>
+(function(){
+  // Отзывы: три колонки-ленты. Скролл-триггер только на reveal шапки; сама лента едет
+  // бесконечно на CSS-анимации, скорость от скролла не зависит.
+  const sec = document.querySelector('.s-reviews');
+  if (!sec) return;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // reveal шапки и ленты
+  if (reduced){ sec.classList.add('in'); }
+  else new IntersectionObserver((en, obs) => {
+    if (en[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.25 }).observe(sec.querySelector('.reviews__head'));
+
+  if (reduced) return; // без анимации: статичные колонки, клоны не добавляем
+
+  // бесшовный цикл: дублируем карточки колонки (клон помечаем .rv-dup + aria-hidden),
+  // трек едет на translateY(0 → -50%), т.е. ровно на одну копию
+  const durations = ['52s', '64s', '46s']; // разные скорости → лёгкий параллакс между колонками
+  sec.querySelectorAll('.reviews-track').forEach((track, i) => {
+    track.style.setProperty('--rv-dur', durations[i] || '54s');
+    [...track.children].forEach(card => {
+      const clone = card.cloneNode(true);
+      clone.classList.add('rv-dup');
+      clone.setAttribute('aria-hidden', 'true');
+      track.appendChild(clone);
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const sec = document.querySelector('.s-contacts');
+  if (!sec) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ sec.classList.add('in'); return; }
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting){ sec.classList.add('in'); obs.disconnect(); }
+  }, { threshold: 0.22 }).observe(sec.querySelector('.contacts__head'));
+})();
+</script>
+<script>
+(function(){
+  // Карта: Яндекс JS API вместо iframe-виджета — только так можно отключить зум колесом,
+  // оставив кнопки «+/−». behaviors без scrollZoom/dblClickZoom: колесо над картой
+  // прокручивает страницу, а не масштабирует карту. drag и пинч на таче сохранены.
+  const box = document.getElementById('scMap');
+  if (!box) return;
+  const COORDS = [55.1686, 61.3862]; // Свердловский просп., 40А (JS API: [широта, долгота])
+
+  function fallbackIframe(){ // страховка: API недоступен — прежний виджет (с зумом колесом)
+    box.innerHTML = '<iframe src="https://yandex.ru/map-widget/v1/?ll=61.386200%2C55.168600&z=16&pt=61.386200,55.168600,pm2rdm&l=map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></iframe>';
+  }
+
+  function init(){
+    ymaps.ready(function(){
+      try {
+        const map = new ymaps.Map(box, {
+          center: COORDS, zoom: 16,
+          controls: ['zoomControl'],
+          behaviors: ['drag', 'multiTouch']
+        }, { suppressMapOpenBlock: true });
+        map.geoObjects.add(new ymaps.Placemark(COORDS, {
+          hintContent: 'Зерно',
+          balloonContent: 'Свердловский проспект, 40А'
+        }, { preset: 'islands#redIcon' }));
+      } catch(e){ fallbackIframe(); }
+    });
+  }
+
+  function load(){ // API подгружается, когда секция уже близко — аналог loading="lazy"
+    const s = document.createElement('script');
+    s.src = 'https://api-maps.yandex.ru/2.1/?lang=ru_RU';
+    s.onload = function(){ window.ymaps ? init() : fallbackIframe(); };
+    s.onerror = fallbackIframe;
+    document.head.appendChild(s);
+  }
+
+  new IntersectionObserver(function(entries, obs){
+    if (entries[0].isIntersecting){ obs.disconnect(); load(); }
+  }, { rootMargin: '600px' }).observe(box);
+})();
+</script>
+<script>
+(function(){
+  // Золотой шейдер-фон: тонкие волновые линии + бегущие по ним сигналы, лёгкий декор под всей страницей.
+  // Скорость течения плавно растёт и падает вместе со скоростью скролла (везде одинаковая непрозрачность).
+  const canvas = document.getElementById('gold-shader-bg');
+  if (!canvas) return;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // premultipliedAlpha:true — наш blend кладёт в буфер именно премноженный цвет (rgb*alpha);
+  // при false браузер при композите на страницу применял альфу ещё раз, и золото «выцветало» в серое
+  const gl = canvas.getContext('webgl', { alpha:true, premultipliedAlpha:true, antialias:false })
+          || canvas.getContext('experimental-webgl', { alpha:true, premultipliedAlpha:true });
+  if (!gl) return; // декор необязателен — без WebGL страница просто остаётся без фона
+
+  const VERT = `
+    attribute vec2 aPos;
+    void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }
+  `;
+  const FRAG = `
+    precision highp float;
+    uniform vec2 uResolution;
+    uniform float uTime;
+    uniform float uOpacity;
+
+    /* тонкое лёгкое ядро линии — без широкого ореола, чтобы не «замыливалось» в туман */
+    float lineCore(float d, float k){
+      return k / (d*d*1400.0 + k);
+    }
+
+    void main(){
+      vec2 uv = gl_FragCoord.xy / uResolution.xy;
+      float aspect = uResolution.x / uResolution.y;
+      vec2 p = vec2(uv.x * aspect, uv.y);
+
+      const int N = 10;
+      float x0    = aspect * 0.62; /* точка, где почти все нити сходятся в одну */
+      float base  = 0.5;
+      float amp   = 0.5;           /* p.y — доля высоты экрана (0..1): весь пучок вместе качается на ~100% высоты */
+      float speed = 0.12;          /* общая скорость — вся связка течёт как одно целое */
+
+      float lineTotal = 0.0;
+      float pulseTotal = 0.0;
+
+      for (int i = 0; i < N; i++){
+        float fi = float(i) - float(N - 1) * 0.5; /* центрированный индекс: -4.5..4.5 */
+        float rnd = fract(sin(fi * 91.17 + 2.3) * 43758.5453); /* 0..1 псевдослучайное на нить */
+        float freq    = 1.15 + fi * (0.09 + rnd * 0.06); /* больший и неравномерный разброс частот — шире расстояния в раскрытых зонах */
+        float baseI   = base + fi * 0.01 + (rnd - 0.5) * 0.025; /* + лёгкий случайный вертикальный сдвиг нити */
+        float weight  = 0.4 + 0.6 * fract(sin(fi * 12.9898 + 4.1414) * 43758.5453); /* у каждой нити своя яркость */
+
+        float y = baseI + amp * sin(freq * (p.x - x0) + uTime * speed);
+        float d = abs(p.y - y);
+        lineTotal += lineCore(d, 0.00085) * weight;
+
+        /* золотой «сигнал», бегущий вдоль этой нити — чуть контрастнее и ярче линии */
+        float pulseSpeed = 0.22 + fract(fi * 0.37 + 0.5) * 0.18;
+        float pulsePhase = fi * 3.1;
+        float travel = fract(uTime * pulseSpeed + pulsePhase);
+        float px_ = travel * (aspect + 0.6) - 0.3;
+        float py_ = baseI + amp * sin(freq * (px_ - x0) + uTime * speed);
+        float dp = length(p - vec2(px_, py_));
+        float edgeFade = smoothstep(0.0, 0.08, travel) * smoothstep(1.0, 0.92, travel);
+        pulseTotal += (0.0009 / (dp*dp*2200.0 + 0.0009)) * edgeFade * weight;
+      }
+
+      vec3 lineColor  = vec3(0.941, 0.835, 0.655); /* gold-200 — тело линии, светлый фирменный оттенок */
+      vec3 pulseColor = vec3(0.992, 0.961, 0.902); /* gold-50 — едва светлее линии, мягкий акцент-сигнал */
+
+      float lineAlpha  = clamp(lineTotal, 0.0, 1.0) * 0.85;
+      float pulseAlpha = clamp(pulseTotal, 0.0, 1.0) * 0.9;
+
+      vec3 color = mix(lineColor, pulseColor, clamp(pulseTotal, 0.0, 1.0));
+      float alpha = clamp(lineAlpha + pulseAlpha, 0.0, 1.0) * uOpacity;
+
+      gl_FragColor = vec4(color, alpha);
+    }
+  `;
+
+  function compile(type, src){
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)){
+      console.warn('gold-shader-bg:', gl.getShaderInfoLog(s));
+      gl.deleteShader(s);
+      return null;
+    }
+    return s;
+  }
+  const vs = compile(gl.VERTEX_SHADER, VERT);
+  const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return;
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+    console.warn('gold-shader-bg:', gl.getProgramInfoLog(prog));
+    return;
+  }
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'aPos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes = gl.getUniformLocation(prog, 'uResolution');
+  const uTimeLoc = gl.getUniformLocation(prog, 'uTime');
+  const uOpacityLoc = gl.getUniformLocation(prog, 'uOpacity');
+
+  gl.enable(gl.BLEND);
+  // цвет — обычный alpha-over; альфа — своя формула (иначе она «схлопывается» в квадрат
+  // и вдобавок кадры накапливаются друг на друге без gl.clear)
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  gl.clearColor(0, 0, 0, 0);
+
+  const dpr = Math.min(devicePixelRatio || 1, 1.5);
+  function resize(){
+    const w = Math.max(1, Math.round(innerWidth * dpr));
+    const h = Math.max(1, Math.round(innerHeight * dpr));
+    if (canvas.width !== w || canvas.height !== h){
+      canvas.width = w; canvas.height = h;
+      gl.viewport(0, 0, w, h);
+    }
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  function draw(time, opacity){
+    resize();
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uTimeLoc, time);
+    gl.uniform1f(uOpacityLoc, opacity);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  if (reduced){
+    draw(0.6, 1); // статичный кадр без анимации
+    return;
+  }
+
+  const IDLE_SPEED  = 0.11;  // базовая скорость течения (без скролла)
+  const BOOST_SCALE = 0.006; // вклад скорости скролла (px/сек) в ускорение волн
+  const BOOST_MAX   = 1.4;
+  const BOOST_TAU   = 0.35;  // сек — симметричная плавность разгона и торможения
+
+  let flowTime = 0, lastNow = 0, lastScrollY = scrollY, scrollSpeed = 0, raf = 0;
+  draw(flowTime, 1); // первый кадр сразу, не дожидаясь rAF
+  function frame(now){
+    const dt = Math.min(0.05, (now - (lastNow || now)) / 1000) || 0.016;
+    lastNow = now;
+
+    const instSpeed = Math.abs(scrollY - lastScrollY) / dt; // px/сек
+    lastScrollY = scrollY;
+    const k = 1 - Math.exp(-dt / BOOST_TAU); // одна и та же плавность что на разгон, что на затухание
+    scrollSpeed += (instSpeed - scrollSpeed) * k;
+    const boost = Math.min(BOOST_MAX, scrollSpeed * BOOST_SCALE);
+    flowTime += dt * (IDLE_SPEED + boost);
+
+    draw(flowTime, 1); // без затухания над контентом — везде одинаково
+    raf = requestAnimationFrame(frame);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden){ cancelAnimationFrame(raf); }
+    else { lastNow = 0; raf = requestAnimationFrame(frame); }
+  });
+  raf = requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

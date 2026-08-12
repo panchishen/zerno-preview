@@ -77,6 +77,65 @@
   outline:2px solid var(--gold-600, #A97C19); outline-offset:4px; border-radius:2px;
 }
 
+/* ===== ХЕДЕР · вариант 2 (макет 430:1292) =====
+   На второй главной шапки две: «2 (on dark)» лежит на видео первого экрана и уезжает
+   вместе с ним, «2» — стики, выезжает сверху, когда первый экран прокручен. Разметку
+   обеих вставляет chrome.js в режиме data-header="v2". */
+
+/* Стики-шапка: механика та же (.site-header--reveal), отличается раскладкой — логотип,
+   меню и контакты разнесены по краям, поля 32px вместо сетки контейнера */
+.site-header--v2 .hd__in{ width:auto; margin-inline:32px; justify-content:space-between }
+.site-header--v2 .hd__logo, .site-header--v2 .hd__right{ flex:none }
+
+/* Кнопка брони — Button M 44 из макета (компонент 47:86). Она компактнее кнопок страницы
+   (те L 56), поэтому описана здесь, а не общим классом .btn */
+.hd__btn{
+  display:inline-flex; align-items:center; flex:none; height:44px; padding:0 24px;
+  border:0; border-radius:8px; corner-shape:squircle; cursor:pointer;
+  background:var(--gold-700, #896100); color:var(--button-primary-label, #FFFFFF);
+  font:600 16px/1.1 var(--font-body, 'Onest', system-ui, sans-serif);
+  letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;
+  transition:background .2s ease;
+}
+.hd__btn:hover{ background:var(--gold-800, #674800) }
+.hd__btn:active{ background:var(--gold-900, #493200) }
+.hd__btn:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:3px }
+
+/* Шапка первого экрана: прозрачная, поверх видео. Не fixed и не sticky — обычный элемент
+   в потоке страницы, поэтому просто уезжает вверх вместе с первым экраном */
+.hero-header{
+  position:absolute; top:0; left:0; right:0; z-index:90;
+  display:flex; align-items:center; gap:32px;
+  padding:24px 48px;
+}
+/* три равные колонки: меню слева, логотип строго по центру, контакты справа */
+.hero-header__nav{ flex:1 1 0; display:flex; align-items:center; gap:32px }
+.hero-header__brand{
+  flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:12px;
+  text-decoration:none;
+}
+.hero-header__contacts{ flex:1 1 0; display:flex; align-items:center; justify-content:flex-end; gap:32px }
+.hero-header__brand img{ width:205px; height:100px; display:block }
+.hero-header__tagline{
+  font:400 16px/1.52 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Small */
+  color:var(--text-secondary-dark, #BDB194); white-space:nowrap;
+}
+.hero-header__nav a{
+  font:500 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif);
+  color:var(--link-default-dark, #D3A856); text-decoration:none; white-space:nowrap;
+}
+/* на тёмном наведение светлеет — то же правило, что и в футере */
+.hero-header__nav a:hover,
+.hero-header__nav a[aria-current="page"]{ color:var(--link-hover-dark, #E2BF7E) }
+.hero-header__contacts a, .hero-header__contacts span{
+  font:500 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif);
+  color:var(--text-inverse, #F9F3E4); text-decoration:none; white-space:nowrap;
+}
+.hero-header__contacts a:hover{ color:var(--link-hover-dark, #E2BF7E) }
+.hero-header a:focus-visible{
+  outline:2px solid var(--gold-400, #D3A856); outline-offset:4px; border-radius:2px;
+}
+
 /* ===== ФУТЕР ===== */
 .site-footer{
   /* тёмный футер (макет 257:383): вертикальный градиент graphite-900 → sand-900 к середине */
@@ -90,6 +149,18 @@
 }
 .ft__logo{ flex:none; display:block; line-height:0 }
 .ft__logo img{ width:234px; height:56px; display:block } /* теперь совпадает с логотипом хедера */
+
+/* Вариант 2 (макет 430:1451): под логотипом слоган, выключка по центру знака */
+.ft__brand{ flex:none; display:flex; flex-direction:column; align-items:center; gap:4px }
+.ft__tagline{
+  font:400 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Base */
+  color:var(--text-secondary-dark, #BDB194); white-space:nowrap;
+}
+/* Логотип в футере v2 чуть меньше, чем в шапке (228×55 против 234×56) — так в макете 171:595.
+   Под него подогнан и верхний отступ колонок: 12px вместо 21px, чтобы первые строки
+   легли на базовую линию слова «ЗЕРНО». Из-за этого футер стал 235px вместо 244px. */
+.ft__brand .ft__logo img{ width:228px; height:55px }
+.site-footer--v2 .ft__col{ padding-top:12px }
 
 .ft__col{
   flex:none; display:flex; flex-direction:column; gap:8px;
@@ -135,13 +206,60 @@
   outline:2px solid var(--gold-400, #D3A856); outline-offset:3px;
 }
 
+/* ===== ПЕРЕКЛЮЧАЛКА ВАРИАНТОВ ГЛАВНОЙ (макет 445:1733) =====
+   Служебная плашка прототипа: две компактные кнопки внизу слева, 32px от краёв.
+   Текущий вариант залит золотом, второй — обводкой. Разметку даёт chrome.js;
+   перед сдачей в продакшн удаляется отсюда и оттуда. */
+.variants{ position:fixed; left:16px; bottom:16px; z-index:200; display:flex; gap:4px }
+.variants__btn{
+  /* 32×28 и радиус 4 — размеры из макета: плашка служебная и не должна тянуть внимание на себя */
+  display:inline-flex; align-items:center; justify-content:center; width:32px; height:28px;
+  border-radius:4px; corner-shape:squircle; text-decoration:none;
+  font:600 16px/1.1 var(--font-body, 'Onest', system-ui, sans-serif);
+  letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;
+  /* неактивная — только обводка, без заливки (как в макете) */
+  color:var(--gold-700, #896100); background:transparent;
+  border:1px solid var(--gold-400, #D3A856);
+  transition:background .2s ease, border-color .2s ease;
+}
+/* подложка на наведении еле заметная и полупрозрачная — читается и на светлом, и на тёмном */
+.variants__btn:hover{ background:rgba(211, 168, 86, .16); border-color:var(--gold-500, #CB9C3F) }
+.variants__btn.is-active{
+  color:var(--button-primary-label, #FFFFFF);
+  background:var(--gold-700, #896100); border-color:var(--gold-700, #896100);
+  cursor:default;
+}
+.variants__btn:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:3px }
+
 /* ===== адаптив: макет десктопный, ниже — чтобы ничего не разъезжалось ===== */
+/* Шапки варианта 2 свёрстаны на 1920: меню, логотип и контакты занимают там 1360px
+   (стики с кнопкой брони — 1587px). На узких экранах убираем правую часть по очереди,
+   начиная с адреса: он повторён и в блоке контактов, и в футере. */
+@media (max-width:1599px){
+  .site-header--v2 .hd__right span{ display:none }
+}
+@media (max-width:1439px){
+  .hero-header__contacts span{ display:none }
+}
+@media (max-width:1365px){
+  .site-header--v2 .hd__right a{ display:none } /* остаётся одна кнопка брони */
+}
 @media (max-width:1199px){
   .hd__in{ gap:24px }
   .hd__nav, .hd__right{ gap:24px }
   .ft__in{ gap:32px }
+  .site-header--v2 .hd__in{ margin-inline:24px }
+  .site-header--v2 .hd__right{ display:none }        /* кнопка брони уже не встаёт рядом с меню */
+  .site-header--v2 .hd__nav{ margin-inline:auto }    /* без правой части меню держится по центру свободного места */
+  .hero-header{ padding:24px 32px; gap:24px }
+  .hero-header__nav, .hero-header__contacts{ gap:24px }
 }
 @media (max-width:1023px){
+  .hero-header{ justify-content:space-between; padding:16px 24px; gap:16px }
+  .hero-header__contacts{ display:none }
+  .hero-header__nav, .hero-header__brand{ flex:none }
+  .hero-header__nav{ gap:16px }   /* иначе пять пунктов и логотип не встают в 768px */
+  .hero-header__brand img{ width:164px; height:80px }
   /* контакты скрыты — центрировать больше не от чего, возвращаем логотип к своей ширине,
      иначе flex:1 растянул бы его и вытолкнул меню вправо */
   .hd__right{ display:none }
@@ -149,10 +267,16 @@
   .hd__in{ justify-content:space-between }
   .ft__in{ flex-wrap:wrap; row-gap:40px }
   .ft__logo{ flex:1 0 100% }
+  /* логотип со слоганом занимает свою строку целиком — тогда выключка по левому краю,
+     как у остальных колонок, а не по центру знака */
+  .ft__brand{ flex:1 0 100%; align-items:flex-start }
+  .ft__brand .ft__logo{ flex:none }
   .ft__col{ padding-top:0 }
 }
 @media (max-width:767px){
   .hd__nav{ display:none } /* мобильное меню — отдельная задача */
+  .hero-header__nav{ display:none }
+  .hero-header{ justify-content:center }
   .ft__in{ flex-direction:column; row-gap:32px; padding-bottom:40px }
   .ft__col a, .ft__col span{ white-space:normal }
   .ft__logo img{ width:200px; height:48px }
