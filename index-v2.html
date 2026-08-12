@@ -346,25 +346,23 @@ body{
   .hero-header__brand, .hero-header__nav, .hero-header__contacts{ animation:none }
 }
 
-/* ===== БЛОК: контакты — «Как попасть в это место» (макет 144:357 заголовок + 144:360 карта) ===== */
+/* ===== БЛОК: контакты — «Как к нам попасть» (макет 428:934: заголовок + карта) ===== */
 .s-contacts{ padding-top:0; padding-bottom:200px } /* сверху — 200px отзывов, снизу — свои 200px; фон прозрачный, просвечивает золотой шейдер */
 .s-contacts .contacts__head{ width:min(1058px, var(--cw)); margin:0 auto; text-align:center }
 .s-contacts h2{
   font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
   letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
 }
-.s-contacts .contacts__sub{ font-weight:500; font-size:24px; line-height:1.6; color:var(--text-primary); margin:32px 0 0 } /* Body/Lead Medium 24/160 */
 .s-contacts .reveal{
   opacity:0; transform:translateY(24px);
   transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
 }
 .s-contacts.in .reveal{ opacity:1; transform:none }
-.s-contacts.in .contacts__sub{ transition-delay:.3s }
-.s-contacts.in .contacts-map{ transition-delay:.5s }
+.s-contacts.in .contacts-map{ transition-delay:.3s } /* подзаголовка больше нет — карта идёт сразу за заголовком */
 
 /* карта: ширина по сетке, пропорции макета 1600×600 (8:3), squircle-скругление как у остальных медиа */
 .contacts-map{
-  position:relative; width:var(--cw); margin:64px auto 0;
+  position:relative; width:var(--cw); margin:80px auto 0; /* макет 428:934: 80 от заголовка */
   aspect-ratio:1600 / 600;
   border-radius:16px; corner-shape:squircle; overflow:hidden;
   background:var(--sand-100);
@@ -388,13 +386,11 @@ body{
   font-family:var(--font-heading); font-weight:400; font-size:48px; line-height:1.12;
   letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
 }
-.s-reviews .reviews__sub{ font-weight:500; font-size:24px; line-height:1.6; color:var(--text-primary); margin:32px 0 0 } /* Body/Lead Medium 24/160 */
 .s-reviews .reveal{
   opacity:0; transform:translateY(24px);
   transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.21,1);
 }
 .s-reviews.in .reveal{ opacity:1; transform:none }
-.s-reviews.in .reviews__sub{ transition-delay:.3s }
 
 /* окно ленты: три колонки, обрезка по высоте + мягкие маски сверху/снизу */
 .reviews-marquee{
@@ -554,8 +550,8 @@ body{
     </div>
     <div class="museum-bento__cell"><img src="assets/z2.jpg" alt="Зал «Челябинскъ»: вывеска и макет хлебной биржи"></div>
     <div class="museum-bento__cell museum-bento__cell--wide">
-      <video src="assets/museum.mp4" autoplay muted loop playsinline preload="metadata"
-             aria-label="Видео: зал музея «Личности времени»"></video>
+      <video src="assets/museum-v2.mp4" autoplay muted loop playsinline preload="metadata"
+             aria-label="Видео: залы музея — «Личности времени» и купеческая лавка"></video>
     </div>
     <div class="museum-bento__cell museum-bento__cell--card">
       <div class="museum-card">
@@ -608,8 +604,7 @@ body{
 
 <section class="s-reviews" id="reviews">
   <div class="reviews__head">
-    <h2 class="reveal">Место, о&nbsp;котором говорят</h2>
-    <p class="reviews__sub reveal">К нам часто приходят по&nbsp;совету — а&nbsp;уходя, советуют сами</p>
+    <h2 class="reveal">Отзывы наших гостей</h2>
   </div>
 
   <div class="reviews-marquee reveal" aria-label="Отзывы гостей">
@@ -787,8 +782,7 @@ body{
 
 <section class="s-contacts" id="contacts">
   <div class="contacts__head">
-    <h2 class="reveal">Как попасть в это место</h2>
-    <p class="contacts__sub reveal">Мы находимся в&nbsp;историческом центре Челябинска</p>
+    <h2 class="reveal">Как к&nbsp;нам попасть</h2>
   </div>
   <!-- карта строится через JS API (зум колесом отключён, только кнопки);
        если API не загрузится — скрипт ниже подставит обычный iframe-виджет -->
