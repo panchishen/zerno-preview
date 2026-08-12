@@ -71,9 +71,9 @@
 /* Наведение — пункт становится золотым (стиль Link/Default). Именно gold/700:
    он и читается на фоне шапки (5.3:1), и заметно отличается от текста (1.8:1).
    Более тёмные золотые формально контрастнее к фону, но сливаются с текстом — проверено */
+/* Ссылки подсвечиваются только под курсором: пункт текущей страницы в макете ничем не
+   выделен, поэтому aria-current остался лишь подсказкой скринридеру, без оформления. */
 .hd__nav a:hover, .hd__right a:hover{ color:var(--link-default, #896100) }
-/* пункт текущей страницы — тот же Link/Default (макет: «Главная» на главной) */
-.hd__nav a[aria-current="page"]{ color:var(--link-default, #896100) }
 .hd__nav a:focus-visible, .hd__right a:focus-visible, .hd__logo:focus-visible{
   outline:2px solid var(--gold-600, #A97C19); outline-offset:4px; border-radius:2px;
 }
@@ -138,13 +138,15 @@
   letter-spacing:.1em; text-transform:uppercase;
   color:var(--text-secondary-dark, #BDB194); white-space:nowrap;
 }
+/* Меню и контакты набраны одним цветом — Text/Primary (on dark), в том числе текущая
+   страница: в макете она ничем не выделена. aria-current в разметке остаётся — это
+   подсказка скринридеру, а не оформление. */
 .hero-header__nav a{
   font:500 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif);
-  color:var(--link-default-dark, #D3A856); text-decoration:none; white-space:nowrap;
+  color:var(--text-inverse, #F9F3E4); text-decoration:none; white-space:nowrap;
 }
-/* на тёмном наведение светлеет — то же правило, что и в футере */
-.hero-header__nav a:hover,
-.hero-header__nav a[aria-current="page"]{ color:var(--link-hover-dark, #E2BF7E) }
+/* на тёмном наведение светлеет до Link/Hover (on dark) — то же правило, что и в футере */
+.hero-header__nav a:hover{ color:var(--link-hover-dark, #E2BF7E) }
 .hero-header__contacts a, .hero-header__contacts span{
   font:500 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif);
   color:var(--text-inverse, #F9F3E4); text-decoration:none; white-space:nowrap;
