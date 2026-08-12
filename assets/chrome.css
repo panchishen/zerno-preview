@@ -52,10 +52,11 @@
 }
 /* Меню строго по центру контейнера (макет 63:257). Приём тот же, что в макете: боковые
    блоки равны по ширине, и меню оказывается ровно посередине. В Figma это сделано фиксированной
-   шириной 234px у header-contacts (как у логотипа); в CSS берём flex:1 1 0 — обе стороны получают
+   шириной 234px у header-contacts (примерно как знак); в CSS берём flex:1 1 0 — обе стороны получают
    поровну независимо от длины номера, поэтому центр не съедет, если телефон когда-нибудь изменится */
-.hd__logo{ flex:1 1 0; display:block; line-height:0 }
-.hd__logo img{ width:234px; height:56px; display:block }
+.hd__brand{ flex:1 1 0 }   /* колонка «знак + подпись»; flex:1 — тот самый приём центровки меню */
+.hd__logo{ display:block; line-height:0 }
+.hd__logo img{ width:228px; height:55px; display:block }
 
 .hd__nav{ display:flex; align-items:center; gap:32px; flex:none }
 .hd__right{ display:flex; align-items:center; gap:32px; flex:1 1 0; justify-content:flex-end }
@@ -77,6 +78,21 @@
   outline:2px solid var(--gold-600, #A97C19); outline-offset:4px; border-radius:2px;
 }
 
+/* ===== ПОДПИСЬ ПОД ЗНАКОМ (макеты 456:1932 шапка, 430:1451 футер) =====
+   Юридическое требование: знак «Зерно» не используется без подписи. Типографика вне шкалы
+   проекта (8px), поэтому размеры заданы вручную. Геометрия: ширина 159 и сдвиг 69 ставят
+   строку ровно под словом «ЗЕРНО» (колос занимает первые 30.4% знака шириной 228),
+   а -12px у знака поднимают её в пустое поле под словом. */
+.hd__brand, .ft__brand{ display:flex; flex-direction:column; align-items:flex-start }
+.hd__brand .hd__logo, .ft__brand .ft__logo{ margin-bottom:-12px }
+.hd__tagline, .ft__tagline{
+  width:159px; margin-left:69px; text-align:center; white-space:nowrap;
+  font:400 8px/1.52 var(--font-body, 'Onest', system-ui, sans-serif);
+  letter-spacing:.1em; text-transform:uppercase;
+}
+.hd__tagline{ color:var(--graphite-600, #5F5A52) }        /* Text/Secondary — на светлой шапке */
+.ft__tagline{ color:var(--text-secondary-dark, #BDB194) } /* Text/Secondary (on dark) — в футере */
+
 /* ===== ХЕДЕР · вариант 2 (макет 430:1292) =====
    На второй главной шапки две: «2 (on dark)» лежит на видео первого экрана и уезжает
    вместе с ним, «2» — стики, выезжает сверху, когда первый экран прокручен. Разметку
@@ -85,7 +101,7 @@
 /* Стики-шапка: механика та же (.site-header--reveal), отличается раскладкой — логотип,
    меню и контакты разнесены по краям, поля 32px вместо сетки контейнера */
 .site-header--v2 .hd__in{ width:auto; margin-inline:32px; justify-content:space-between }
-.site-header--v2 .hd__logo, .site-header--v2 .hd__right{ flex:none }
+.site-header--v2 .hd__brand, .site-header--v2 .hd__right{ flex:none }
 
 /* Кнопка брони — Button M 44 из макета (компонент 47:86). Она компактнее кнопок страницы
    (те L 56), поэтому описана здесь, а не общим классом .btn */
@@ -116,8 +132,10 @@
 }
 .hero-header__contacts{ flex:1 1 0; display:flex; align-items:center; justify-content:flex-end; gap:32px }
 .hero-header__brand img{ width:205px; height:100px; display:block }
+/* та же обязательная подпись, но под вертикальным знаком — крупнее и по центру (макет 430:1656) */
 .hero-header__tagline{
-  font:400 16px/1.52 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Small */
+  font:400 10px/1.52 var(--font-body, 'Onest', system-ui, sans-serif);
+  letter-spacing:.1em; text-transform:uppercase;
   color:var(--text-secondary-dark, #BDB194); white-space:nowrap;
 }
 .hero-header__nav a{
@@ -147,24 +165,14 @@
   display:flex; align-items:flex-start; justify-content:space-between; gap:48px;
   padding:32px 0 48px;
 }
-.ft__logo{ flex:none; display:block; line-height:0 }
-.ft__logo img{ width:234px; height:56px; display:block } /* теперь совпадает с логотипом хедера */
-
-/* Вариант 2 (макет 430:1451): под логотипом слоган, выключка по центру знака */
-.ft__brand{ flex:none; display:flex; flex-direction:column; align-items:center; gap:4px }
-.ft__tagline{
-  font:400 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Base */
-  color:var(--text-secondary-dark, #BDB194); white-space:nowrap;
-}
-/* Логотип в футере v2 чуть меньше, чем в шапке (228×55 против 234×56) — так в макете 171:595.
-   Под него подогнан и верхний отступ колонок: 12px вместо 21px, чтобы первые строки
-   легли на базовую линию слова «ЗЕРНО». Из-за этого футер стал 235px вместо 244px. */
-.ft__brand .ft__logo img{ width:228px; height:55px }
-.site-footer--v2 .ft__col{ padding-top:12px }
+.ft__brand{ flex:none }
+.ft__logo{ display:block; line-height:0 }
+.ft__logo img{ width:228px; height:55px; display:block } /* тот же размер, что в шапке */
 
 .ft__col{
   flex:none; display:flex; flex-direction:column; gap:8px;
-  padding-top:21px; /* по макету: строки колонок выровнены ниже верха логотипа */
+  /* 12px ставит первые строки колонок на базовую линию слова «ЗЕРНО» (макет 171:595) */
+  padding-top:12px;
 }
 .ft__col a, .ft__col span{
   font:500 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif); /* макет 171:595: Body/Base Medium 18/160 */
@@ -263,14 +271,10 @@
   /* контакты скрыты — центрировать больше не от чего, возвращаем логотип к своей ширине,
      иначе flex:1 растянул бы его и вытолкнул меню вправо */
   .hd__right{ display:none }
-  .hd__logo{ flex:none }
+  .hd__brand{ flex:none }
   .hd__in{ justify-content:space-between }
   .ft__in{ flex-wrap:wrap; row-gap:40px }
-  .ft__logo{ flex:1 0 100% }
-  /* логотип со слоганом занимает свою строку целиком — тогда выключка по левому краю,
-     как у остальных колонок, а не по центру знака */
-  .ft__brand{ flex:1 0 100%; align-items:flex-start }
-  .ft__brand .ft__logo{ flex:none }
+  .ft__brand{ flex:1 0 100% } /* знак с подписью занимает свою строку целиком */
   .ft__col{ padding-top:0 }
 }
 @media (max-width:767px){
@@ -279,7 +283,8 @@
   .hero-header{ justify-content:center }
   .ft__in{ flex-direction:column; row-gap:32px; padding-bottom:40px }
   .ft__col a, .ft__col span{ white-space:normal }
-  .ft__logo img{ width:200px; height:48px }
+  /* знак здесь не уменьшаем: подпись под ним привязана к его ширине (159 и 69 из макета),
+     и при другом размере она перестала бы попадать под слово «ЗЕРНО» */
 }
 @media (prefers-reduced-motion: reduce){
   .site-header--reveal{ transition:none }

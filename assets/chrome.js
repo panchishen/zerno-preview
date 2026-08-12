@@ -26,10 +26,24 @@
   var HOME = new URL('../index-v1.html', BASE).href; // главная существует в двух вариантах, «домом» считаем первый
 
   var LOGO_VERT = new URL('logo_vert.svg', BASE).href; // вертикальный знак — только в шапке на тёмном
-  var NAV = ['Ресторан', 'Музей', 'Конференц-зал', 'Контакты'];
-  var NAV_V2 = ['Ресторан', 'Музей', 'Мастер-классы', 'Контакты']; // во втором варианте макета вместо конференц-зала
+  // «Мастер-классы» вместо «Конференц-зала» — правка макета от 12.08.2026, она же в шапке
+  // первого варианта (63:257) и в футере (171:595), поэтому список один на все шапки и футер
+  var NAV = ['Ресторан', 'Музей', 'Мастер-классы', 'Контакты'];
   var PHONE = { label:'8 (922) 711-09-40', href:'tel:+79227110940' };
   var ADDRESS = 'Свердловский проспект, 40А';
+  // Обязательная подпись под знаком: юридически логотип «Зерно» не используется без неё.
+  // В верхнем регистре её рисует CSS, здесь текст в обычном — чтобы скринридер не читал по буквам
+  var TAGLINE = 'Еда. Развитие. Инновации.';
+
+  // знак с подписью — одинаково устроен в обеих шапках и в футере (макеты 456:1932, 430:1451)
+  function brand(cls, href, title, attrs){
+    return '<div class="' + cls + '__brand">' +
+      '<a class="' + cls + '__logo" href="' + href + '" title="' + title + '"' + (attrs || '') + '>' +
+        '<img src="' + LOGO + '" alt="Зерно" width="228" height="55">' +
+      '</a>' +
+      '<span class="' + cls + '__tagline">' + TAGLINE + '</span>' +
+    '</div>';
+  }
   // Соцсети — кнопки-иконки (макет Icon button 352:474). Контуры встроены прямо сюда:
   // так они наследуют цвет через currentColor, чего <img src=".svg"> не умеет.
   // Исходники тех же путей — assets/icons/*.svg, там же нормализация глифа в 20×20.
@@ -56,17 +70,15 @@
   function headerHTML(){
     var isHome = !!document.getElementById('hero');
     // на главной клик по логотипу перезапускает интро, на внутренних — ведёт домой
-    var logo = isHome
-      ? '<a class="hd__logo" href="#" title="Зерно — на главную" data-restart>'
-      : '<a class="hd__logo" href="' + HOME + '" title="Зерно — на главную">';
+    var brandBlock = isHome
+      ? brand('hd', '#', 'Зерно — на главную', ' data-restart')
+      : brand('hd', HOME, 'Зерно — на главную');
     // «Главная» — единственный рабочий пункт меню (макет 63:257). На самой главной
     // помечен aria-current="page": и подсветка Link/Default, и подсказка для скринридера
     var home = '<a href="' + HOME + '"' + (isHome ? ' aria-current="page"' : '') + '>Главная</a>';
     return '<header class="site-header" id="siteHeader">' +
       '<div class="hd__in">' +
-        logo +
-          '<img src="' + LOGO + '" alt="Зерно — на главную" width="234" height="56">' +
-        '</a>' +
+        brandBlock +
         '<nav class="hd__nav" aria-label="Основное меню">' + home + stubs(NAV) + '</nav>' +
         // соцсети из хедера временно убраны (макет 63:257) — в футере (171:595) пока остаются
         '<div class="hd__right">' + phone() + '</div>' +
@@ -80,11 +92,11 @@
   function heroHeaderHTML(){
     return '<header class="hero-header">' +
       '<nav class="hero-header__nav" aria-label="Основное меню">' +
-        '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV_V2) +
+        '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV) +
       '</nav>' +
       '<a class="hero-header__brand" href="#" data-top title="Зерно — наверх">' +
         '<img src="' + LOGO_VERT + '" alt="Зерно" width="205" height="100">' +
-        '<span class="hero-header__tagline">Еда. Развитие. Инновации.</span>' +
+        '<span class="hero-header__tagline">' + TAGLINE + '</span>' +
       '</a>' +
       '<div class="hero-header__contacts"><span>' + ADDRESS + '</span>' + phone() + '</div>' +
     '</header>';
@@ -94,11 +106,9 @@
   function headerV2HTML(){
     return '<header class="site-header site-header--v2" id="siteHeader">' +
       '<div class="hd__in">' +
-        '<a class="hd__logo" href="#" data-top title="Зерно — наверх">' +
-          '<img src="' + LOGO + '" alt="Зерно" width="234" height="56">' +
-        '</a>' +
+        brand('hd', '#', 'Зерно — наверх', ' data-top') +
         '<nav class="hd__nav" aria-label="Основное меню">' +
-          '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV_V2) +
+          '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV) +
         '</nav>' +
         '<div class="hd__right">' +
           '<span>' + ADDRESS + '</span>' + phone() +
@@ -134,21 +144,15 @@
     return '<div class="scroll-progress" id="scrollProgress" aria-hidden="true"><i></i></div>';
   }
 
-  // isV2: во втором варианте главной под логотипом появился слоган (макет 430:1451),
-  // в остальном футер тот же. Логотип там же ведёт наверх, а не перезагружает страницу
+  // isV2 отличает только поведение логотипа: во втором варианте он ведёт наверх страницы,
+  // в первом — на главную. Подпись под знаком в футере одинаковая у обоих (макет 171:595)
   function footerHTML(isV2){
-    var logo = isV2
-      ? '<a class="ft__logo" href="#" data-top title="Зерно — наверх">'
-      : '<a class="ft__logo" href="' + HOME + '" title="Зерно — на главную">';
-    var brand =
-      logo +
-        '<img src="' + LOGO + '" alt="Зерно" width="234" height="56">' +
-      '</a>';
-    if (isV2) brand = '<div class="ft__brand">' + brand +
-      '<span class="ft__tagline">Еда. Развитие. Инновации.</span></div>';
-    return '<footer class="site-footer' + (isV2 ? ' site-footer--v2' : '') + '">' +
+    var brandBlock = isV2
+      ? brand('ft', '#', 'Зерно — наверх', ' data-top')
+      : brand('ft', HOME, 'Зерно — на главную');
+    return '<footer class="site-footer">' +
       '<div class="ft__in">' +
-        brand +
+        brandBlock +
         '<nav class="ft__col" aria-label="Разделы сайта">' + stubs(NAV) + '</nav>' +
         '<div class="ft__col">' +
           phone() +
