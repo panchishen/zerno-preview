@@ -221,7 +221,15 @@
    Служебная плашка прототипа: две компактные кнопки внизу слева, 32px от краёв.
    Текущий вариант залит золотом, второй — обводкой. Разметку даёт chrome.js;
    перед сдачей в продакшн удаляется отсюда и оттуда. */
-.variants{ position:fixed; left:16px; bottom:16px; z-index:200; display:flex; gap:4px }
+/* Появляется вместе со стики-шапкой и информером — на первом экране её не видно.
+   Класс .show вешает chrome.js по тому же условию, что и шапке. */
+.variants{
+  position:fixed; left:16px; bottom:16px; z-index:200; display:flex; gap:4px;
+  opacity:0; transform:translateY(12px); pointer-events:none;
+  transition:opacity .5s cubic-bezier(.22,.61,.21,1), transform .5s cubic-bezier(.22,.61,.21,1);
+}
+.variants.show{ opacity:1; transform:none; pointer-events:auto }
+@media (prefers-reduced-motion: reduce){ .variants{ transition:none } }
 .variants__btn{
   /* 32×28 — размеры из макета; ни фона, ни обводки: плашка служебная и не должна
      тянуть внимание на себя, отличается только цвет цифры */

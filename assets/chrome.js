@@ -185,15 +185,21 @@
     document.body.insertAdjacentHTML('beforeend', footerHTML(isV2) + variantsHTML());
 
     var header = document.getElementById('siteHeader');
+    var variants = document.querySelector('.variants');
 
     if ((mode === 'reveal' || isV2) && hero){
       header.classList.add('site-header--reveal');
       var check = function(){
-        header.classList.toggle('show', hero.getBoundingClientRect().bottom <= 0);
+        // переключалка вариантов появляется в тот же момент, что и шапка: на первом экране её не видно
+        var past = hero.getBoundingClientRect().bottom <= 0;
+        header.classList.toggle('show', past);
+        if (variants) variants.classList.toggle('show', past);
       };
       addEventListener('scroll', check, { passive:true });
       addEventListener('resize', check);
       check();
+    } else if (variants){
+      variants.classList.add('show'); // страницы без первого экрана — прятать не от чего
     }
 
     // href="#" у заглушек нужен только ради hover/фокуса — прыгать наверх по клику незачем.
