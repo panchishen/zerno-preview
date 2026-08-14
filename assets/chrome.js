@@ -31,6 +31,8 @@
   var NAV = ['Ресторан', 'Музей', 'Мастер-классы', 'Контакты'];
   var PHONE = { label:'8 (922) 711-09-40', href:'tel:+79227110940' };
   var ADDRESS = 'Свердловский проспект, 40А';
+  // в шапке на тёмном адрес сокращён — там в строке ещё и «Контакты» (макет 430:1358)
+  var ADDRESS_SHORT = 'Свердловский пр-кт, 40А';
   // Обязательная подпись под знаком: юридически логотип «Зерно» не используется без неё.
   // В верхнем регистре её рисует CSS, здесь текст в обычном — чтобы скринридер не читал по буквам
   var TAGLINE = 'Еда. Развитие. Инновации.';
@@ -90,15 +92,18 @@
   // «2 (on dark)»: прозрачная, лежит на видео первого экрана. Логотип вертикальный и по центру,
   // меню и контакты — по краям. Уезжает вместе с первым экраном, поэтому position:absolute.
   function heroHeaderHTML(){
+    // «Контакты» здесь не в меню, а в правой группе — рядом с адресом и телефоном (макет 430:1358)
     return '<header class="hero-header">' +
       '<nav class="hero-header__nav" aria-label="Основное меню">' +
-        '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV) +
+        '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV.slice(0, -1)) +
       '</nav>' +
       '<a class="hero-header__brand" href="#" data-top title="Зерно — наверх">' +
         '<img src="' + LOGO_VERT + '" alt="Зерно" width="205" height="100">' +
         '<span class="hero-header__tagline">' + TAGLINE + '</span>' +
       '</a>' +
-      '<div class="hero-header__contacts"><span>' + ADDRESS + '</span>' + phone() + '</div>' +
+      '<div class="hero-header__contacts">' +
+        '<span>' + ADDRESS_SHORT + '</span>' + phone() + stubs(NAV.slice(-1)) +
+      '</div>' +
     '</header>';
   }
   // «2»: стики-шапка. От первого варианта отличается раскладкой и кнопкой брони,

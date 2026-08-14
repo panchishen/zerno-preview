@@ -121,16 +121,17 @@
    в потоке страницы, поэтому просто уезжает вверх вместе с первым экраном */
 .hero-header{
   position:absolute; top:0; left:0; right:0; z-index:90;
-  display:flex; align-items:center; gap:32px;
-  padding:24px 48px;
+  display:flex; align-items:center; gap:64px; /* макет 430:1358: боковых полей нет, между группами 64 */
+  padding:24px 0;
 }
-/* три равные колонки: меню слева, логотип строго по центру, контакты справа */
-.hero-header__nav{ flex:1 1 0; display:flex; align-items:center; gap:32px }
+/* Знак посередине, по бокам две равные группы — меню и контакты. Содержимое каждой
+   группы стоит по центру своей половины, поэтому знак остаётся строго в центре страницы. */
+.hero-header__nav{ flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:32px }
 .hero-header__brand{
-  flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:12px;
+  flex:none; display:flex; flex-direction:column; align-items:center; gap:12px;
   text-decoration:none;
 }
-.hero-header__contacts{ flex:1 1 0; display:flex; align-items:center; justify-content:flex-end; gap:32px }
+.hero-header__contacts{ flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:32px }
 .hero-header__brand img{ width:205px; height:100px; display:block }
 /* та же обязательная подпись, но под вертикальным знаком — крупнее и по центру (макет 430:1656) */
 .hero-header__tagline{
