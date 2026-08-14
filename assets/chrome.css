@@ -223,23 +223,18 @@
    перед сдачей в продакшн удаляется отсюда и оттуда. */
 .variants{ position:fixed; left:16px; bottom:16px; z-index:200; display:flex; gap:4px }
 .variants__btn{
-  /* 32×28 и радиус 4 — размеры из макета: плашка служебная и не должна тянуть внимание на себя */
+  /* 32×28 — размеры из макета; ни фона, ни обводки: плашка служебная и не должна
+     тянуть внимание на себя, отличается только цвет цифры */
   display:inline-flex; align-items:center; justify-content:center; width:32px; height:28px;
   border-radius:4px; corner-shape:squircle; text-decoration:none;
   font:600 16px/1.1 var(--font-body, 'Onest', system-ui, sans-serif);
   letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;
-  /* неактивная — только обводка, без заливки (как в макете) */
-  color:var(--gold-700, #896100); background:transparent;
-  border:1px solid var(--gold-400, #D3A856);
-  transition:background .2s ease, border-color .2s ease;
+  color:var(--text-muted, #757068); background:transparent; border:0; /* Text/Muted */
+  transition:color .2s ease;
 }
-/* подложка на наведении еле заметная и полупрозрачная — читается и на светлом, и на тёмном */
-.variants__btn:hover{ background:rgba(211, 168, 86, .16); border-color:var(--gold-500, #CB9C3F) }
-.variants__btn.is-active{
-  color:var(--button-primary-label, #FFFFFF);
-  background:var(--gold-700, #896100); border-color:var(--gold-700, #896100);
-  cursor:default;
-}
+.variants__btn:hover{ color:var(--link-default, #896100) }
+/* текущий вариант — золотом (Link/Default), нажимать его незачем */
+.variants__btn.is-active{ color:var(--link-default, #896100); cursor:default }
 .variants__btn:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:3px }
 
 /* ===== адаптив: макет десктопный, ниже — чтобы ничего не разъезжалось ===== */
