@@ -210,22 +210,20 @@ body{
 .hero-header__nav, .hero-header__contacts{ animation:hero2-rise .7s cubic-bezier(.22,.61,.21,1) .5s both }
 
 /* ===== ИНФОРМЕР (макет 511:1730) =====
-   Пилюля по центру внизу экрана: белый фон, мягкая тень, крестик справа. Закрывается
-   нажатием и больше не возвращается до перезагрузки — ничего не запоминаем намеренно. */
+   Пилюля по центру внизу экрана: белый фон, мягкая тень, крестик справа. Появляется в тот же
+   момент, что и стики-шапка — когда первый экран уходит вверх. Закрывается нажатием и больше
+   не возвращается до перезагрузки: ничего не запоминаем намеренно. */
 .informer{
   position:fixed; left:50%; bottom:32px; z-index:200;
-  transform:translateX(-50%); /* центровка живёт здесь, а не в кадрах анимации */
   display:flex; align-items:center; gap:10px;
   padding:12px 16px 12px 32px;          /* слева больше — крестик держит свой отступ сам */
   background:#FFFFFF; border-radius:100px;
   box-shadow:0 20px 15px rgba(0,0,0,.05);
-  animation:informer-in .5s cubic-bezier(.22,.61,.21,1) 1.2s both;
+  /* сдвиг по X — часть transform, поэтому центровка и движение живут в одном свойстве */
+  opacity:0; transform:translate(-50%, 24px); pointer-events:none;
+  transition:opacity .5s cubic-bezier(.22,.61,.21,1), transform .5s cubic-bezier(.22,.61,.21,1);
 }
-/* сдвиг по X живёт внутри кадров: иначе анимация transform затёрла бы центровку */
-@keyframes informer-in{
-  from{ opacity:0; transform:translate(-50%, 24px) }
-  to  { opacity:1; transform:translate(-50%, 0) }
-}
+.informer.is-shown{ opacity:1; transform:translate(-50%, 0); pointer-events:auto }
 .informer__text{
   margin:0; font:400 18px/1.6 var(--font-body); color:var(--text-primary); white-space:nowrap;
 }
@@ -237,21 +235,19 @@ body{
 .informer__close svg{ width:32px; height:32px; display:block; fill:currentColor }
 .informer__close:hover{ color:var(--gold-700) } /* меняется только сам крестик, подложки нет */
 .informer__close:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
-/* закрытие: та же пружина, что и на появлении, только вниз */
+/* закрытие: та же пружина, только вниз */
 .informer.is-closing{
-  opacity:0; transform:translate(-50%, 16px);
+  opacity:0; transform:translate(-50%, 16px); pointer-events:none;
   transition:opacity .3s ease, transform .3s cubic-bezier(.22,.61,.21,1);
-  animation:none; pointer-events:none;
 }
 @media (max-width:767px){
-  .informer{ left:16px; right:16px; transform:none; padding:12px 12px 12px 20px }
-  .informer__text{ white-space:normal; font-size:16px }
-  @keyframes informer-in{ from{ opacity:0; transform:translateY(24px) } to{ opacity:1; transform:none } }
+  .informer{ left:16px; right:16px; transform:translateY(24px); padding:12px 12px 12px 20px }
+  .informer.is-shown{ transform:none }
   .informer.is-closing{ transform:translateY(16px) }
+  .informer__text{ white-space:normal; font-size:16px }
 }
 @media (prefers-reduced-motion: reduce){
-  .informer{ animation:none }
-  .informer.is-closing{ transition:none }
+  .informer{ transition:none }
 }
 
 /* ===== ПОЯВЛЕНИЕ ЭЛЕМЕНТОВ =====
@@ -763,10 +759,22 @@ body{
 
 <script>
 (function(){
-  // Информер: закрывается крестиком и убирается из разметки совсем. Ничего не запоминаем —
-  // при следующей загрузке страницы он должен появиться снова.
+  // Информер: показывается ровно тогда же, когда выезжает стики-шапка — как только первый
+  // экран ушёл вверх. Условие то же самое, что у шапки в chrome.js, но проверяем сами,
+  // чтобы блок не зависел от её внутренностей.
   const box = document.getElementById('informer');
+  const hero = document.getElementById('hero');
   if (!box) return;
+  if (hero){
+    new IntersectionObserver(([e]) => {
+      box.classList.toggle('is-shown', !e.isIntersecting);
+    }, { threshold: 0 }).observe(hero);
+  } else {
+    box.classList.add('is-shown'); // на страницах без первого экрана показываем сразу
+  }
+
+  // Закрывается крестиком и убирается из разметки совсем. Ничего не запоминаем —
+  // при следующей загрузке страницы он должен появиться снова.
   box.querySelector('.informer__close').addEventListener('click', () => {
     box.classList.add('is-closing');
     box.addEventListener('transitionend', () => box.remove(), { once: true });
