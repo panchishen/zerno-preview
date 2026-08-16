@@ -152,8 +152,13 @@ body{
   position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
   animation:hero2-fade .9s ease .1s both;
 }
-/* затемнение: в макете кадр перекрыт чёрным на 60% — иначе светлый зал не держит светлый текст */
-.hero2__shade{ position:absolute; inset:0; background:rgba(0,0,0,.6) }
+/* Затемнение кадра. В макете это не плоская заливка, а вертикальный градиент тёплого
+   тёмного (--sand-900 #3D372A): сверху 60%, книзу 10%. Верх плотнее — там лежат меню
+   и заголовок, низу плотность не нужна. Значения сняты с отрисовки макета 472:1268. */
+.hero2__shade{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(61,55,42,.6) 0%, rgba(61,55,42,.1) 100%);
+}
 /* центрируем блок обёрткой, а не его собственным transform — тот занят анимацией */
 .hero2__inner{
   position:absolute; inset:0; display:grid; place-content:center; justify-items:center;
@@ -295,6 +300,22 @@ body{
   .rest-gallery__cell--wide{ aspect-ratio:788 / 570 }
 }
 
+/* Плашка «Приходите пробовать» под фотосеткой (макет 519:1545): песочный фон, текст
+   и два действия по центру. Отступ сверху 24 — тот же, что между рядами сетки. */
+.rest-cta{
+  width:var(--cw); margin:24px auto 0;
+  padding:48px 64px 64px; /* снизу больше: кнопки не должны липнуть к краю плашки */
+  background:var(--sand-200); border-radius:8px; corner-shape:squircle;
+  display:flex; flex-direction:column; align-items:center; gap:40px; text-align:center;
+}
+.rest-cta__title{
+  margin:0; font-family:var(--font-heading); font-weight:400; font-size:28px; line-height:1.28;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--gold-600); /* Heading/H3 */
+}
+.rest-cta__sub{ margin:8px 0 0; font-weight:500; font-size:24px; line-height:1.6; color:var(--text-primary) } /* Body/Lead Medium */
+.rest-cta__buttons{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px }
+@media (max-width:767px){ .rest-cta{ padding:32px 24px 40px; gap:32px } }
+
 /* ===== БЛОК: афиша мероприятий — карусель (макет 482:1620) =====
    Четыре карточки 720×480 в ряд; листается перетаскиванием и колесом (скрипт внизу файла). */
 .s-events{ padding-top:0; padding-bottom:200px } /* сверху — margin-bottom кнопки конференц-зала */
@@ -396,6 +417,30 @@ body{
 /* кадры вне потока: тогда высоту ряда задаёт только текст карточек, а не размер картинки */
 .museum-bento__cell img, .museum-bento__cell video{
   position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
+}
+
+/* Иконка колоса в карточках (макет 530:1524): 64×64, по центру над заголовком.
+   Рисуется штрихом, поэтому её можно «прорастить»: у каждого пути pathLength=1, штрих
+   длиной в весь путь сдвинут за его конец, а анимация возвращает сдвиг к нулю. Порядок —
+   снизу вверх: стебель, три пары листьев, остриё. Запускается, когда карточка проявилась. */
+.museum-card__icon{
+  display:block; width:64px; height:64px; margin:0 auto 10px;
+  color:var(--gold-600); overflow:visible;
+}
+.museum-card__icon path{ fill:none; stroke:currentColor; stroke-width:2 }
+@keyframes wheat-draw{ to{ stroke-dashoffset:0 } }
+@media (prefers-reduced-motion: no-preference){
+  .museum-card__icon path{ stroke-dasharray:1; stroke-dashoffset:1 }
+  .museum-bento__cell.in .museum-card__icon path{
+    animation:wheat-draw .45s cubic-bezier(.22,.61,.21,1) forwards;
+    animation-delay:calc(.35s + var(--wd, 0s)); /* .35с — чтобы сначала проступила сама карточка */
+  }
+  /* пары листьев растут одновременно слева и справа */
+  .museum-card__icon path:nth-child(1){ --wd:0s }                                        /* стебель */
+  .museum-card__icon path:nth-child(2), .museum-card__icon path:nth-child(5){ --wd:.1s }  /* нижняя пара */
+  .museum-card__icon path:nth-child(3), .museum-card__icon path:nth-child(6){ --wd:.2s }  /* средняя */
+  .museum-card__icon path:nth-child(4), .museum-card__icon path:nth-child(7){ --wd:.3s }  /* верхняя */
+  .museum-card__icon path:nth-child(8){ --wd:.4s }                                       /* остриё */
 }
 
 /* текстовая карточка бенто: песочная плашка, текст по центру, ширина текста 470 из 517 */
@@ -549,7 +594,7 @@ body{
 
 <section class="hero2" id="hero">
   <video class="hero2__video" src="assets/hero_v2.mp4" autoplay muted loop playsinline preload="auto"
-         fetchpriority="high" aria-label="Видео: пшеничное поле"></video>
+         fetchpriority="high" aria-label="Видео: входная зона «Зерна» и залы музея"></video>
   <div class="hero2__shade" aria-hidden="true"></div>
   <div class="hero2__inner">
     <h1 class="hero2__title">Музей зерна</h1>
@@ -570,6 +615,16 @@ body{
     <div class="reveal museum-bento__cell"><img src="assets/z1.jpg" alt="Вход в музей: знак «Зерно» и сухие колосья"></div>
     <div class="reveal museum-bento__cell museum-bento__cell--card">
       <div class="museum-card">
+        <svg class="museum-card__icon" viewBox="0 0 64 64" aria-hidden="true">
+          <path pathLength="1" d="M32 62L32 54"/>
+          <path pathLength="1" d="M32 52C32 45.3726 37.3726 40 44 40H46V42C46 48.6274 40.6274 54 34 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 37.3726 28 44 28H46V30C46 36.6274 40.6274 42 34 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 37.3726 16 44 16H46V18C46 24.6274 40.6274 30 34 30H32V28Z"/>
+          <path pathLength="1" d="M32 52C32 45.3726 26.6274 40 20 40H18V42C18 48.6274 23.3726 54 30 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 26.6274 28 20 28H18V30C18 36.6274 23.3726 42 30 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 26.6274 16 20 16H18V18C18 24.6274 23.3726 30 30 30H32V28Z"/>
+          <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
+        </svg>
         <h3>Путешествие во&nbsp;времени</h3>
         <p>от&nbsp;неолита до&nbsp;наших дней</p>
       </div>
@@ -581,6 +636,16 @@ body{
     </div>
     <div class="reveal museum-bento__cell museum-bento__cell--card">
       <div class="museum-card">
+        <svg class="museum-card__icon" viewBox="0 0 64 64" aria-hidden="true">
+          <path pathLength="1" d="M32 62L32 54"/>
+          <path pathLength="1" d="M32 52C32 45.3726 37.3726 40 44 40H46V42C46 48.6274 40.6274 54 34 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 37.3726 28 44 28H46V30C46 36.6274 40.6274 42 34 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 37.3726 16 44 16H46V18C46 24.6274 40.6274 30 34 30H32V28Z"/>
+          <path pathLength="1" d="M32 52C32 45.3726 26.6274 40 20 40H18V42C18 48.6274 23.3726 54 30 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 26.6274 28 20 28H18V30C18 36.6274 23.3726 42 30 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 26.6274 16 20 16H18V18C18 24.6274 23.3726 30 30 30H32V28Z"/>
+          <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
+        </svg>
         <h3>Личности времени</h3>
         <p>Кузнецов. Григорович. Берестов. Каждый&nbsp;— творец своей эпохи</p>
       </div>
@@ -588,6 +653,16 @@ body{
     <div class="reveal museum-bento__cell"><img src="assets/z3.jpg" alt="Изба с русской печью и прялкой"></div>
     <div class="reveal museum-bento__cell museum-bento__cell--card">
       <div class="museum-card">
+        <svg class="museum-card__icon" viewBox="0 0 64 64" aria-hidden="true">
+          <path pathLength="1" d="M32 62L32 54"/>
+          <path pathLength="1" d="M32 52C32 45.3726 37.3726 40 44 40H46V42C46 48.6274 40.6274 54 34 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 37.3726 28 44 28H46V30C46 36.6274 40.6274 42 34 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 37.3726 16 44 16H46V18C46 24.6274 40.6274 30 34 30H32V28Z"/>
+          <path pathLength="1" d="M32 52C32 45.3726 26.6274 40 20 40H18V42C18 48.6274 23.3726 54 30 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 26.6274 28 20 28H18V30C18 36.6274 23.3726 42 30 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 26.6274 16 20 16H18V18C18 24.6274 23.3726 30 30 30H32V28Z"/>
+          <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
+        </svg>
         <h3>Лаборатория</h3>
         <p>где через микроскоп каждый может увидеть строение зерна</p>
       </div>
@@ -595,6 +670,16 @@ body{
     <div class="reveal museum-bento__cell"><img src="assets/museum-lab.jpg" alt="Лаборатория музея: микроскоп и колбы"></div>
     <div class="reveal museum-bento__cell museum-bento__cell--card">
       <div class="museum-card">
+        <svg class="museum-card__icon" viewBox="0 0 64 64" aria-hidden="true">
+          <path pathLength="1" d="M32 62L32 54"/>
+          <path pathLength="1" d="M32 52C32 45.3726 37.3726 40 44 40H46V42C46 48.6274 40.6274 54 34 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 37.3726 28 44 28H46V30C46 36.6274 40.6274 42 34 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 37.3726 16 44 16H46V18C46 24.6274 40.6274 30 34 30H32V28Z"/>
+          <path pathLength="1" d="M32 52C32 45.3726 26.6274 40 20 40H18V42C18 48.6274 23.3726 54 30 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 26.6274 28 20 28H18V30C18 36.6274 23.3726 42 30 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 26.6274 16 20 16H18V18C18 24.6274 23.3726 30 30 30H32V28Z"/>
+          <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
+        </svg>
         <h3>Интерактивная игра</h3>
         <p>с&nbsp;помощью которой можно узнать о&nbsp;пользе каждой крупы</p>
       </div>
@@ -603,6 +688,16 @@ body{
     <div class="reveal museum-bento__cell museum-bento__cell--wide"><img src="assets/museum-neolith.jpg" alt="Зал «Зерно. Начало»: неолит и карта путешествия зерна"></div>
     <div class="reveal museum-bento__cell museum-bento__cell--card">
       <div class="museum-card">
+        <svg class="museum-card__icon" viewBox="0 0 64 64" aria-hidden="true">
+          <path pathLength="1" d="M32 62L32 54"/>
+          <path pathLength="1" d="M32 52C32 45.3726 37.3726 40 44 40H46V42C46 48.6274 40.6274 54 34 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 37.3726 28 44 28H46V30C46 36.6274 40.6274 42 34 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 37.3726 16 44 16H46V18C46 24.6274 40.6274 30 34 30H32V28Z"/>
+          <path pathLength="1" d="M32 52C32 45.3726 26.6274 40 20 40H18V42C18 48.6274 23.3726 54 30 54H32V52Z"/>
+          <path pathLength="1" d="M32 40C32 33.3726 26.6274 28 20 28H18V30C18 36.6274 23.3726 42 30 42H32V40Z"/>
+          <path pathLength="1" d="M32 28C32 21.3726 26.6274 16 20 16H18V18C18 24.6274 23.3726 30 30 30H32V28Z"/>
+          <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
+        </svg>
         <h3>Элеватор&nbsp;— сердце производства</h3>
         <p>все этапы обработки зерна происходят на&nbsp;нём</p>
       </div>
@@ -632,6 +727,16 @@ body{
       <div class="reveal rest-gallery__cell"><img src="assets/car-events.jpg" alt="Гости за ужином тёплым вечером" loading="lazy"></div>
       <div class="reveal rest-gallery__cell"><img src="assets/car-menu.jpg" alt="Паста на столе ресторана" loading="lazy"></div>
       <div class="reveal rest-gallery__cell rest-gallery__cell--wide"><img src="assets/car-photo3.jpg" alt="Светлый зал ресторана с гостями" loading="lazy"></div>
+    </div>
+  </div>
+  <div class="rest-cta reveal">
+    <div>
+      <h3 class="rest-cta__title">Приходите пробовать</h3>
+      <p class="rest-cta__sub">Забронируйте место или сначала загляните в&nbsp;меню</p>
+    </div>
+    <div class="rest-cta__buttons">
+      <button class="btn btn--primary" type="button">Забронировать стол</button>
+      <button class="btn btn--secondary" type="button">Посмотреть меню</button>
     </div>
   </div>
 </section>
@@ -940,14 +1045,16 @@ body{
   const COORDS = [55.1686, 61.3862]; // Свердловский просп., 40А (JS API: [широта, долгота])
 
   function fallbackIframe(){ // страховка: API недоступен — прежний виджет (с зумом колесом)
-    box.innerHTML = '<iframe src="https://yandex.ru/map-widget/v1/?ll=61.386200%2C55.168600&z=16&pt=61.386200,55.168600,pm2rdm&l=map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></iframe>';
+    box.innerHTML = '<iframe src="https://yandex.ru/map-widget/v1/?ll=61.386200%2C55.168600&z=12&pt=61.386200,55.168600,pm2rdm&l=map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></iframe>';
   }
 
   function init(){
     ymaps.ready(function(){
       try {
         const map = new ymaps.Map(box, {
-          center: COORDS, zoom: 16,
+          // зум 12 — обзор города целиком, с подписью «Челябинск» (макет блока контактов);
+          // ближе разглядывать можно кнопками зума
+          center: COORDS, zoom: 12,
           controls: ['zoomControl'],
           behaviors: ['drag', 'multiTouch']
         }, { suppressMapOpenBlock: true });

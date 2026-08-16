@@ -217,34 +217,6 @@
   outline:2px solid var(--gold-400, #D3A856); outline-offset:3px;
 }
 
-/* ===== ПЕРЕКЛЮЧАЛКА ВАРИАНТОВ ГЛАВНОЙ (макет 445:1733) =====
-   Служебная плашка прототипа: две компактные кнопки внизу слева, 32px от краёв.
-   Текущий вариант залит золотом, второй — обводкой. Разметку даёт chrome.js;
-   перед сдачей в продакшн удаляется отсюда и оттуда. */
-/* Появляется вместе со стики-шапкой и информером — на первом экране её не видно.
-   Класс .show вешает chrome.js по тому же условию, что и шапке. */
-.variants{
-  position:fixed; left:16px; bottom:16px; z-index:200; display:flex; gap:4px;
-  opacity:0; transform:translateY(12px); pointer-events:none;
-  transition:opacity .5s cubic-bezier(.22,.61,.21,1), transform .5s cubic-bezier(.22,.61,.21,1);
-}
-.variants.show{ opacity:1; transform:none; pointer-events:auto }
-@media (prefers-reduced-motion: reduce){ .variants{ transition:none } }
-.variants__btn{
-  /* 32×28 — размеры из макета; ни фона, ни обводки: плашка служебная и не должна
-     тянуть внимание на себя, отличается только цвет цифры */
-  display:inline-flex; align-items:center; justify-content:center; width:32px; height:28px;
-  border-radius:4px; corner-shape:squircle; text-decoration:none;
-  font:600 16px/1.1 var(--font-body, 'Onest', system-ui, sans-serif);
-  letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;
-  color:var(--text-muted, #757068); background:transparent; border:0; /* Text/Muted */
-  transition:color .2s ease;
-}
-.variants__btn:hover{ color:var(--link-default, #896100) }
-/* текущий вариант — золотом (Link/Default), нажимать его незачем */
-.variants__btn.is-active{ color:var(--link-default, #896100); cursor:default }
-.variants__btn:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:3px }
-
 /* ===== адаптив: макет десктопный, ниже — чтобы ничего не разъезжалось ===== */
 /* Шапки варианта 2 свёрстаны на 1920: меню, логотип и контакты занимают там 1360px
    (стики с кнопкой брони — 1587px). На узких экранах убираем правую часть по очереди,

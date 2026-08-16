@@ -26,9 +26,10 @@
   var HOME = new URL('../index-v1.html', BASE).href; // главная существует в двух вариантах, «домом» считаем первый
 
   var LOGO_VERT = new URL('logo_vert.svg', BASE).href; // вертикальный знак — только в шапке на тёмном
-  // «Мастер-классы» вместо «Конференц-зала» — правка макета от 12.08.2026, она же в шапке
-  // первого варианта (63:257) и в футере (171:595), поэтому список один на все шапки и футер
-  var NAV = ['Ресторан', 'Музей', 'Мастер-классы', 'Контакты'];
+  // Список пунктов один на все шапки и футер. «Мастер-классы» вместо «Конференц-зала»
+  // (правка макета 12.08.2026), музей перед рестораном — вслед за порядком блоков
+  // на главной (16.08.2026). Макеты: шапки 36:36, 430:1296, 430:1361, футер 159:417
+  var NAV = ['Музей', 'Ресторан', 'Мастер-классы', 'Контакты'];
   var PHONE = { label:'8 (922) 711-09-40', href:'tel:+79227110940' };
   var ADDRESS = 'Свердловский проспект, 40А';
   // в шапке на тёмном адрес сокращён — там в строке ещё и «Контакты» (макет 430:1358)
@@ -123,26 +124,6 @@
     '</header>';
   }
 
-  // ===== Переключалка вариантов главной (макет 445:1733) =====
-  // Служебная плашка прототипа: заказчик сравнивает два варианта главной. Ссылки
-  // относительные — работает и локально, и на GitHub Pages. Перед сдачей в продакшн
-  // убирается отсюда и из chrome.css вместе с вызовом в init().
-  var VARIANTS = [
-    { label:'1', file:'index-v1.html' },
-    { label:'2', file:'index-v2.html' }
-  ];
-  function variantsHTML(){
-    var here = location.pathname.split('/').pop();
-    return '<nav class="variants" aria-label="Вариант главной страницы">' +
-      VARIANTS.map(function(v){
-        // текущий вариант — не ссылка: нажимать некуда, мы уже здесь
-        return here === v.file
-          ? '<span class="variants__btn is-active" aria-current="page">' + v.label + '</span>'
-          : '<a class="variants__btn" href="' + v.file + '" title="Вариант ' + v.label + ' главной">' + v.label + '</a>';
-      }).join('') +
-    '</nav>';
-  }
-
   // Полоса прогресса — отдельный элемент, не часть шапки: она поверх шапки и не зависит
   // от того, показана та или нет. aria-hidden — то же самое сообщает нативный скроллбар.
   function progressHTML(){
@@ -182,24 +163,18 @@
 
     document.body.insertAdjacentHTML('afterbegin',
       (isV2 ? heroHeaderHTML() + headerV2HTML() : headerHTML()) + progressHTML());
-    document.body.insertAdjacentHTML('beforeend', footerHTML(isV2) + variantsHTML());
+    document.body.insertAdjacentHTML('beforeend', footerHTML(isV2));
 
     var header = document.getElementById('siteHeader');
-    var variants = document.querySelector('.variants');
 
     if ((mode === 'reveal' || isV2) && hero){
       header.classList.add('site-header--reveal');
       var check = function(){
-        // переключалка вариантов появляется в тот же момент, что и шапка: на первом экране её не видно
-        var past = hero.getBoundingClientRect().bottom <= 0;
-        header.classList.toggle('show', past);
-        if (variants) variants.classList.toggle('show', past);
+        header.classList.toggle('show', hero.getBoundingClientRect().bottom <= 0);
       };
       addEventListener('scroll', check, { passive:true });
       addEventListener('resize', check);
       check();
-    } else if (variants){
-      variants.classList.add('show'); // страницы без первого экрана — прятать не от чего
     }
 
     // href="#" у заглушек нужен только ради hover/фокуса — прыгать наверх по клику незачем.
