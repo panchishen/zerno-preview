@@ -108,13 +108,15 @@
 .hd__btn{
   display:inline-flex; align-items:center; flex:none; height:44px; padding:0 24px;
   border:0; border-radius:8px; corner-shape:squircle; cursor:pointer;
-  background:var(--gold-700, #896100); color:var(--button-primary-label, #FFFFFF);
+  /* Цвета те же, что у Primary L (компонент 47:86). Раньше M начинался на ступень
+     темнее — gold-700/800/900; в Figma это выровняли, здесь догоняем */
+  background:var(--gold-600, #A97C19); color:var(--button-primary-label, #FFFFFF);
   font:600 16px/1.1 var(--font-body, 'Onest', system-ui, sans-serif);
   letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;
   transition:background .2s ease;
 }
-.hd__btn:hover{ background:var(--gold-800, #674800) }
-.hd__btn:active{ background:var(--gold-900, #493200) }
+.hd__btn:hover{ background:var(--gold-700, #896100) }
+.hd__btn:active{ background:var(--gold-800, #674800) }
 .hd__btn:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:3px }
 
 /* Шапка первого экрана: прозрачная, поверх видео. Не fixed и не sticky — обычный элемент
