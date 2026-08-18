@@ -80,15 +80,11 @@ body{
   position:relative; overflow:hidden; isolation:isolate;
 }
 .btn--primary:hover{ background:var(--gold-700) }
-/* Кнопка брони в стики-шапке — тоже Primary, только компактная. Разметку даёт chrome.js,
-   но правила держим здесь: chrome.css общий с первым вариантом, а его не трогаем.
-   Цвета выровнены с компонентом: у размера M они теперь те же, что у L (были на тон темнее). */
-.hd__btn{
-  position:relative; overflow:hidden; isolation:isolate;
-  background:var(--gold-600);
-}
-.hd__btn:hover{ background:var(--gold-700) }
-.hd__btn:active{ background:var(--gold-800) }
+/* Кнопка брони в стики-шапке. Цвета живут в chrome.css рядом с самой кнопкой — здесь
+   только то, чего в общем файле быть не должно: подложка под перелив. Дублировать
+   заливку не стали намеренно: держали в двух местах — разошлись бы при первой же правке.
+   Кнопка рисуется только в шапке v2, так что общий файл править было безопасно. */
+.hd__btn{ position:relative; overflow:hidden; isolation:isolate }
 
 /* Перелив: светлая полоса проходит по золоту слева направо. В покое раз в 5 секунд,
    под курсором вдвое чаще — но тем же плавным ходом (≈1.1с), а не рывком. */
@@ -200,7 +196,7 @@ body{
 }
 .hero2__sub{
   width:var(--cw); margin:0;
-  font-weight:500; font-size:24px; line-height:1.6; /* Body/Lead Medium 24/160 */
+  font-weight:500; font-size:30px; line-height:1.6; /* вне шкалы проекта: в макете у этой строки нет стиля */
   color:var(--text-inverse); text-align:center; text-wrap:balance;
   animation:hero2-rise .8s cubic-bezier(.22,.61,.21,1) 1s both; /* следом за заголовком */
 }
@@ -635,7 +631,7 @@ body{
 
 <section class="s-museum" id="museum">
   <div class="museum__head">
-    <h2 class="reveal">Первый в&nbsp;России музей, посвящённый зерну: от&nbsp;поля до&nbsp;стола</h2>
+    <h2 class="reveal">Первый в&nbsp;России музей,<br>посвящённый зерну: от&nbsp;поля до&nbsp;стола</h2>
     <p class="museum__sub reveal">Каждый зал&nbsp;— путешествие сквозь время: от&nbsp;настоящего к&nbsp;прошлому и&nbsp;будущему</p>
   </div>
   <div class="museum-bento" id="museum-bento">
