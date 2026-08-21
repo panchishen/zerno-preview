@@ -159,6 +159,42 @@
   outline:2px solid var(--gold-400, #D3A856); outline-offset:4px; border-radius:2px;
 }
 
+/* ===== ВЫПАДАЮЩИЙ СПИСОК В МЕНЮ (макет Dropdown 613:886) =====
+   «События» раскрываются по наведению: карточка 224px, строки по 52 с полем 20 (Dropdown option).
+   Между пунктом и карточкой 12px, и этот зазор перекрывает прозрачный мостик ::after —
+   иначе курсор по дороге вниз теряет наведение и список успевает закрыться.
+   Раскрытие висит и на :focus-within (клавиатура), и на классе .is-open (тач, где ховера нет). */
+.nav-sub{ position:relative; display:inline-flex }
+.nav-sub::after{ content:''; position:absolute; top:100%; left:0; right:0; height:12px }
+.nav-sub__list{
+  position:absolute; top:calc(100% + 12px); left:0; z-index:10;
+  width:224px; padding:8px 0; display:flex; flex-direction:column;
+  background:var(--input-bg, #FFFFFF);
+  border-radius:8px; corner-shape:squircle;
+  /* обводка внутренней тенью, а не border: в макете рамка не добавляет высоты,
+     и карточка ровно 120 (8 + 52 + 52 + 8), а не 122 */
+  box-shadow:0 8px 24px rgba(28,26,18,.14), inset 0 0 0 1px var(--input-border, #D3C6A9);
+  opacity:0; visibility:hidden; transform:translateY(-6px);
+  transition:opacity .18s ease, transform .18s ease, visibility .18s;
+}
+.nav-sub:hover .nav-sub__list,
+.nav-sub:focus-within .nav-sub__list,
+.nav-sub.is-open .nav-sub__list{ opacity:1; visibility:visible; transform:none }
+/* Строки набраны Body/Base обычного начертания, не Medium как сам пункт меню.
+   Оба селектора нужны, чтобы перебить цвет ссылок в шапке на тёмном — там текст светлый. */
+.hd__nav .nav-sub__list a, .hero-header__nav .nav-sub__list a{
+  display:flex; align-items:center; height:52px; padding:0 20px;
+  font:400 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif);
+  color:var(--text-primary, #474134); text-decoration:none; white-space:nowrap;
+  transition:background-color .15s ease;
+}
+.hd__nav .nav-sub__list a:hover, .hero-header__nav .nav-sub__list a:hover{
+  background:var(--surface-hover, #F0E6CE); color:var(--text-primary, #474134);
+}
+@media (prefers-reduced-motion: reduce){
+  .nav-sub__list{ transition:none }
+}
+
 /* ===== ФУТЕР ===== */
 .site-footer{
   /* тёмный футер (макет 257:383): вертикальный градиент graphite-900 → sand-900 к середине */

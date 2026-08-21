@@ -23,13 +23,21 @@
   // пути считаем от самого скрипта — работает и из подпапок
   var BASE = new URL('.', document.currentScript.src);
   var LOGO = new URL('logo_hor.svg', BASE).href;
-  var HOME = new URL('../index-v1.html', BASE).href; // главная существует в двух вариантах, «домом» считаем первый
+  var HOME = new URL('../index.html', BASE).href; // основная главная (прежний второй вариант)
 
   var LOGO_VERT = new URL('logo_vert.svg', BASE).href; // вертикальный знак — только в шапке на тёмном
   // Список пунктов один на все шапки и футер. «Мастер-классы» вместо «Конференц-зала»
   // (правка макета 12.08.2026), музей перед рестораном — вслед за порядком блоков
   // на главной (16.08.2026). Макеты: шапки 36:36, 430:1296, 430:1361, футер 159:417
-  var NAV = ['Музей', 'Ресторан', 'Мастер-классы', 'Контакты'];
+  var NAV = ['Музей', 'Ресторан', 'Мастер-классы', 'События', 'Контакты'];
+  // В шапке архивной страницы состав прежний: её компонент (36:36) «Событий» не получил
+  var NAV_ARHIVE = NAV.filter(function(t){ return t !== 'События'; });
+  // «События» в шапках раскрываются списком разделов по наведению (макет Dropdown 613:886).
+  // В футере тот же пункт остаётся обычной ссылкой — там раскрывать нечего, разделы и так на виду
+  var SUBMENU = { 'События': ['Афиша мероприятий', 'Новости'] };
+  // В футере «События» разворачиваются в свои разделы: раскрывать по наведению там нечего,
+  // а места на отдельные строки хватает — сам пункт «События» из списка уходит
+  var NAV_FOOTER = NAV.reduce(function(список, t){ return список.concat(SUBMENU[t] || t); }, []);
   var PHONE = { label:'8 (922) 711-09-40', href:'tel:+79227110940' };
   var ADDRESS = 'Свердловский проспект, 40А';
   // в шапке на тёмном адрес сокращён — там в строке ещё и «Контакты» (макет 430:1358)
@@ -63,8 +71,17 @@
   }
   // заглушки: адреса ещё не известны, но это полноценные <a> — работают hover, фокус и курсор.
   // data-soon — клик по такой ссылке ничего не делает (иначе href="#" бросает страницу наверх)
-  function stubs(items){
-    return items.map(function(t){ return '<a href="#" data-soon>' + t + '</a>' }).join('');
+  function stubs(items, сПодменю){
+    return items.map(function(t){
+      var под = сПодменю && SUBMENU[t];
+      if (!под) return '<a href="#" data-soon>' + t + '</a>';
+      return '<span class="nav-sub">' +
+        '<a href="#" data-soon aria-haspopup="true" aria-expanded="false">' + t + '</a>' +
+        '<span class="nav-sub__list">' +
+          под.map(function(s){ return '<a href="#" data-soon>' + s + '</a>' }).join('') +
+        '</span>' +
+      '</span>';
+    }).join('');
   }
   function phone(){
     return '<a href="' + PHONE.href + '">' + PHONE.label + '</a>';
@@ -82,7 +99,7 @@
     return '<header class="site-header" id="siteHeader">' +
       '<div class="hd__in">' +
         brandBlock +
-        '<nav class="hd__nav" aria-label="Основное меню">' + home + stubs(NAV) + '</nav>' +
+        '<nav class="hd__nav" aria-label="Основное меню">' + home + stubs(NAV_ARHIVE) + '</nav>' +
         // соцсети из хедера временно убраны (макет 63:257) — в футере (171:595) пока остаются
         '<div class="hd__right">' + phone() + '</div>' +
       '</div>' +
@@ -96,7 +113,7 @@
     // «Контакты» здесь не в меню, а в правой группе — рядом с адресом и телефоном (макет 430:1358)
     return '<header class="hero-header">' +
       '<nav class="hero-header__nav" aria-label="Основное меню">' +
-        '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV.slice(0, -1)) +
+        stubs(NAV.slice(0, -1), true) +   // «Контакты» ушли в правую группу, «Главной» в меню больше нет
       '</nav>' +
       '<a class="hero-header__brand" href="#" data-top title="Зерно — наверх">' +
         '<img src="' + LOGO_VERT + '" alt="Зерно" width="205" height="100">' +
@@ -114,7 +131,7 @@
       '<div class="hd__in">' +
         brand('hd', '#', 'Зерно — наверх', ' data-top') +
         '<nav class="hd__nav" aria-label="Основное меню">' +
-          '<a href="#" data-top aria-current="page">Главная</a>' + stubs(NAV) +
+          stubs(NAV, true) +         // «Главной» в меню больше нет (макет 430:1296)
         '</nav>' +
         '<div class="hd__right">' +
           '<span>' + ADDRESS + '</span>' + phone() +
@@ -139,7 +156,7 @@
     return '<footer class="site-footer">' +
       '<div class="ft__in">' +
         brandBlock +
-        '<nav class="ft__col" aria-label="Разделы сайта">' + stubs(NAV) + '</nav>' +
+        '<nav class="ft__col" aria-label="Разделы сайта">' + stubs(NAV_FOOTER) + '</nav>' +
         '<div class="ft__col">' +
           phone() +
           '<span>' + ADDRESS + '</span>' +
@@ -186,6 +203,28 @@
         e.preventDefault();
         scrollTo({ top:0, behavior:'smooth' });
       }
+    });
+
+    // Само раскрытие подменю делает CSS (:hover и :focus-within). Скрипт добавляет то,
+    // чего CSS не умеет: сообщает состояние скринридеру и даёт открыть список на тач-экране,
+    // где наведения нет вовсе. Второй тап по пункту закрывает, тап мимо — тоже.
+    document.querySelectorAll('.nav-sub').forEach(function(обёртка){
+      var пункт = обёртка.querySelector('[aria-haspopup]');
+      if (!пункт) return;
+      function состояние(открыт){ пункт.setAttribute('aria-expanded', открыт ? 'true' : 'false'); }
+      обёртка.addEventListener('mouseenter', function(){ состояние(true); });
+      обёртка.addEventListener('mouseleave', function(){ обёртка.classList.remove('is-open'); состояние(false); });
+      обёртка.addEventListener('focusin',  function(){ состояние(true); });
+      обёртка.addEventListener('focusout', function(){
+        if (!обёртка.contains(document.activeElement)) состояние(false);
+      });
+      пункт.addEventListener('click', function(){ состояние(обёртка.classList.toggle('is-open')); });
+    });
+    // тап мимо закрывает раскрытый на тач список
+    document.addEventListener('click', function(e){
+      document.querySelectorAll('.nav-sub.is-open').forEach(function(n){
+        if (!n.contains(e.target)) n.classList.remove('is-open');
+      });
     });
 
     var restart = header.querySelector('[data-restart]');

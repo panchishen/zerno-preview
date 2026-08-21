@@ -5,3 +5,34 @@ Thumbs.db
 
 # Локальный сервер прототипов — на сайте не нужен
 запустить-сервер.bat
+
+
+# Прежний (первый) вариант главной — оставлен локально для сравнения, на сайте не нужен
+index-arhive.html
+
+# Ассеты, нужные только локальному архиву index-arhive.html — на сайте не используются
+assets/hero.mp4
+assets/museum.mp4
+assets/conf1.jpg
+assets/conf2.jpg
+assets/conf3.jpg
+assets/z2.jpg
+assets/z4.jpg
+assets/z5.jpg
+assets/avatars/av04.jpg
+assets/avatars/av05.jpg
+assets/avatars/av06.jpg
+assets/avatars/av07.jpg
+assets/avatars/av08.jpg
+assets/avatars/av09.jpg
+assets/avatars/av10.jpg
+assets/avatars/av11.jpg
+assets/avatars/av12.jpg
+assets/avatars/av13.jpg
+assets/avatars/av14.jpg
+assets/avatars/av15.jpg
+assets/avatars/av16.jpg
+assets/avatars/av17.jpg
+assets/avatars/av18.jpg
+assets/avatars/av19.jpg
+assets/avatars/av20.jpg

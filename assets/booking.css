@@ -1,0 +1,113 @@
+/* ===== Зерно · модальное окно бронирования =====
+   Макеты: состояния формы 597:2169 (пустая, со списком, заполненная, готовая, успех).
+   Поля берём готовые из forms.css — здесь только само окно и раскладка формы.
+
+   Подключение:
+     <link rel="stylesheet" href="assets/vendor/air-datepicker.css">
+     <link rel="stylesheet" href="assets/forms.css">
+     <link rel="stylesheet" href="assets/booking.css">
+     <script src="assets/vendor/air-datepicker.js"></script>
+     <script src="assets/vendor/air-datepicker-ru.js"></script>
+     <script src="assets/forms.js" defer></script>
+     <script src="assets/booking.js" defer></script> */
+
+/* ===== ПОДЛОЖКА ===== */
+.booking{
+  position:fixed; inset:0; z-index:300;      /* выше информера (200) и шапки (100) */
+  display:grid; place-items:safe center;     /* safe: у высокой карточки верх не срезается и остаётся доступен */
+  /* Длинную форму прокручивает подложка, а не карточка. Иначе overflow карточки
+     срезает крестик — он стоит снаружи, у верхнего правого угла (макет 589:1840).
+     Поля сверху и по бокам — не меньше 48, чтобы крестику хватило места. */
+  padding:48px; overflow-y:auto; overscroll-behavior:contain;
+  background:rgba(28,26,18,.55);             /* graphite-900 с прозрачностью */
+  opacity:0; visibility:hidden;
+  transition:opacity .25s ease, visibility .25s;
+}
+.booking.is-open{ opacity:1; visibility:visible }
+
+/* ===== КАРТОЧКА ===== */
+.booking__card{
+  position:relative; width:500px; max-width:100%;
+  background:#FFFFFF; border-radius:8px; corner-shape:squircle;
+  padding:43px 32px;                          /* макет 582:1695 */
+  display:flex; flex-direction:column; gap:32px;
+  transform:translateY(16px) scale(.98);
+  transition:transform .25s cubic-bezier(.22,.61,.21,1);
+}
+.booking.is-open .booking__card{ transform:none }
+
+/* внутри карточки шаг между заголовком, формой и согласием — 32 (макет 582:1695) */
+.booking__form-wrap{ display:flex; flex-direction:column; gap:32px }
+
+.booking__title{
+  margin:0; font-family:var(--font-heading); font-weight:400; font-size:24px; line-height:1.36;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--gold-600); text-align:center; /* Heading/H4 */
+}
+
+/* Крестик стоит снаружи карточки, у её верхнего правого угла (макет 589:1840) */
+.booking__close{
+  position:absolute; left:100%; bottom:100%;
+  width:32px; height:32px; padding:0; border:0; background:transparent;
+  color:#FFFFFF; cursor:pointer; display:grid; place-items:center;
+  transition:color .2s ease;
+}
+.booking__close svg{ width:20px; height:20px; display:block; fill:currentColor }
+.booking__close:hover{ color:var(--gold-300) }
+.booking__close:focus-visible{ outline:2px solid var(--gold-400); outline-offset:3px }
+
+/* ===== ФОРМА ===== */
+.booking-form{ display:flex; flex-direction:column; gap:16px }
+.booking-form__row{ display:flex; gap:8px }
+.booking-form__row .field{ flex:1 1 0; min-width:0 }
+/* Пустая подсказка не должна занимать место: иначе gap у .field добавляет лишние 8px
+   к каждому полю и шаг между ними становится 24 вместо макетных 16. */
+.booking .field__hint:empty{ display:none }
+.booking .btn{ width:100%; justify-content:center }
+
+/* ===== СОГЛАСИЕ ===== */
+.booking__consent{
+  margin:0; font:400 16px/1.52 var(--font-body); /* Body/Small */
+  color:var(--graphite-600); text-align:center;
+}
+.booking__consent a{ color:var(--link-default); text-decoration:none }
+.booking__consent a:hover{ color:var(--link-hover) }
+
+/* ===== ЭКРАН УСПЕХА ===== */
+.booking__success{ display:flex; flex-direction:column; gap:32px }
+.booking__success-head{ display:flex; flex-direction:column; gap:8px; text-align:center }
+.booking__success-text{ margin:0; font:400 18px/1.6 var(--font-body); color:var(--text-primary) }
+/* окно переключается между формой и успехом — показываем что-то одно */
+.booking[data-state="form"] .booking__success,
+.booking[data-state="success"] .booking__form-wrap{ display:none }
+
+/* Календарь в модалке. Два отличия от обычного:
+   1) слой выше окна — иначе карточка (z-index 300) перекрывает выпавший календарь;
+   2) компактный вид: полноразмерный 441px не помещается на мониторах ниже ~970px,
+      потому что поле даты стоит в нижней половине экрана.
+   Правила висят на body, а не на самом календаре: он создаётся лениво, при первом
+   открытии, и класс на него навесить заранее нельзя. */
+body.is-booking-open .air-datepicker{
+  z-index:400;
+  --adp-font-size:16px;
+  --adp-width:334px;               /* рамка + 12 + 7 × 44 + 12 + рамка */
+  --adp-day-cell-width:44px;
+  --adp-day-cell-height:38px;
+  --adp-padding:12px;
+  --adp-nav-height:29px;
+  --adp-month-cell-height:48px;
+  --adp-year-cell-height:48px;
+}
+
+@media (max-width:559px){
+  .booking{ padding:16px }   /* крестик здесь уходит внутрь карточки, запас снаружи не нужен */
+  .booking__card{ padding:32px 20px; gap:24px }
+  .booking-form__row{ flex-direction:column; gap:16px }
+  /* на узком экране крестик уводим внутрь карточки — снаружи ему уже нет места */
+  .booking__close{ left:auto; right:12px; bottom:auto; top:12px; color:var(--text-primary) }
+  .booking__close:hover{ color:var(--gold-700) }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .booking, .booking__card, .booking__close{ transition:none }
+  .booking__card{ transform:none }
+}

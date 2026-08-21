@@ -1,0 +1,28 @@
+/* ===== Зерно · тултип =====
+   Макет 615:1059. Плашка чёрная с прозрачностью, текст Body/Small на светлом.
+   Подсказку рисует общий узел из tooltip.js, поэтому здесь только сама плашка —
+   позицию скрипт задаёт через left/top, а transform оставляет анимации.
+
+   Подключение (в <head>):
+     <link rel="stylesheet" href="assets/tooltip.css">
+     <script src="assets/tooltip.js" defer></script>
+   Применение: атрибут data-tooltip="текст" на любом элементе. */
+
+.tooltip{
+  position:fixed; top:0; left:0; z-index:500;   /* выше окна брони (300) и календаря (400) */
+  max-width:320px; padding:8px 16px;
+  background:rgba(0,0,0,.8); border-radius:8px; corner-shape:squircle;
+  font:400 16px/1.52 var(--font-body, 'Onest', system-ui, sans-serif);
+  color:var(--text-inverse, #F9F3E4); white-space:nowrap;
+  pointer-events:none;             /* подсказка не должна перехватывать курсор у элемента под ней */
+  opacity:0; visibility:hidden; transform:translateY(4px);
+  transition:opacity .18s ease, transform .18s ease, visibility .18s;
+}
+.tooltip.is-open{ opacity:1; visibility:visible; transform:none }
+/* Длинную подсказку переносим по словам: строка в 320px уже не «короткая надпись»,
+   и в одну строку она бы вылезла за край экрана */
+.tooltip--wrap{ white-space:normal }
+
+@media (prefers-reduced-motion: reduce){
+  .tooltip{ transition:none }
+}

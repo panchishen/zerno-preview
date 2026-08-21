@@ -1,0 +1,265 @@
+/* ===== Зерно · поля форм =====
+   Макеты: Input 585:744, Dropdown 585:1648, Calendar 587:913, Calendar day 586:792.
+
+   Подключение:
+     <link rel="stylesheet" href="assets/vendor/air-datepicker.css">
+     <link rel="stylesheet" href="assets/forms.css">
+     <script src="assets/vendor/air-datepicker.js"></script>
+     <script src="assets/vendor/air-datepicker-ru.js"></script>
+     <script src="assets/forms.js" defer></script>
+
+   Разметка поля:
+     <label class="field">
+       <span class="field__label">Имя</span>
+       <span class="field__box">
+         <input class="field__control" type="text" required>
+         <span class="field__icon">…</span>   <!-- необязательно -->
+       </span>
+       <span class="field__hint"></span>
+     </label>
+   Текст ошибки forms.js подставляет сам. */
+
+/* ===== ПОЛЕ ЦЕЛИКОМ ===== */
+.field{ display:flex; flex-direction:column; gap:8px; width:100% }
+.field__label{
+  font:500 16px/1.3 var(--font-body, 'Onest', system-ui, sans-serif); /* UI/Label без капса: подпись, а не кнопка */
+  color:var(--text-secondary, #5F5A52);
+}
+
+/* ===== КОНТРОЛ ===== */
+.field__control{
+  width:100%; height:56px; padding:0 20px; /* 56 — как у кнопок L, чтобы стояли в ряд */
+  font:400 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Base */
+  color:var(--text-primary, #474134);
+  background:var(--input-bg, #FFFFFF);
+  border:1px solid var(--input-border, #D3C6A9);
+  border-radius:8px; corner-shape:squircle;
+  transition:border-color .18s ease, background .18s ease;
+  appearance:none; -webkit-appearance:none;
+}
+.field__control::placeholder{ color:var(--input-placeholder, #757068); opacity:1 }
+.field__control:hover:not(:disabled):not(:focus){ border-color:var(--input-border-hover, #BDB194) }
+/* Фокус — обводка 2px, а не тень: толщина читается и в ч/б, и не спорит с переливом кнопок.
+   Внутренний box-shadow вместо border-width, иначе поле «толстеет» и соседи прыгают */
+.field__control:focus{
+  outline:none;
+  border-color:var(--input-border-focus, #A97C19);
+  box-shadow:inset 0 0 0 1px var(--input-border-focus, #A97C19);
+}
+.field__control:disabled{
+  background:var(--input-disabled-bg, #F0E6CE);
+  color:var(--text-disabled, #9F9B93);
+  cursor:not-allowed;
+}
+.field__control:disabled::placeholder{ color:var(--text-disabled, #9F9B93) }
+
+/* Автозаполнение браузера красит поле своим голубым фоном — возвращаем наш.
+   Фон подменяем толстой внутренней тенью: обычный background автозаполнение перебивает.
+   У сфокусированного поля обводку кладём первой, иначе её перекроет эта же тень. */
+.field__control:-webkit-autofill,
+.field__control:-webkit-autofill:hover{
+  -webkit-text-fill-color: var(--text-primary, #474134);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--input-bg, #FFFFFF);
+  caret-color: var(--text-primary, #474134);
+}
+.field__control:-webkit-autofill:focus{
+  -webkit-box-shadow: inset 0 0 0 1px var(--input-border-focus, #A97C19), inset 0 0 0 1000px var(--input-bg, #FFFFFF);
+}
+.field--error .field__control:-webkit-autofill:focus{
+  -webkit-box-shadow: inset 0 0 0 1px var(--input-border-error, #BF3B2B), inset 0 0 0 1000px var(--input-bg, #FFFFFF);
+}
+
+/* ===== ОШИБКА ===== */
+.field--error .field__control,
+.field--error .field__control:hover{ border-color:var(--input-border-error, #BF3B2B) }
+.field--error .field__control:focus{ box-shadow:inset 0 0 0 1px var(--input-border-error, #BF3B2B) }
+.field__hint{
+  font:400 16px/1.52 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Small */
+  color:var(--text-muted, #757068);
+  min-height:0;
+}
+.field--error .field__hint{ color:var(--input-border-error, #BF3B2B) }
+
+/* ===== ПОЛЯ С ИКОНКОЙ (дата и селект) =====
+   Иконка позиционируется от .field__box, а не от всего поля: иначе её пришлось бы
+   считать от низа блока, а он гуляет вместе с появлением строки ошибки. */
+.field__box{ position:relative; display:block }
+.field--icon .field__control{ padding-right:56px } /* место под иконку 24 + отступы */
+.field__icon{
+  position:absolute; right:20px; top:50%; transform:translateY(-50%);
+  width:24px; height:24px;
+  color:var(--text-muted, #757068);
+  pointer-events:none; /* клик должен доходить до поля, а не гаситься иконкой */
+}
+.field__icon svg{ width:24px; height:24px; display:block; fill:currentColor }
+.field__control:disabled ~ .field__icon{ color:var(--text-disabled, #9F9B93) }
+
+/* Селект: свой треугольник уже нарисован иконкой, родной убираем */
+select.field__control{ cursor:pointer }
+select.field__control::-ms-expand{ display:none }
+/* У поля даты в тач-режиме родная иконка календаря лишняя — рисуем свою */
+.field__control[type="date"]::-webkit-calendar-picker-indicator{ opacity:0; cursor:pointer }
+
+/* ===== СЕЛЕКТ: свой список вместо системного (макет Dropdown 585:1648) =====
+   Разметка остаётся обычной: <select class="field__control">. forms.js прячет
+   родной селект и строит рядом кнопку .select__toggle + список .select__menu.
+   Без JS остаётся системный выпадающий список — форма работает в любом случае.
+   Внимание: у кнопки тот же класс .field__control, чтобы не дублировать стили
+   поля. Код, который обходит все .field__control и смотрит value, должен
+   пропускать .select__toggle — у кнопки value всегда пустой. */
+.select__native{ display:none }
+.select__toggle{
+  display:flex; align-items:center; text-align:left;
+  cursor:pointer; overflow:hidden;
+}
+.select__value{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.select__toggle[data-placeholder="true"] .select__value{ color:var(--input-placeholder, #757068) }
+.select.is-open .field__icon{ transform:translateY(-50%) rotate(180deg) }
+.field__icon{ transition:transform .18s ease }
+
+.select__menu{
+  position:absolute; z-index:20; top:calc(100% + 8px); left:0; width:100%;
+  max-height:280px; overflow-y:auto; overscroll-behavior:contain;
+  padding:8px 0;
+  background:var(--input-bg, #FFFFFF);
+  border:1px solid var(--input-border, #D3C6A9);
+  border-radius:8px; corner-shape:squircle;
+  box-shadow:0 8px 24px rgba(29,25,17,.14);
+}
+/* если снизу не хватает места — раскрываем вверх */
+.select__menu--up{ top:auto; bottom:calc(100% + 8px) }
+
+.select__option{
+  display:flex; align-items:center; min-height:56px; padding:8px 20px;
+  font:400 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Base, как в поле */
+  color:var(--text-primary, #474134);
+  cursor:pointer;
+  transition:background .15s ease, color .15s ease;
+}
+/* выбранный — светлая плашка и золотой текст; наведение поверх него только темнее фон */
+.select__option[aria-selected="true"]{ background:var(--surface-card, #F9F3E4); color:var(--gold-600, #A97C19) }
+.select__option:hover:not(.select__option--off),
+.select__option.is-active:not(.select__option--off){ background:var(--surface-hover, #F0E6CE) }
+.select__option:active:not(.select__option--off){ background:var(--surface-pressed, #E4D8BD) }
+.select__option--off{ color:var(--text-disabled, #9F9B93); cursor:not-allowed }
+
+/* ===== КАЛЕНДАРЬ: тема air-datepicker на наших токенах ===== */
+.air-datepicker{
+  --adp-font-family: var(--font-body, 'Onest', system-ui, sans-serif);
+  --adp-font-size: 18px;
+  --adp-width: 386px;          /* вся панель: рамка + 24 + 7 колонок по 48 + 24 + рамка (макет Calendar 587:913 — 384 + рамки) */
+  --adp-day-cell-width: 48px;
+  --adp-day-cell-height: 48px;
+  --adp-month-cell-height: 56px;   /* по умолчанию 42/56 — не наши, месяцы и годы разъезжались */
+  --adp-year-cell-height: 56px;
+  --adp-nav-action-size: 24px;     /* размер иконки; кликается зона шире, см. ниже */
+  --adp-cell-border-radius: 12px;  /* при обрезке фона по внутренней коробке радиус
+                                      уменьшается на величину поля: 12 − 4 = макетные 8 */
+  --adp-color: var(--text-primary, #474134);
+  --adp-color-secondary: var(--text-muted, #757068);
+  --adp-background-color: var(--input-bg, #FFFFFF);
+  --adp-background-color-hover: var(--surface-hover, #F0E6CE);
+  --adp-background-color-active: var(--surface-pressed, #E4D8BD);
+  --adp-background-color-selected-other-month: var(--gold-700, #896100);
+  --adp-color-current-date: var(--text-primary, #474134);
+  --adp-color-other-month: var(--text-disabled, #9F9B93);
+  --adp-color-disabled: var(--text-disabled, #9F9B93);
+  --adp-accent-color: var(--gold-600, #A97C19);
+  --adp-border-color: var(--input-border, #D3C6A9);
+  --adp-border-color-inner: transparent;
+  --adp-border-radius: 8px;
+  --adp-padding: 24px;
+  --adp-nav-height: 29px;          /* строка заголовка 18/1.6 */
+  --adp-nav-color-secondary: var(--text-muted, #757068);
+  --adp-cell-background-color-selected: var(--gold-600, #A97C19);
+  --adp-cell-background-color-selected-hover: var(--gold-700, #896100);
+  --adp-cell-background-color-in-range: var(--surface-card, #F9F3E4);
+  --adp-cell-background-color-in-range-hover: var(--surface-hover, #F0E6CE);
+  --adp-day-name-color: var(--text-muted, #757068);
+  --adp-day-name-color-hover: var(--text-muted, #757068);
+  box-shadow:0 8px 24px rgba(29,25,17,.14);
+  corner-shape:squircle;
+}
+/* Библиотека считает шапку и тело по content-box: к ширине панели добавлялись
+   поля, из-за чего сетка дней и правая стрелка выходили за белую карточку.
+   Переводим на border-box — тогда --adp-width это вся панель, как в макете. */
+.air-datepicker, .air-datepicker *{ box-sizing:border-box }
+/* Треугольного носика у панели в макете нет, а библиотека рисует его по классу
+   размещения, который при развороте вверх остаётся прежним — носик оказывался
+   с противоположной стороны. Убираем совсем. */
+.air-datepicker--pointer{ display:none }
+.air-datepicker-nav{ border-bottom:0; padding:var(--adp-padding) var(--adp-padding) 0 }
+/* Шапка календаря живёт по тем же полям, что и сетка дней: без этого стрелки
+   прижимались к самым краям панели, а месяц вплотную к верхней кромке. */
+.air-datepicker--content{ padding-top:8px }
+/* Стрелки в макете — иконки 24×24 без плашки. Плашку убираем, наведение
+   показываем цветом, а зону клика растягиваем псевдоэлементом до 44×44:
+   24 пикселя — слишком мелкая мишень для мыши и тем более для пальца. */
+.air-datepicker-nav--action{
+  position:relative;
+  width:var(--adp-nav-action-size); height:var(--adp-nav-action-size);
+  color:var(--text-primary, #474134);
+  background:none; border-radius:0;
+}
+.air-datepicker-nav--action::after{ content:''; position:absolute; inset:-10px }
+.air-datepicker-nav--action:hover,
+.air-datepicker-nav--action:active{ background:none; color:var(--gold-600, #A97C19) }
+/* Библиотека рисует свои стрелки обводкой (path{fill:none;stroke}) и растягивает
+   их до 32px. Наши иконки — заливка 24px, поэтому правила перебиваем. */
+.air-datepicker-nav--action svg{ width:24px; height:24px }
+.air-datepicker-nav--action path{ fill:currentColor; stroke:none }
+.air-datepicker-nav--action.-disabled-{ visibility:hidden }
+/* Заголовок переехал с акцидентного Prosto One на основной шрифт и потерял капс
+   (макет calendar-header 587:759): месяц читается как подпись, а не как заголовок блока. */
+.air-datepicker-nav--title{
+  font:700 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Base Bold */
+  letter-spacing:0; text-transform:none; color:var(--text-primary, #474134);
+}
+.air-datepicker-body--day-name{
+  font:400 16px/1.52 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Small */
+  text-transform:none;
+}
+/* Отбивки строки дней недели по макету: 12 сверху, 8 снизу, сама строка 28 */
+.air-datepicker-body--day-names{ margin:12px 0 8px; grid-auto-rows:28px }
+.air-datepicker-cell.-selected-{ font-weight:500 }
+.air-datepicker-cell.-current-{ font-weight:500 }
+/* День — пилюля 40×40 внутри слота 48×48 (макет Calendar day, слой day-pill).
+   Библиотека красит саму ячейку, поэтому прижимаем фон к внутренней коробке:
+   так одним правилом пилюлей рисуются все состояния — выбран, наведение, диапазон.
+   !important здесь по делу: каждое состояние библиотека задаёт шорткатом background,
+   а он сбрасывает background-clip, и перебить его весом селектора не выйдет —
+   правил у неё с десяток и вес у них разный. */
+.air-datepicker-cell{ padding:4px; background-clip:content-box !important }
+/* «Сегодня» — обводка, а не заливка: заливкой отмечен выбранный день,
+   два закрашенных кружка спорили бы между собой. Обводку ведём псевдоэлементом:
+   у box-shadow нет способа сесть на внутреннюю коробку, он растянулся бы на весь слот. */
+.air-datepicker-cell.-current-:not(.-selected-){ box-shadow:none }
+.air-datepicker-cell.-current-:not(.-selected-)::before{
+  content:''; position:absolute; inset:4px;
+  border:1px solid var(--gold-600, #A97C19); border-radius:8px;
+}
+/* Зачёркивания в макете больше нет (Calendar 587:913 от 21.08.2026): прошедшие,
+   занятые и чужие дни выглядят одинаково приглушённо — цветом text/disabled.
+   Разницу между «уже прошло» и «мест нет» объясняет подсказка при наведении. */
+
+/* ===== ПОДСКАЗКА (макет Tooltip 615:1060, 615:1062) =====
+   Появляется по наведению на недоступный день календаря. Лежит в body и
+   позиционируется от окна: панель календаря сама может стоять у края экрана,
+   а подсказка шире дня в четыре раза. */
+.tip{
+  position:fixed; z-index:500;          /* выше календаря в модалке (400) */
+  max-width:280px; padding:8px 16px;
+  font:400 16px/1.52 var(--font-body, 'Onest', system-ui, sans-serif); /* Body/Small */
+  color:var(--text-inverse, #F9F3E4);
+  background:var(--tooltip-bg, #333230);
+  border-radius:8px; corner-shape:squircle;
+  pointer-events:none;                  /* курсор должен доходить до дня под ней */
+  opacity:0; transition:opacity .15s ease;
+  transform:translate(-50%, 0);         /* точка привязки — низ дня, растём вниз */
+}
+.tip--above{ transform:translate(-50%, -100%) }   /* у нижнего края окна разворачиваем вверх */
+.tip.is-visible{ opacity:1 }
+
+@media (prefers-reduced-motion: reduce){
+  .field__control, .field__icon, .select__option, .tip{ transition:none }
+}
