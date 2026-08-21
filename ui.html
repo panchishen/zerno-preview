@@ -41,6 +41,8 @@ h2{ font:400 28px/1.28 var(--font-heading); letter-spacing:.06em; text-transform
       font:600 20px/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase }
 .btn:hover{ background:var(--gold-700) }
 .note{ color:var(--text-muted); font-size:16px; line-height:1.52; margin:0 0 24px }
+.checks{ display:flex; flex-wrap:wrap; gap:24px }
+.check{ display:flex; align-items:center; gap:12px; font-size:16px; line-height:1.52; cursor:pointer }
 /* только для витрины: настоящая подсказка висит у окна и появляется по наведению */
 .tips{ display:flex; gap:16px; flex-wrap:wrap }
 .tips .tip{ position:static; transform:none; opacity:1 }
@@ -88,6 +90,15 @@ h2{ font:400 28px/1.28 var(--font-heading); letter-spacing:.06em; text-transform
     </div>
     <p style="margin:32px 0 0"><button class="btn" type="submit">Забронировать</button></p>
   </form>
+
+  <h2>Чекбокс</h2>
+  <p class="note">Стоит в согласии на обработку данных под формой брони. Макет Checkbox 24×24 в consent-row 626:918.</p>
+  <div class="checks">
+    <label class="check"><input class="checkbox" type="checkbox"> <span>Обычный</span></label>
+    <label class="check"><input class="checkbox" type="checkbox" checked> <span>Отмеченный</span></label>
+    <label class="check"><input class="checkbox checkbox--error" type="checkbox"> <span>С ошибкой</span></label>
+    <label class="check"><input class="checkbox" type="checkbox" disabled> <span>Выключенный</span></label>
+  </div>
 
   <h2>Подсказка</h2>
   <p class="note">Появляется при наведении на недоступный день календаря: прошедшие и занятые

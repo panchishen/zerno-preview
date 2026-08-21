@@ -100,6 +100,38 @@ select.field__control::-ms-expand{ display:none }
 /* У поля даты в тач-режиме родная иконка календаря лишняя — рисуем свою */
 .field__control[type="date"]::-webkit-calendar-picker-indicator{ opacity:0; cursor:pointer }
 
+/* ===== ЧЕКБОКС (макет Checkbox 24×24 в consent-row 626:918) =====
+   Родной input с appearance:none: доступность, фокус и клик по подписи достаются даром,
+   а нарисовать 24 пикселя коробки проще, чем городить свой виджет. */
+.checkbox{
+  appearance:none; -webkit-appearance:none;
+  flex:none; width:24px; height:24px; margin:0;
+  display:grid; place-content:center;
+  background:var(--input-bg, #FFFFFF);
+  border:1px solid var(--input-border, #D3C6A9);
+  border-radius:4px;
+  cursor:pointer;
+  transition:background .18s ease, border-color .18s ease;
+}
+.checkbox:hover:not(:disabled):not(:checked){ border-color:var(--input-border-hover, #BDB194) }
+.checkbox:checked{
+  background:var(--button-primary-bg, #A97C19);
+  border-color:var(--button-primary-bg, #A97C19);
+}
+/* Галочка — две грани квадрата, повёрнутые на 45°. Ради двенадцати пикселей
+   тащить иконку незачем, а цвет и толщина остаются под контролем CSS. */
+.checkbox::after{
+  content:''; width:12px; height:6px;
+  border-left:2px solid var(--button-primary-label, #FFFFFF);
+  border-bottom:2px solid var(--button-primary-label, #FFFFFF);
+  transform:translateY(-2px) rotate(-45deg);
+  opacity:0; transition:opacity .12s ease;
+}
+.checkbox:checked::after{ opacity:1 }
+.checkbox:focus-visible{ outline:2px solid var(--input-border-focus, #A97C19); outline-offset:2px }
+.checkbox:disabled{ background:var(--input-disabled-bg, #F0E6CE); border-color:var(--input-border, #D3C6A9); cursor:not-allowed }
+.checkbox--error{ border-color:var(--input-border-error, #BF3B2B) }
+
 /* ===== СЕЛЕКТ: свой список вместо системного (макет Dropdown 585:1648) =====
    Разметка остаётся обычной: <select class="field__control">. forms.js прячет
    родной селект и строит рядом кнопку .select__toggle + список .select__menu.
@@ -261,5 +293,5 @@ select.field__control::-ms-expand{ display:none }
 .tip.is-visible{ opacity:1 }
 
 @media (prefers-reduced-motion: reduce){
-  .field__control, .field__icon, .select__option, .tip{ transition:none }
+  .field__control, .field__icon, .select__option, .tip, .checkbox, .checkbox::after{ transition:none }
 }

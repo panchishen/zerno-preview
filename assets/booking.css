@@ -64,13 +64,20 @@
 .booking .field__hint:empty{ display:none }
 .booking .btn{ width:100%; justify-content:center }
 
-/* ===== СОГЛАСИЕ ===== */
-.booking__consent{
+/* ===== СОГЛАСИЕ (макет consent-row 626:918) =====
+   Было предложение «отправляя форму, вы соглашаетесь» по центру — стало осознанное
+   действие: галочка и текст по левому краю. */
+/* Согласие стоит внутри <form>: так его сбрасывает form.reset() и оно уходит вместе
+   с заявкой. Шаг у формы 16, а до согласия по макету 32 — добираем отступом. */
+.booking__consent{ display:flex; flex-direction:column; gap:8px; margin-top:16px }
+.booking__consent-row{ display:flex; align-items:flex-start; gap:12px }
+.booking__consent-text{
   margin:0; font:400 16px/1.52 var(--font-body); /* Body/Small */
-  color:var(--graphite-600); text-align:center;
+  color:var(--graphite-600); cursor:pointer;
 }
-.booking__consent a{ color:var(--link-default); text-decoration:none }
-.booking__consent a:hover{ color:var(--link-hover) }
+.booking__consent-text a{ color:var(--link-default); text-decoration:none; cursor:pointer }
+.booking__consent-text a:hover{ color:var(--link-hover) }
+.booking__consent--error .field__hint{ color:var(--input-border-error, #BF3B2B) }
 
 /* ===== ЭКРАН УСПЕХА ===== */
 .booking__success{ display:flex; flex-direction:column; gap:32px }

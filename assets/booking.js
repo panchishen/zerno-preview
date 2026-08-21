@@ -10,7 +10,8 @@
    4. Проверяет всё при отправке: пустое поле, несуществующая или прошедшая дата
       («Укажите верную дату»), занятый день («Нет свободных мест»).
    5. Проверяет телефон: номер набран целиком и код существует (правила в forms.js).
-   6. Показывает экран «Заявка принята!». Реальной отправки нет — фронтенд без интеграции. */
+   6. Требует отметить согласие на обработку данных.
+   7. Показывает экран «Заявка принята!». Реальной отправки нет — фронтенд без интеграции. */
 (function(){
   'use strict';
 
@@ -21,6 +22,7 @@
   var form    = modal.querySelector('.booking-form');
   var guests  = modal.querySelector('[data-guests]');
   var phone   = modal.querySelector('[data-phone]');
+  var consent = modal.querySelector('[data-consent]');
   var date    = modal.querySelector('[data-date]');
   var api = window.ZernoForms || {};
 
@@ -47,11 +49,33 @@
   }
   function сегодня(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
 
+  // ——— согласие ———
+  // Ошибку показываем той же строкой подсказки, что и у полей, но блок не .field:
+  // у согласия нет рамки поля, красить нечего — красим саму коробку галочки.
+  function пометитьСогласие(текст){
+    if (!consent) return;
+    var блок = consent.closest('.booking__consent');
+    if (!блок) return;
+    блок.classList.toggle('booking__consent--error', !!текст);
+    consent.classList.toggle('checkbox--error', !!текст);
+    var hint = блок.querySelector('.field__hint');
+    if (hint) hint.textContent = текст || '';
+    if (текст) consent.setAttribute('aria-invalid', 'true');
+    else consent.removeAttribute('aria-invalid');
+  }
+  if (consent){
+    consent.addEventListener('change', function(){ if (consent.checked) пометитьСогласие(''); });
+    // Ссылка на политику лежит внутри подписи: клик по ней не должен ставить галочку
+    var политика = modal.querySelector('.booking__consent-text a');
+    if (политика) политика.addEventListener('click', function(e){ e.stopPropagation(); });
+  }
+
   // ——— открытие и закрытие ———
   var вернутьФокус = null;
 
   function сброситьОшибки(){
     form.querySelectorAll('.field__control').forEach(снять);
+    пометитьСогласие('');
   }
   function открыть(){
     вернутьФокус = document.activeElement;
@@ -202,8 +226,12 @@
     }
     var датаОк = проверитьДату();
     if (!датаОк && !первое) первое = date;
+    // согласие: без него заявку принимать нельзя
+    var согласиеОк = !consent || consent.checked;
+    пометитьСогласие(согласиеОк ? '' : 'Отметьте согласие на обработку данных');
+    if (!согласиеОк && !первое) первое = consent;
     if (первое) (api.фокус || function(el){ el.focus(); })(первое);
-    return !первое && датаОк;
+    return !первое && датаОк && согласиеОк;
   }
 
   form.addEventListener('submit', function(e){
