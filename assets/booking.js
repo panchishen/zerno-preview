@@ -85,6 +85,9 @@
       if (date && date._dp) date._dp.clear();
     }
     modal.dataset.state = 'form';
+    // Согласие даётся заново при каждом открытии окна: галочка, доставшаяся от прошлого
+    // раза, — это не действие человека, а значит и не согласие.
+    if (consent) consent.checked = false;
     сброситьОшибки();          // прошлые подсветки не должны встречать человека при новом открытии
     modal.classList.add('is-open');
     modal.removeAttribute('aria-hidden');
