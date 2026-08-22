@@ -306,12 +306,12 @@
   .hero-header__logo--hor{ display:block; width:228px; height:55px; margin-bottom:-12px }
   /* подпись встаёт по геометрии горизонтального знака — те же 159 и 69, что в шапке:
      они ставят строку ровно под словом «ЗЕРНО» */
-  /* Слово «ЗЕРНО» занимает в знаке полосу 18.7..28.3 из 48, то есть его середина почти
-     совпадает с серединой блока — и формально оно на одной линии с кнопкой меню. Но глаз
-     читает «ЗЕРНО» вместе с подписью под ним как один текстовый блок, чья масса ниже, и
-     слово кажется приподнятым. Сдвиг на 4px убирает это ощущение. Не transform: он занят
-     анимацией появления шапки на первом экране. */
-  .hero-header__brand{ align-items:flex-start; gap:0; position:relative; top:4px }
+  /* Слово «ЗЕРНО» занимает в знаке полосу 18.7..28.3 из 48 — его середина совпадает с
+     серединой блока с точностью до 0.6px, поэтому кнопки справа встают с ним на одну
+     линию сами. Раньше здесь стоял сдвиг на 4px: знак был один, сравнивать его высоту
+     было не с чем, и подпись снизу тянула взгляд. Теперь справа две иконки, они задают
+     явную линию, и любой сдвиг от неё читается как ошибка. */
+  .hero-header__brand{ align-items:flex-start; gap:0 }
   .hero-header__tagline{ width:159px; margin-left:69px; text-align:center; font-size:8px }
 
   .hero-header{ justify-content:space-between; padding:16px 24px; gap:16px }
@@ -327,10 +327,14 @@
   .ft__col{ padding-top:0 }
 }
 @media (max-width:767px){
-  /* Знак 228 + кнопка 44 + поля 32 = 304 — помещается даже в 360px, поэтому здесь
-     остаются только поля: сам знак и в обеих шапках, и в футере одного размера. */
+  /* Со звонком в шапке кнопок стало две: знак 228 + 92 на пару кнопок + отступ между
+     ними + поля 32 = 344 при доступных 328, и группа вылезала за правый край. Знак
+     уменьшаем до 190; подпись под ним пересчитана пропорционально — 159 и 69 из макета
+     это 69.7% и 30.3% ширины знака, иначе строка съезжает из-под слова «ЗЕРНО». */
   .hero-header{ padding:12px 16px }
   .site-header--v2 .hd__in{ margin-inline:16px }
+  .hero-header__logo--hor, .hd__logo img{ width:190px; height:46px }
+  .hero-header__tagline, .hd__tagline{ width:132px; margin-left:57px }
   .ft__in{ flex-direction:column; row-gap:32px; padding-bottom:40px }
   .ft__col a, .ft__col span{ white-space:normal }
   /* знак здесь не уменьшаем: подпись под ним привязана к его ширине (159 и 69 из макета),
@@ -344,8 +348,23 @@
    На телефоне ни одна из шапок не вмещает пять пунктов, поэтому меню уходит в панель
    на весь экран. Кнопка стоит в каждой шапке, панель одна на страницу (её разметку
    chrome.js кладёт в конец body — так она не наследует ни цвет, ни слой шапки). */
+/* Звонок и меню стоят парой в правом углу шапки; видимостью управляет группа целиком */
+.nav-actions{ display:none; align-items:center; gap:4px; flex:none }
+/* Иконка — Heroicons outline (phone). Штрих 1.5 живёт в самой разметке, цвет берётся
+   от шапки через currentColor: на видео светлый, на кремовой стики-шапке тёмный */
+.nav-phone{
+  width:44px; height:44px; flex:none;
+  display:grid; place-items:center;
+  color:var(--text-primary, #474134); transition:color .2s ease;
+}
+.nav-phone svg{ width:24px; height:24px; display:block }
+.nav-phone:hover{ color:var(--link-default, #896100) }
+.nav-phone:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:2px; border-radius:4px }
+.hero-header .nav-phone{ color:var(--text-inverse, #F9F3E4) }
+.hero-header .nav-phone:hover{ color:var(--link-hover-dark, #E2BF7E) }
+
 .nav-burger{
-  display:none;           /* до 767 включительно — включается в медиазапросе ниже */
+  display:grid;           /* показывает или прячет её группа .nav-actions */
   width:44px; height:44px; flex:none; padding:0;
   border:0; background:transparent; cursor:pointer;
   place-content:center; gap:6px; grid-auto-flow:row;
@@ -379,7 +398,9 @@
   display:grid; place-items:center;
   color:var(--text-primary, #474134); transition:color .2s ease;
 }
-.mnav__close svg{ width:32px; height:32px; display:block; fill:currentColor }
+/* 24px, как у бургера и телефона: крестик встаёт на место кнопки меню, и при разной
+   величине глифа подмена читалась бы как скачок */
+.mnav__close svg{ width:24px; height:24px; display:block; fill:currentColor }
 .mnav__close:hover{ color:var(--link-default, #896100) }
 .mnav__close:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:2px; border-radius:4px }
 
@@ -419,9 +440,9 @@
   .mnav__sheet{ transform:none }
 }
 
-/* Кнопка появляется ровно там, где из шапок исчезают пункты меню.
-   Правило стоит в конце файла намеренно: выше объявлен .nav-burger{display:none},
+/* Группа появляется ровно там, где из шапок исчезают пункты меню и контакты.
+   Правило стоит в конце файла намеренно: выше объявлен .nav-actions{display:none},
    и при равной специфичности выигрывает последнее. */
 @media (max-width:1024px){
-  .nav-burger{ display:grid }
+  .nav-actions{ display:flex }
 }

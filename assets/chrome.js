@@ -96,6 +96,19 @@
            'aria-expanded="false" aria-controls="mobileNav">' +
            '<span></span><span></span><span></span></button>';
   }
+  // Звонок и меню — одна группа справа: по отдельности flex-раскладка шапки развела бы
+  // их по разным краям. Иконка наследует цвет шапки через currentColor, поэтому на видео
+  // она светлая, а на кремовой стики-шапке тёмная — отдельных версий не нужно.
+  function navActionsHTML(){
+    return '<div class="nav-actions">' +
+      '<a class="nav-phone" href="' + PHONE.href + '" aria-label="Позвонить: ' + PHONE.label + '">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" aria-hidden="true">' +
+          '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />' +
+        '</svg>' +
+      '</a>' +
+      burgerHTML() +
+    '</div>';
+  }
   // Состав тот же, что в футере: «События» своей страницы не имеют и в шапках только
   // разводят на «Афишу» и «Новости». Высотой панель не ограничена, поэтому разделы
   // становятся обычными пунктами, а разводящий уровень исчезает вместе с лишним шагом.
@@ -132,7 +145,7 @@
         '<nav class="hd__nav" aria-label="Основное меню">' + home + stubs(NAV_ARHIVE) + '</nav>' +
         // соцсети из хедера временно убраны (макет 63:257) — в футере (171:595) пока остаются
         '<div class="hd__right">' + phone() + '</div>' +
-        burgerHTML() +
+        navActionsHTML() +
       '</div>' +
     '</header>';
   }
@@ -157,7 +170,7 @@
       '<div class="hero-header__contacts">' +
         '<span>' + ADDRESS_SHORT + '</span>' + phone() + stubs(NAV.slice(-1)) +
       '</div>' +
-      burgerHTML() +
+      navActionsHTML() +
     '</header>';
   }
   // «2»: стики-шапка. От первого варианта отличается раскладкой и кнопкой брони,
@@ -173,7 +186,7 @@
           '<span>' + ADDRESS + '</span>' + phone() +
           '<button class="hd__btn" type="button">Забронировать</button>' +
         '</div>' +
-        burgerHTML() +
+        navActionsHTML() +
       '</div>' +
     '</header>';
   }
@@ -287,9 +300,23 @@
       var бургеры = document.querySelectorAll('.nav-burger');
       var открыта = false;
 
-      function показать(){
+      // Крестик должен встать ровно туда, где стоял бургер, иначе при открытии кнопка
+      // «прыгает». Позицию считаем от самой нажатой кнопки, а не по отступам панели:
+      // в шапке первого экрана поля 12px, в стики-шапке — 16px, и одним значением
+      // обе не накрыть. Двигаем поля листа, а не крестик: он прижат к их углу, и
+      // содержимое под ним съезжает вместе с ним.
+      var лист = панель.querySelector('.mnav__sheet');
+      function поместитьКрестик(кнопка){
+        if (!кнопка || !лист) return;
+        var r = кнопка.getBoundingClientRect();
+        лист.style.paddingTop = Math.max(0, Math.round(r.top)) + 'px';
+        лист.style.paddingRight = Math.max(0, Math.round(document.documentElement.clientWidth - r.right)) + 'px';
+      }
+
+      function показать(кнопка){
         if (открыта) return;
         открыта = true;
+        поместитьКрестик(кнопка);
         панель.hidden = false;
         // Чтение offsetWidth заставляет браузер пересчитать раскладку прямо сейчас, поэтому
         // закрытое состояние успевает отрисоваться и переход проигрывается. Через rAF было бы
@@ -311,7 +338,7 @@
         setTimeout(function(){ if (!открыта) панель.hidden = true; }, 300);
       }
 
-      бургеры.forEach(function(b){ b.addEventListener('click', показать); });
+      бургеры.forEach(function(b){ b.addEventListener('click', function(){ показать(b); }); });
       панель.addEventListener('click', function(e){
         // закрывает крестик, любой пункт меню и подложка мимо листа
         if (e.target.closest('.mnav__close, .mnav__list a, .mnav__btn') || e.target === панель) спрятать();
