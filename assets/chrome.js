@@ -87,6 +87,36 @@
     return '<a href="' + PHONE.href + '">' + PHONE.label + '</a>';
   }
 
+  // ===== МОБИЛЬНОЕ МЕНЮ =====
+  // На телефоне горизонтальное меню не помещается ни в одну из шапок, поэтому пункты
+  // уезжают в панель на весь экран. Кнопка-бургер стоит в каждой шапке, панель одна
+  // на страницу: два одинаковых списка разошлись бы при первой же правке состава.
+  function burgerHTML(){
+    return '<button class="nav-burger" type="button" aria-label="Меню" ' +
+           'aria-expanded="false" aria-controls="mobileNav">' +
+           '<span></span><span></span><span></span></button>';
+  }
+  // Состав тот же, что в футере: «События» своей страницы не имеют и в шапках только
+  // разводят на «Афишу» и «Новости». Высотой панель не ограничена, поэтому разделы
+  // становятся обычными пунктами, а разводящий уровень исчезает вместе с лишним шагом.
+  function mobileNavHTML(){
+    var пункты = stubs(NAV_FOOTER);
+    return '<div class="mnav" id="mobileNav" hidden>' +
+      '<div class="mnav__sheet" role="dialog" aria-modal="true" aria-label="Меню">' +
+        '<button class="mnav__close" type="button" aria-label="Закрыть меню">' +
+          '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M26 6.80102L16.7999 16L26 25.2001L25.2001 26L16 16.7999L6.79991 26L6 25.2001L15.199 16L6 6.80102L6.79991 6L16 15.2001L25.2001 6L26 6.80102Z"/></svg>' +
+        '</button>' +
+        '<nav class="mnav__list" aria-label="Основное меню">' + пункты + '</nav>' +
+        '<div class="mnav__contacts">' +
+          '<a href="' + PHONE.href + '">' + PHONE.label + '</a>' +
+          '<span>' + ADDRESS + '</span>' +
+          '<span>Время работы: 8:00–22:00</span>' +
+        '</div>' +
+        '<button class="mnav__btn" type="button" data-booking-open>Забронировать</button>' +
+      '</div>' +
+    '</div>';
+  }
+
   function headerHTML(){
     var isHome = !!document.getElementById('hero');
     // на главной клик по логотипу перезапускает интро, на внутренних — ведёт домой
@@ -102,6 +132,7 @@
         '<nav class="hd__nav" aria-label="Основное меню">' + home + stubs(NAV_ARHIVE) + '</nav>' +
         // соцсети из хедера временно убраны (макет 63:257) — в футере (171:595) пока остаются
         '<div class="hd__right">' + phone() + '</div>' +
+        burgerHTML() +
       '</div>' +
     '</header>';
   }
@@ -115,13 +146,18 @@
       '<nav class="hero-header__nav" aria-label="Основное меню">' +
         stubs(NAV.slice(0, -1), true) +   // «Контакты» ушли в правую группу, «Главной» в меню больше нет
       '</nav>' +
+      // Два знака: вертикальный — как в макете первого экрана, горизонтальный включается
+      // с 1024, когда меню уезжает в бургер и шапка становится однострочной. Переключает
+      // их CSS: при смене ширины окна знак меняется сразу, без пересборки разметки.
       '<a class="hero-header__brand" href="#" data-top title="Зерно — наверх">' +
-        '<img src="' + LOGO_VERT + '" alt="Зерно" width="205" height="100">' +
+        '<img class="hero-header__logo--vert" src="' + LOGO_VERT + '" alt="Зерно" width="205" height="100">' +
+        '<img class="hero-header__logo--hor" src="' + LOGO + '" alt="Зерно" width="228" height="55">' +
         '<span class="hero-header__tagline">' + TAGLINE + '</span>' +
       '</a>' +
       '<div class="hero-header__contacts">' +
         '<span>' + ADDRESS_SHORT + '</span>' + phone() + stubs(NAV.slice(-1)) +
       '</div>' +
+      burgerHTML() +
     '</header>';
   }
   // «2»: стики-шапка. От первого варианта отличается раскладкой и кнопкой брони,
@@ -137,6 +173,7 @@
           '<span>' + ADDRESS + '</span>' + phone() +
           '<button class="hd__btn" type="button">Забронировать</button>' +
         '</div>' +
+        burgerHTML() +
       '</div>' +
     '</header>';
   }
@@ -173,14 +210,29 @@
     '</footer>';
   }
 
+  // Ширина видимой области без полосы прокрутки. Сетка страницы считается от --vw:
+  // 100vw полосу включает (scrollbar-gutter:stable), и правое поле выходило уже левого.
+  function ширинаОкна(){
+    // ноль приходит, когда вкладка ещё не отрисована (фоновая загрузка): в этот момент
+    // переопределять сетку нельзя — контейнер схлопнулся бы до нуля
+    var w = document.documentElement.clientWidth;
+    if (w > 0) document.documentElement.style.setProperty('--vw', w + 'px');
+  }
+
   function init(){
+    ширинаОкна();
+    // ResizeObserver, а не событие resize: clientWidth меняется и без изменения окна —
+    // например когда полоса прокрутки появляется или исчезает вместе с высотой контента
+    if (window.ResizeObserver) new ResizeObserver(ширинаОкна).observe(document.documentElement);
+    else addEventListener('resize', ширинаОкна);
+
     var hero = document.getElementById('hero');
     var mode = document.body.dataset.header || (hero ? 'reveal' : 'static');
     var isV2 = mode === 'v2';
 
     document.body.insertAdjacentHTML('afterbegin',
       (isV2 ? heroHeaderHTML() + headerV2HTML() : headerHTML()) + progressHTML());
-    document.body.insertAdjacentHTML('beforeend', footerHTML(isV2));
+    document.body.insertAdjacentHTML('beforeend', footerHTML(isV2) + mobileNavHTML());
 
     var header = document.getElementById('siteHeader');
 
@@ -226,6 +278,51 @@
         if (!n.contains(e.target)) n.classList.remove('is-open');
       });
     });
+
+    // ===== Мобильное меню: открытие, закрытие, блокировка прокрутки =====
+    // Прокрутку гасим так же, как модалка бронирования (overflow на body): место под полосу
+    // прокрутки зарезервировано через scrollbar-gutter, поэтому вёрстка не дёргается.
+    var панель = document.getElementById('mobileNav');
+    if (панель){
+      var бургеры = document.querySelectorAll('.nav-burger');
+      var открыта = false;
+
+      function показать(){
+        if (открыта) return;
+        открыта = true;
+        панель.hidden = false;
+        // Чтение offsetWidth заставляет браузер пересчитать раскладку прямо сейчас, поэтому
+        // закрытое состояние успевает отрисоваться и переход проигрывается. Через rAF было бы
+        // тем же по смыслу, но в фоновой вкладке кадры не идут — и панель зависла бы прозрачной.
+        void панель.offsetWidth;
+        панель.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+        бургеры.forEach(function(b){ b.setAttribute('aria-expanded', 'true'); });
+        var первая = панель.querySelector('.mnav__close');
+        if (первая) первая.focus();
+      }
+      function спрятать(){
+        if (!открыта) return;
+        открыта = false;
+        панель.classList.remove('is-open');
+        document.body.style.overflow = '';
+        бургеры.forEach(function(b){ b.setAttribute('aria-expanded', 'false'); });
+        // прячем от скринридера и клавиатуры только после того, как панель уехала
+        setTimeout(function(){ if (!открыта) панель.hidden = true; }, 300);
+      }
+
+      бургеры.forEach(function(b){ b.addEventListener('click', показать); });
+      панель.addEventListener('click', function(e){
+        // закрывает крестик, любой пункт меню и подложка мимо листа
+        if (e.target.closest('.mnav__close, .mnav__list a, .mnav__btn') || e.target === панель) спрятать();
+      });
+      addEventListener('keydown', function(e){ if (e.key === 'Escape') спрятать(); });
+      // окно стало шире брейкпоинта (поворот планшета) — меню в шапке снова на месте,
+      // висящая панель только мешала бы
+      addEventListener('resize', function(){
+        if (открыта && document.documentElement.clientWidth > 1024) спрятать();
+      });
+    }
 
     var restart = header.querySelector('[data-restart]');
     if (restart) restart.addEventListener('click', function(e){

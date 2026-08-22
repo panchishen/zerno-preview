@@ -134,7 +134,9 @@
   text-decoration:none;
 }
 .hero-header__contacts{ flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:32px }
-.hero-header__brand img{ width:205px; height:100px; display:block }
+.hero-header__logo--vert{ width:205px; height:100px; display:block }
+/* горизонтальный знак лежит в разметке рядом и включается с 1024 (см. секцию адаптива) */
+.hero-header__logo--hor{ display:none }
 /* та же обязательная подпись, но под вертикальным знаком — крупнее и по центру (макет 430:1656) */
 .hero-header__tagline{
   font:400 10px/1.52 var(--font-body, 'Onest', system-ui, sans-serif);
@@ -223,6 +225,15 @@
 /* правая колонка (политика, копирайт, разработчик) — Text/Secondary (on dark).
    Контраст 5.6:1 на светлом конце градиента футера — проходит AA для основного текста */
 .ft__col--secondary a, .ft__col--secondary span{ color:var(--text-secondary-dark, #BDB194) }
+/* Здесь самые длинные строки футера («Политика обработки персональных данных»), а колонки
+   стоят в nowrap и flex:none — вчетвером они переставали помещаться уже на 1280 и растягивали
+   страницу вбок. Базис 400px — ширина, ниже которой эти строки начинают ломаться пополам:
+   пока в ряду столько места есть, колонка стоит четвёртой (и занимает весь остаток строки),
+   а как только перестаёт помещаться — целиком уходит под остальные и разворачивается на всю
+   ширину. Порог получается сам, привязывать его к брейкпоинту не нужно. */
+.ft__in{ flex-wrap:wrap }
+.ft__col--secondary{ flex:1 0 400px; min-width:0 }
+.ft__col--secondary a, .ft__col--secondary span{ white-space:normal }
 /* Наведение на тёмном — стиль Link/Hover (on dark), gold/300. Не gold/highlight:
    тот стоит на тоне 48°, тогда как вся золотая шкала бренда — 38-41°, и на глаз он
    читается жёлтым, а не золотым. gold/300 втрое насыщеннее песочного цвета ссылки,
@@ -268,7 +279,7 @@
 @media (max-width:1365px){
   .site-header--v2 .hd__right a{ display:none } /* остаётся одна кнопка брони */
 }
-@media (max-width:1199px){
+@media (max-width:1279px){
   .hd__in{ gap:24px }
   .hd__nav, .hd__right{ gap:24px }
   .ft__in{ gap:32px }
@@ -278,25 +289,48 @@
   .hero-header{ padding:24px 32px; gap:24px }
   .hero-header__nav, .hero-header__contacts{ gap:24px }
 }
-@media (max-width:1023px){
-  .hero-header{ justify-content:space-between; padding:16px 24px; gap:16px }
+/* ===== 1024 и ниже: меню целиком уезжает в бургер =====
+   Дальше сжимать горизонтальное меню некуда: в стики-шапке знак 228 и пять пунктов
+   по 18px требуют 789px, и уже на планшете в портрете меню вылезало за правый край.
+   Вместе с меню уходят и контакты — они есть в панели, в блоке контактов и в футере. */
+@media (max-width:1024px){
+  .hd__nav{ display:none }
+  .hero-header__nav{ display:none }
   .hero-header__contacts{ display:none }
-  .hero-header__nav, .hero-header__brand{ flex:none }
-  .hero-header__nav{ gap:16px }   /* иначе пять пунктов и логотип не встают в 768px */
-  .hero-header__brand img{ width:164px; height:80px }
-  /* контакты скрыты — центрировать больше не от чего, возвращаем логотип к своей ширине,
-     иначе flex:1 растянул бы его и вытолкнул меню вправо */
   .hd__right{ display:none }
+
+  /* Знак первого экрана — горизонтальный, тот же, что в шапке и футере: вертикальный
+     на 100px высоты рассчитан на трёхчастную шапку с меню по бокам, а в однострочной
+     «знак слева — кнопка справа» он выглядит колонной посреди пустой строки. */
+  .hero-header__logo--vert{ display:none }
+  .hero-header__logo--hor{ display:block; width:228px; height:55px; margin-bottom:-12px }
+  /* подпись встаёт по геометрии горизонтального знака — те же 159 и 69, что в шапке:
+     они ставят строку ровно под словом «ЗЕРНО» */
+  /* Слово «ЗЕРНО» занимает в знаке полосу 18.7..28.3 из 48, то есть его середина почти
+     совпадает с серединой блока — и формально оно на одной линии с кнопкой меню. Но глаз
+     читает «ЗЕРНО» вместе с подписью под ним как один текстовый блок, чья масса ниже, и
+     слово кажется приподнятым. Сдвиг на 4px убирает это ощущение. Не transform: он занят
+     анимацией появления шапки на первом экране. */
+  .hero-header__brand{ align-items:flex-start; gap:0; position:relative; top:4px }
+  .hero-header__tagline{ width:159px; margin-left:69px; text-align:center; font-size:8px }
+
+  .hero-header{ justify-content:space-between; padding:16px 24px; gap:16px }
+  .hero-header__brand{ flex:none }
   .hd__brand{ flex:none }
   .hd__in{ justify-content:space-between }
+
+  .ft__in{ row-gap:40px }   /* правый блок футера здесь уже стоит отдельной строкой */
+}
+@media (max-width:1023px){
   .ft__in{ flex-wrap:wrap; row-gap:40px }
   .ft__brand{ flex:1 0 100% } /* знак с подписью занимает свою строку целиком */
   .ft__col{ padding-top:0 }
 }
 @media (max-width:767px){
-  .hd__nav{ display:none } /* мобильное меню — отдельная задача */
-  .hero-header__nav{ display:none }
-  .hero-header{ justify-content:center }
+  /* Знак 228 + кнопка 44 + поля 32 = 304 — помещается даже в 360px, поэтому здесь
+     остаются только поля: сам знак и в обеих шапках, и в футере одного размера. */
+  .hero-header{ padding:12px 16px }
+  .site-header--v2 .hd__in{ margin-inline:16px }
   .ft__in{ flex-direction:column; row-gap:32px; padding-bottom:40px }
   .ft__col a, .ft__col span{ white-space:normal }
   /* знак здесь не уменьшаем: подпись под ним привязана к его ширине (159 и 69 из макета),
@@ -304,4 +338,90 @@
 }
 @media (prefers-reduced-motion: reduce){
   .site-header--reveal{ transition:none }
+}
+
+/* ===== БУРГЕР И МОБИЛЬНОЕ МЕНЮ =====
+   На телефоне ни одна из шапок не вмещает пять пунктов, поэтому меню уходит в панель
+   на весь экран. Кнопка стоит в каждой шапке, панель одна на страницу (её разметку
+   chrome.js кладёт в конец body — так она не наследует ни цвет, ни слой шапки). */
+.nav-burger{
+  display:none;           /* до 767 включительно — включается в медиазапросе ниже */
+  width:44px; height:44px; flex:none; padding:0;
+  border:0; background:transparent; cursor:pointer;
+  place-content:center; gap:6px; grid-auto-flow:row;
+  color:var(--text-primary, #474134);
+}
+.nav-burger span{
+  display:block; width:24px; height:2px; background:currentColor; border-radius:1px;
+}
+.nav-burger:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:2px; border-radius:4px }
+/* шапка первого экрана лежит на видео — там полоски светлые, как меню и контакты */
+.hero-header .nav-burger{ color:var(--text-inverse, #F9F3E4) }
+
+.mnav{
+  position:fixed; inset:0; z-index:250;   /* выше информера (200) и шапки (100), ниже окна брони (300) */
+  background:rgba(29,25,17,.4);
+  opacity:0; transition:opacity .3s cubic-bezier(.22,.61,.21,1);
+}
+.mnav.is-open{ opacity:1 }
+.mnav__sheet{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; gap:32px;
+  padding:24px 16px 32px;
+  background:var(--surface-page, #FDFAF1);
+  overflow-y:auto; overscroll-behavior:contain;  /* длинный список листается сам, страница под ним стоит */
+  transform:translateY(-16px); transition:transform .3s cubic-bezier(.22,.61,.21,1);
+}
+.mnav.is-open .mnav__sheet{ transform:none }
+.mnav__close{
+  align-self:flex-end; flex:none;
+  width:44px; height:44px; padding:0; border:0; background:transparent; cursor:pointer;
+  display:grid; place-items:center;
+  color:var(--text-primary, #474134); transition:color .2s ease;
+}
+.mnav__close svg{ width:32px; height:32px; display:block; fill:currentColor }
+.mnav__close:hover{ color:var(--link-default, #896100) }
+.mnav__close:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:2px; border-radius:4px }
+
+.mnav__list{ display:flex; flex-direction:column }
+.mnav__list a{
+  /* 56px в строке — палец попадает без прицеливания; разделители те же, что у шапки */
+  display:flex; align-items:center; min-height:56px; padding:8px 8px;
+  font:500 22px/1.3 var(--font-body, 'Onest', system-ui, sans-serif);
+  color:var(--text-primary, #474134); text-decoration:none;
+  border-bottom:1px solid var(--sand-300, #E4D8BD);
+}
+.mnav__list a:last-child{ border-bottom:0 }
+.mnav__list a:active{ color:var(--link-default, #896100) }
+.mnav__list a:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:-2px }
+
+.mnav__contacts{ display:flex; flex-direction:column; gap:8px; margin-top:auto }
+.mnav__contacts a, .mnav__contacts span{
+  font:500 18px/1.6 var(--font-body, 'Onest', system-ui, sans-serif);
+  color:var(--text-primary, #474134); text-decoration:none;
+}
+.mnav__contacts span{ color:var(--graphite-600, #5F5A52) }
+
+/* кнопка брони — Button L Primary, но во всю ширину панели */
+.mnav__btn{
+  flex:none; width:100%; height:56px; padding:0 24px;
+  border:0; border-radius:8px; corner-shape:squircle; cursor:pointer;
+  background:var(--gold-600, #A97C19); color:var(--button-primary-label, #FFFFFF);
+  font:600 18px/1.1 var(--font-body, 'Onest', system-ui, sans-serif);
+  letter-spacing:.06em; text-transform:uppercase;
+  transition:background .2s ease;
+}
+.mnav__btn:active{ background:var(--gold-800, #674800) }
+.mnav__btn:focus-visible{ outline:2px solid var(--gold-600, #A97C19); outline-offset:3px }
+
+@media (prefers-reduced-motion: reduce){
+  .mnav, .mnav__sheet{ transition:none }
+  .mnav__sheet{ transform:none }
+}
+
+/* Кнопка появляется ровно там, где из шапок исчезают пункты меню.
+   Правило стоит в конце файла намеренно: выше объявлен .nav-burger{display:none},
+   и при равной специфичности выигрывает последнее. */
+@media (max-width:1024px){
+  .nav-burger{ display:grid }
 }
