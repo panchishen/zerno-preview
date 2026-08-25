@@ -420,6 +420,9 @@ body{
 /* ===== БЛОК: афиша мероприятий — карусель (макет 482:1620) =====
    Четыре карточки 720×480 в ряд; листается перетаскиванием и колесом (скрипт внизу файла). */
 .s-events{ padding-top:0; padding-bottom:var(--section-gap) } /* сверху — margin-bottom кнопки конференц-зала */
+/* Афиша скрыта временно: заказчик снял её с макета, а на её месте стоит блок новостей.
+   Правило висит на id, а не на классе — новости живут на тех же стилях секции */
+#events{ display:none }
 .s-events .events__head{ width:var(--cw); margin:0 auto; text-align:center }
 .s-events h2{
   font-family:var(--font-heading); font-weight:400; font-size:var(--fs-h2); line-height:1.12;
@@ -678,7 +681,24 @@ body{
   display:flex; flex-direction:column; gap:var(--gap);
 }
 .reviews-card__author{ margin-top:auto } /* подпись прижата к низу — карточки разной длины выглядят ровно */
-.reviews-card__text{ margin:0; font:400 var(--fs-body)/1.6 var(--font-body); color:var(--text-primary); overflow-wrap:break-word }
+.reviews-card__body{ display:flex; flex-direction:column; gap:8px } /* макет 653:1553: текст и псевдоссылка через 8 */
+/* Длинный отзыв обрезаем десятью строками, остальное показывает модалка. line-clamp
+   работает и с несколькими абзацами внутри: -webkit-box считает строки, а не блоки. */
+.reviews-card__text{
+  margin:0; font:400 var(--fs-body)/1.6 var(--font-body); color:var(--text-primary); overflow-wrap:break-word;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:10; overflow:hidden;
+}
+.reviews-card__text p{ margin:0 }
+.reviews-card__text p + p{ margin-top:.6em }
+/* «Читать весь отзыв» — псевдоссылка: кнопка, потому что открывает окно, а не ведёт по адресу.
+   Подчёркивание точками — как в макете 653:1486 */
+.reviews-card__more{
+  align-self:flex-start; padding:0; border:0; background:none; cursor:pointer;
+  font:400 var(--fs-body)/1.6 var(--font-body); color:var(--link-default);
+  text-decoration:underline dotted; text-decoration-thickness:1px; text-underline-offset:.25em;
+}
+.reviews-card__more:hover{ color:var(--link-hover) }
+.reviews-card__more:focus-visible{ outline:2px solid var(--gold-600); outline-offset:3px; border-radius:2px }
 .reviews-card__author{ display:flex; align-items:center; gap:16px }
 .reviews-card__ava{
   flex:none; width:56px; height:56px; border-radius:50%;
@@ -692,6 +712,69 @@ body{
 .reviews-card__role{
   margin:0; font:400 var(--fs-small)/1.52 var(--font-body); color:var(--graphite-600);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  /* Подпись временно скрыта (правка 25.08.2026): в компоненте 170:290 её больше нет.
+     Разметку не трогаем — вернуть строку значит убрать одну строку ниже */
+  display:none;
+}
+
+/* ===== ОКНО «ВЕСЬ ОТЗЫВ» (макет 653:1785) =====
+   Устроено как окно брони: длинный отзыв прокручивает подложка, а не карточка,
+   иначе overflow срезал бы крестик — он стоит снаружи, у верхнего правого угла */
+.review-modal{
+  position:fixed; inset:0; z-index:300;
+  display:grid; place-items:safe center;
+  padding:48px; overflow-y:auto; overscroll-behavior:contain;
+  background:rgba(28,26,23,.8);
+  opacity:0; visibility:hidden;
+  transition:opacity .25s ease, visibility .25s;
+}
+.review-modal.is-open{ opacity:1; visibility:visible }
+.review-modal__card{
+  position:relative; width:500px; max-width:100%;
+  /* Выше экрана карточка не растёт: длинный отзыв прокручивается внутри неё,
+     а имя автора остаётся на виду. 96 и 32 — поля подложки сверху и снизу */
+  max-height:calc(100dvh - 96px);
+  background:#FFFFFF; border-radius:8px; corner-shape:squircle;
+  padding:43px 32px; display:flex; flex-direction:column; gap:32px;
+  transform:translateY(16px) scale(.98);
+  transition:transform .25s cubic-bezier(.22,.61,.21,1);
+}
+.review-modal.is-open .review-modal__card{ transform:none }
+.review-modal__text{
+  margin:0; font:400 var(--fs-body)/1.6 var(--font-body); color:var(--text-primary);
+  /* min-height:0 обязателен: без него флекс-элемент не сжимается ниже своего содержимого
+     и прокручиваться начинает не текст, а всё окно. Отрицательное поле уводит полосу
+     прокрутки в поле карточки, чтобы она не прижималась вплотную к строкам */
+  min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  padding-right:12px; margin-right:-12px; scrollbar-width:thin;
+}
+.review-modal__text p{ margin:0 }
+.review-modal__text p + p{ margin-top:.8em }
+.review-modal__author{ display:flex; align-items:center; gap:16px }
+.review-modal__ava{ flex:none; width:56px; height:56px; border-radius:50%; object-fit:cover; background:var(--sand-200); display:block }
+.review-modal__name{
+  margin:0; font:700 var(--fs-body)/1.6 var(--font-body); color:var(--text-primary);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.review-modal__close{
+  position:absolute; left:100%; bottom:100%;
+  width:32px; height:32px; padding:0; border:0; background:transparent;
+  color:#FFFFFF; cursor:pointer; display:grid; place-items:center;
+  transition:color .2s ease;
+}
+.review-modal__close svg{ width:20px; height:20px; display:block; fill:currentColor }
+.review-modal__close:hover{ color:var(--gold-300) }
+.review-modal__close:focus-visible{ outline:2px solid var(--gold-400); outline-offset:3px }
+@media (max-width:559px){
+  .review-modal{ padding:16px }
+  .review-modal__card{ padding:32px 20px; gap:24px; max-height:calc(100dvh - 32px) }
+  /* на узком экране крестик уводим внутрь карточки — снаружи ему уже нет места */
+  .review-modal__close{ left:auto; right:12px; bottom:auto; top:12px; color:var(--text-primary) }
+  .review-modal__close:hover{ color:var(--gold-700) }
+}
+@media (prefers-reduced-motion: reduce){
+  .review-modal, .review-modal__card, .review-modal__close{ transition:none }
+  .review-modal__card{ transform:none }
 }
 
 /* CTA отзывов (макет 229:380): подпись + пилюли-ссылки на площадки с отзывами.
@@ -737,7 +820,7 @@ body{
 
 <!-- информер: сообщение о тестовом режиме, закрывается крестиком (макет 511:1730) -->
 <div class="informer" id="informer" role="status">
-  <p class="informer__text">Музей временно работает в&nbsp;тестовом режиме</p>
+  <p class="informer__text">Музей временно работает в&nbsp;тестовом режиме с&nbsp;8:00 до&nbsp;22:00</p>
   <button class="informer__close" type="button" aria-label="Закрыть сообщение">
     <svg viewBox="0 0 32 32" aria-hidden="true">
       <path d="M26 6.80102L16.7999 16L26 25.2001L25.2001 26L16 16.7999L6.79991 26L6 25.2001L15.199 16L6 6.80102L6.79991 6L16 15.2001L25.2001 6L26 6.80102Z"/>
@@ -780,7 +863,7 @@ body{
           <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
         </svg>
         <h3>Зерно сквозь века</h3>
-        <p>От&nbsp;неолита до&nbsp;наших дней</p>
+          <p>От&nbsp;неолита до&nbsp;наших дней</p>
       </div>
     </div>
     <div class="reveal museum-bento__cell"><img src="assets/museum-personalities.jpg" alt="Зал «Личности времени»: портреты на экранах"></div>
@@ -801,7 +884,7 @@ body{
           <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
         </svg>
         <h3>Люди своего времени</h3>
-        <p>Кузнецов. Григорович. Берестов. Каждый&nbsp;— творец своей эпохи</p>
+          <p>Кузнецов. Григорович. Берестов. Каждый&nbsp;— творец своей эпохи</p>
       </div>
     </div>
     <div class="reveal museum-bento__cell"><img src="assets/z3.jpg" alt="Изба с русской печью и прялкой"></div>
@@ -818,7 +901,7 @@ body{
           <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
         </svg>
         <h3>Лаборатория</h3>
-        <p>Исследуйте зерно под микроскопом</p>
+          <p>Исследуйте зерно под микроскопом</p>
       </div>
     </div>
     <div class="reveal museum-bento__cell"><img src="assets/museum-lab.jpg" alt="Лаборатория музея: микроскоп и колбы"></div>
@@ -835,7 +918,7 @@ body{
           <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
         </svg>
         <h3>Интерактивная игра</h3>
-        <p>Откройте полезные свойства каждой крупы</p>
+          <p>Откройте полезные свойства каждой крупы</p>
       </div>
     </div>
     <div class="reveal museum-bento__cell"><img src="assets/z6.jpg" alt="Светящаяся карта Челябинской области с производственными площадками"></div>
@@ -853,7 +936,7 @@ body{
           <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
         </svg>
         <h3>Элеватор&nbsp;— сердце производства</h3>
-        <p>От&nbsp;зерна&nbsp;— к&nbsp;готовому продукту</p>
+          <p>От&nbsp;зерна&nbsp;— к&nbsp;готовому продукту</p>
       </div>
     </div>
   </div>
@@ -865,7 +948,7 @@ body{
 
 <section class="s-restaurant" id="restaurant">
   <div class="restaurant__head">
-    <h2 class="reveal">Не только музей, но&nbsp;и&nbsp;ресторан</h2>
+    <h2 class="reveal">У&nbsp;нас можно попробовать<br>легендарную преснушку</h2>
     <p class="restaurant__sub reveal">Зерно, мука и&nbsp;хлеб&nbsp;— от&nbsp;старинных уральских рецептов до&nbsp;современной кухни</p>
   </div>
   <div class="rest-gallery" id="rest-gallery">
@@ -909,6 +992,9 @@ body{
   </div>
 </section>
 
+<!-- Афиша мероприятий временно скрыта (правка 25.08.2026, макет 482:1620): её место
+     занял блок новостей — копия с другим заголовком и кнопками. Разметку не удаляем,
+     вернуть блок значит убрать правило #events{ display:none } в стилях выше. -->
 <section class="s-events" id="events">
   <div class="events__head">
     <h2 class="reveal">Афиша мероприятий</h2>
@@ -958,6 +1044,55 @@ body{
   </div>
 </section>
 
+<section class="s-events" id="news">
+  <div class="events__head">
+    <h2 class="reveal">Новости</h2>
+    <p class="events__sub reveal">Путеводитель по&nbsp;самым вкусным событиям месяца</p>
+  </div>
+  <div class="events-car reveal" id="news-car" aria-label="Карусель новостей. Листайте перетаскиванием или колесом мыши">
+    <article class="event-card">
+      <video src="assets/car-restaurant.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="event-card__shade"></div>
+      <div class="event-card__inner">
+        <p class="event-card__label">Ресторан</p>
+        <h3 class="event-card__title">Здоровые привычки внедряем каждый день</h3>
+        <p class="event-card__desc">Вам не&nbsp;нужно думать о&nbsp;пользе блюда&nbsp;— мы&nbsp;сделали это за&nbsp;вас. Позвольте себе открыть уральскую кухню заново.</p>
+        <button class="btn btn--primary btn--m event-card__btn" type="button">Подробнее</button>
+      </div>
+    </article>
+    <article class="event-card">
+      <img src="assets/car-events.jpg" alt="">
+      <div class="event-card__shade"></div>
+      <div class="event-card__inner">
+        <p class="event-card__label">21 августа</p>
+        <h3 class="event-card__title">Музыка позднего лета</h3>
+        <p class="event-card__desc">Живая музыка, приглушённый свет и&nbsp;бокал вина&nbsp;— провожаем август не&nbsp;спеша. Столики у&nbsp;окна разбирают первыми, торопитесь!</p>
+        <button class="btn btn--primary btn--m event-card__btn" type="button">Подробнее</button>
+      </div>
+    </article>
+    <article class="event-card">
+      <video src="assets/car-masterclass.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="event-card__shade"></div>
+      <div class="event-card__inner">
+        <p class="event-card__label">18 сентября</p>
+        <h3 class="event-card__title">Мастер-класс</h3>
+        <p class="event-card__desc">С&nbsp;шеф-поваром ресторана «Зерно» вы&nbsp;научитесь не&nbsp;просто готовить, вы&nbsp;проживёте историю: от&nbsp;выбора ингредиентов до&nbsp;финального приготовления. Бронируйте место заранее.</p>
+        <button class="btn btn--primary btn--m event-card__btn" type="button">Подробнее</button>
+      </div>
+    </article>
+    <article class="event-card">
+      <img src="assets/car-menu.jpg" alt="">
+      <div class="event-card__shade"></div>
+      <div class="event-card__inner">
+        <p class="event-card__label">Меню</p>
+        <h3 class="event-card__title">Уральское блюдо на&nbsp;вашей тарелке&nbsp;— это история, в&nbsp;которой вековые традиции сочетаются с&nbsp;заботой о&nbsp;вашем здоровье</h3>
+        <p class="event-card__desc">Мы&nbsp;бережно храним наследие предков и&nbsp;культивируем здоровое питание. Наше меню создано с&nbsp;учётом уральских традиций и&nbsp;полезного сочетания ингредиентов.</p>
+        <button class="btn btn--primary btn--m event-card__btn" type="button">Подробнее</button>
+      </div>
+    </article>
+  </div>
+</section>
+
 <section class="s-reviews" id="reviews">
   <div class="reviews__head">
     <h2 class="reveal">Отзывы наших гостей</h2>
@@ -965,24 +1100,47 @@ body{
 
   <div class="reviews-row" aria-label="Отзывы гостей">
     <article class="reviews-card reveal">
-      <p class="reviews-card__text">Мы с&nbsp;женой постоянно исследуем новые места Челябинска. Музей зерна стал одним из&nbsp;них. Приятно удивлены сервисом и&nbsp;вкусным ужином.</p>
+      <div class="reviews-card__body">
+        <div class="reviews-card__text">
+          <p>Отличный и&nbsp;познавательный Музей Зерна — это прекрасное место, где можно узнать много нового о&nbsp;сельском хозяйстве и&nbsp;переработке. Экспозиция интересная, подача материала живая, а&nbsp;расположение удобное. Очень вкусная кухня, приготовленная на сырье Союзпищепрома, а&nbsp;также кофе на растительном молоке Грин Милк! Рекомендую к&nbsp;посещению! Будет интересно и&nbsp;вкусно!</p>
+        </div>
+        <!-- псевдоссылка появляется только если текст не поместился в десять строк — этим занимается скрипт ниже -->
+        <button class="reviews-card__more" type="button" hidden>Читать весь отзыв</button>
+      </div>
       <div class="reviews-card__author">
-        <img class="reviews-card__ava" src="assets/avatars/av02.jpg" alt="" width="56" height="56" loading="lazy">
-        <div class="reviews-card__meta"><p class="reviews-card__name">Игорь Вахрушев</p><p class="reviews-card__role">Знаток города 5 уровня</p></div>
+        <img class="reviews-card__ava" src="assets/avatars/markina.png" alt="" width="56" height="56" loading="lazy">
+        <div class="reviews-card__meta"><p class="reviews-card__name">Елена Маркина</p><p class="reviews-card__role">Знаток города 5 уровня</p></div>
       </div>
     </article>
     <article class="reviews-card reveal">
-      <p class="reviews-card__text">Проходили мимо и&nbsp;увидели большую вывеску в&nbsp;центре города: Музей зерна. Зашли туда и&nbsp;вкусно пообедали. А&nbsp;вечером девушка записала нас на&nbsp;экскурсию. По&nbsp;итогу, нам очень понравилось: и&nbsp;интересно, и&nbsp;вкусно. Записались ещё на&nbsp;мастер-класс.</p>
+      <div class="reviews-card__body">
+        <div class="reviews-card__text">
+          <p>Мне очень понравилось, и&nbsp;экспозиции и&nbsp;экскурсовод! Зал будущего производит сильное впечатление. исторические оживленные фотографии, тоже очень интересно, необычно.</p>
+        </div>
+        <!-- псевдоссылка появляется только если текст не поместился в десять строк — этим занимается скрипт ниже -->
+        <button class="reviews-card__more" type="button" hidden>Читать весь отзыв</button>
+      </div>
       <div class="reviews-card__author">
-        <img class="reviews-card__ava" src="assets/avatars/av01.jpg" alt="" width="56" height="56" loading="lazy">
-        <div class="reviews-card__meta"><p class="reviews-card__name">Анна Черепанова</p><p class="reviews-card__role">Знаток города 3 уровня</p></div>
+        <img class="reviews-card__ava" src="assets/avatars/vainert.png" alt="" width="56" height="56" loading="lazy">
+        <div class="reviews-card__meta"><p class="reviews-card__name">Жанна Вайнерт</p><p class="reviews-card__role">Знаток города 3 уровня</p></div>
       </div>
     </article>
     <article class="reviews-card reveal">
-      <p class="reviews-card__text">Были с&nbsp;детьми на&nbsp;экскурсии, им&nbsp;очень понравилось. Спасибо экскурсоводу Ольге</p>
+      <div class="reviews-card__body">
+        <div class="reviews-card__text">
+          <p>Посещение музея оставило очень приятные впечатления. Экспозиции музея хорошо оформлены, залы разделены по временным периодам. Понравилось большое количество интерактивных стендов, где можно подробнее изучить информацию.</p>
+          <p>Экскурсия была очень информативной и&nbsp;интересной. Было познавательно узнать, насколько многое в&nbsp;жизни человека связано с&nbsp;зерном. В&nbsp;экскурсию гармонично включена история нашего города и&nbsp;предприятия. Красивые макеты зданий и&nbsp;исторические предметы дополняют рассказ и&nbsp;позволяют по-новому взглянуть на знакомую историю.</p>
+          <p>Отдельно хочется отметить экскурсовода Ольгу. Ее доброжелательность, открытость и&nbsp;внимательное отношение к&nbsp;гостям создают приятную атмосферу. Информацию Ольга подает живо и&nbsp;интересно, слушать экскурсию действительно увлекательно.</p>
+          <p>Очень понравился интерактив с&nbsp;зерном и&nbsp;крупами. Он получился необычным и&nbsp;познавательным. После экскурсии появилось желание вернуться к&nbsp;интерактиву и&nbsp;продолжить викторину.</p>
+          <p>Яркое впечатление оставил и&nbsp;фильм в&nbsp;зале будущего. Он красочный и&nbsp;динамичный. В&nbsp;нем рассказано о&nbsp;принципах здорового питания и&nbsp;интересные факты на эту тему.</p>
+          <p>В&nbsp;качестве пожелания хотелось бы предложить организовать при музее небольшой магазин, где можно приобрести продукцию предприятия, представленную в&nbsp;фильме. Это было бы приятным завершением посещения музея и&nbsp;позволило бы гостям познакомиться с&nbsp;продукцией предприятия поближе.</p>
+        </div>
+        <!-- псевдоссылка появляется только если текст не поместился в десять строк — этим занимается скрипт ниже -->
+        <button class="reviews-card__more" type="button" hidden>Читать весь отзыв</button>
+      </div>
       <div class="reviews-card__author">
-        <img class="reviews-card__ava" src="assets/avatars/av03.jpg" alt="" width="56" height="56" loading="lazy">
-        <div class="reviews-card__meta"><p class="reviews-card__name">Андрей Щербинин</p><p class="reviews-card__role">8 отзывов</p></div>
+        <img class="reviews-card__ava" src="assets/avatars/hrisanova.png" alt="" width="56" height="56" loading="lazy">
+        <div class="reviews-card__meta"><p class="reviews-card__name">Анна Хрисанова</p><p class="reviews-card__role">8 отзывов</p></div>
       </div>
     </article>
   </div>
@@ -1016,6 +1174,89 @@ body{
   </div>
 </section>
 
+
+<!-- ===== Окно «весь отзыв» (макет 653:1785) =====
+     Содержимое подставляет скрипт: текст, аватар и имя берутся из карточки, по которой кликнули -->
+<div class="review-modal" id="review-modal" role="dialog" aria-modal="true" aria-label="Отзыв гостя" aria-hidden="true">
+  <div class="review-modal__card">
+    <button class="review-modal__close" type="button" data-review-close aria-label="Закрыть отзыв"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="review-modal__text"></div>
+    <div class="review-modal__author">
+      <img class="review-modal__ava" src="" alt="" width="56" height="56">
+      <p class="review-modal__name"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Отзыв в карточке обрезан десятью строками (CSS). Здесь две вещи:
+  // 1) показать «Читать весь отзыв» только там, где текст действительно не поместился;
+  // 2) открыть окно с полным текстом. Текст в карточке лежит целиком — обрезка чисто
+  //    визуальная, поэтому окну достаточно скопировать разметку, дублировать её не нужно.
+  var окно = document.getElementById('review-modal');
+  var карточки = [].slice.call(document.querySelectorAll('.reviews-card'));
+  if (!окно || !карточки.length) return;
+
+  var текстОкна = окно.querySelector('.review-modal__text');
+  var автоОкна  = окно.querySelector('.review-modal__ava');
+  var имяОкна   = окно.querySelector('.review-modal__name');
+  var вернутьФокус = null;
+
+  function обновитьКнопки(){
+    карточки.forEach(function(к){
+      var т = к.querySelector('.reviews-card__text');
+      var б = к.querySelector('.reviews-card__more');
+      if (!т || !б) return;
+      б.hidden = т.scrollHeight <= т.clientHeight + 1;   // +1 — запас на дробные пиксели
+    });
+  }
+  обновитьКнопки();
+  // шрифт грузится позже разметки и меняет число строк — пересчитываем, когда он готов
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(обновитьКнопки);
+  var таймер = null;
+  addEventListener('resize', function(){ clearTimeout(таймер); таймер = setTimeout(обновитьКнопки, 150); });
+
+  function открыть(к){
+    вернутьФокус = document.activeElement;
+    текстОкна.innerHTML = к.querySelector('.reviews-card__text').innerHTML;
+    var а = к.querySelector('.reviews-card__ava');
+    автоОкна.src = а ? а.src : '';
+    имяОкна.textContent = к.querySelector('.reviews-card__name').textContent;
+    окно.classList.add('is-open');
+    окно.removeAttribute('aria-hidden');
+    document.body.style.overflow = 'hidden';   // место под полосу прокрутки держит scrollbar-gutter
+    окно.querySelector('.review-modal__close').focus();
+  }
+  function закрыть(){
+    окно.classList.remove('is-open');
+    окно.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (вернутьФокус && вернутьФокус.focus) вернутьФокус.focus();
+  }
+
+  карточки.forEach(function(к){
+    var б = к.querySelector('.reviews-card__more');
+    if (б) б.addEventListener('click', function(){ открыть(к); });
+  });
+  окно.addEventListener('click', function(e){
+    if (e.target === окно || e.target.closest('[data-review-close]')) закрыть();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && окно.classList.contains('is-open')) закрыть();
+  });
+  // фокус не должен уходить из открытого окна
+  окно.addEventListener('keydown', function(e){
+    if (e.key !== 'Tab') return;
+    var фокусируемые = окно.querySelectorAll('button, [href], input, select, textarea');
+    var видимые = [].filter.call(фокусируемые, function(el){ return !el.disabled && el.offsetParent !== null; });
+    if (!видимые.length) return;
+    var первый = видимые[0], последний = видимые[видимые.length - 1];
+    if (e.shiftKey && document.activeElement === первый){ e.preventDefault(); последний.focus(); }
+    else if (!e.shiftKey && document.activeElement === последний){ e.preventDefault(); первый.focus(); }
+  });
+})();
+</script>
 
 <!-- ===== Модальное окно бронирования (макеты состояний 597:2169) =====
      Открывается кнопкой «Забронировать» в шапке. Поля — общие компоненты из forms.css. -->
@@ -1160,7 +1401,11 @@ body{
 </script>
 <script>
 (function(){
-  const vp = document.getElementById('events-car');
+  // Карусель одна на две полосы — афишу и новости (макеты 472:1119, 482:1620).
+  // Скрытую полосу пропускаем: у неё нулевые размеры, мерить нечего
+  document.querySelectorAll('.events-car').forEach(vp => { if (vp.offsetParent) карусель(vp); });
+
+  function карусель(vp){
   const cards = [...vp.children];
   const N = cards.length;
   const clamp = (val, a, b) => Math.min(b, Math.max(a, val));
@@ -1266,6 +1511,7 @@ body{
   addEventListener('resize', measure);
   measure();
   addEventListener('load', measure); // после загрузки медиа ширины уточняются
+  }
 })();
 </script>
 
