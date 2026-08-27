@@ -820,7 +820,7 @@ body{
 
 <!-- информер: сообщение о тестовом режиме, закрывается крестиком (макет 511:1730) -->
 <div class="informer" id="informer" role="status">
-  <p class="informer__text">Музей временно работает в&nbsp;тестовом режиме с&nbsp;8:00 до&nbsp;22:00</p>
+  <p class="informer__text">Музей временно работает в&nbsp;тестовом режиме с&nbsp;8:00 до&nbsp;16:00</p>
   <button class="informer__close" type="button" aria-label="Закрыть сообщение">
     <svg viewBox="0 0 32 32" aria-hidden="true">
       <path d="M26 6.80102L16.7999 16L26 25.2001L25.2001 26L16 16.7999L6.79991 26L6 25.2001L15.199 16L6 6.80102L6.79991 6L16 15.2001L25.2001 6L26 6.80102Z"/>
@@ -1108,7 +1108,7 @@ body{
         <button class="reviews-card__more" type="button" hidden>Читать весь отзыв</button>
       </div>
       <div class="reviews-card__author">
-        <img class="reviews-card__ava" src="assets/avatars/markina.png" alt="" width="56" height="56" loading="lazy">
+        <img class="reviews-card__ava" src="assets/avatars/review-01.png" alt="" width="56" height="56" loading="lazy">
         <div class="reviews-card__meta"><p class="reviews-card__name">Елена Маркина</p><p class="reviews-card__role">Знаток города 5 уровня</p></div>
       </div>
     </article>
@@ -1121,7 +1121,7 @@ body{
         <button class="reviews-card__more" type="button" hidden>Читать весь отзыв</button>
       </div>
       <div class="reviews-card__author">
-        <img class="reviews-card__ava" src="assets/avatars/vainert.png" alt="" width="56" height="56" loading="lazy">
+        <img class="reviews-card__ava" src="assets/avatars/review-02.png" alt="" width="56" height="56" loading="lazy">
         <div class="reviews-card__meta"><p class="reviews-card__name">Жанна Вайнерт</p><p class="reviews-card__role">Знаток города 3 уровня</p></div>
       </div>
     </article>
@@ -1139,7 +1139,7 @@ body{
         <button class="reviews-card__more" type="button" hidden>Читать весь отзыв</button>
       </div>
       <div class="reviews-card__author">
-        <img class="reviews-card__ava" src="assets/avatars/hrisanova.png" alt="" width="56" height="56" loading="lazy">
+        <img class="reviews-card__ava" src="assets/avatars/review-03.png" alt="" width="56" height="56" loading="lazy">
         <div class="reviews-card__meta"><p class="reviews-card__name">Анна Хрисанова</p><p class="reviews-card__role">8 отзывов</p></div>
       </div>
     </article>
@@ -1182,7 +1182,8 @@ body{
     <button class="review-modal__close" type="button" data-review-close aria-label="Закрыть отзыв"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
     <div class="review-modal__text"></div>
     <div class="review-modal__author">
-      <img class="review-modal__ava" src="" alt="" width="56" height="56">
+      <!-- src подставляет скрипт: пустой атрибут браузер грузил бы как саму страницу -->
+      <img class="review-modal__ava" alt="" width="56" height="56">
       <p class="review-modal__name"></p>
     </div>
   </div>

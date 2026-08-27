@@ -22,7 +22,11 @@
 
   // пути считаем от самого скрипта — работает и из подпапок
   var BASE = new URL('.', document.currentScript.src);
+  // Знак идёт в трёх файлах: горизонтальный на светлом (шапки), горизонтальный на тёмном
+  // (футер, шапка первого экрана) и вертикальный — там он без надписи, один колос.
+  // Отличаются цветом надписи: gold-500 на светлом, gold-300 на тёмном (макеты 456:1784, 159:434)
   var LOGO = new URL('logo_hor.svg', BASE).href;
+  var LOGO_DARK = new URL('logo_hor_dark.svg', BASE).href;
   var HOME = new URL('../index.html', BASE).href; // основная главная (прежний второй вариант)
 
   var LOGO_VERT = new URL('logo_vert.svg', BASE).href; // вертикальный знак — только в шапке на тёмном
@@ -34,10 +38,14 @@
   var NAV_ARHIVE = NAV.filter(function(t){ return t !== 'События'; });
   // «События» в шапках раскрываются списком разделов по наведению (макет Dropdown 613:886).
   // В футере тот же пункт остаётся обычной ссылкой — там раскрывать нечего, разделы и так на виду
-  var SUBMENU = { 'События': ['Афиша мероприятий', 'Новости'] };
+  var SUBMENU = { 'События': ['Афиша', 'Новости'] };
   // В футере «События» разворачиваются в свои разделы: раскрывать по наведению там нечего,
-  // а места на отдельные строки хватает — сам пункт «События» из списка уходит
-  var NAV_FOOTER = NAV.reduce(function(список, t){ return список.concat(SUBMENU[t] || t); }, []);
+  // а места на отдельные строки хватает — сам пункт «События» из списка уходит.
+  // Раздел там назван полностью (макет 159:417), в выпадающем меню он сокращён до «Афиши»
+  var SUBMENU_FOOTER = { 'События': ['Афиша мероприятий', 'Новости'] };
+  var NAV_FOOTER = NAV.reduce(function(список, t){ return список.concat(SUBMENU_FOOTER[t] || t); }, []);
+  // Мобильное меню повторяет состав футера, но раздел там назван коротко — как в выпадающем
+  var NAV_MOBILE = NAV.reduce(function(список, t){ return список.concat(SUBMENU[t] || t); }, []);
   var PHONE = { label:'8 (922) 711-09-40', href:'tel:+79227110940' };
   // почта музея — в футере под телефоном (макет 658:1830)
   var EMAIL = 'muzey_zerno@spp.ru';
@@ -48,11 +56,12 @@
   // В верхнем регистре её рисует CSS, здесь текст в обычном — чтобы скринридер не читал по буквам
   var TAGLINE = 'Еда. Развитие. Инновации.';
 
-  // знак с подписью — одинаково устроен в обеих шапках и в футере (макеты 456:1932, 430:1451)
-  function brand(cls, href, title, attrs){
+  // знак с подписью — одинаково устроен в обеих шапках и в футере (макеты 456:1932, 430:1451).
+  // Последним параметром идёт файл знака: на тёмном фоне надпись светлее, чем на белом
+  function brand(cls, href, title, attrs, файл){
     return '<div class="' + cls + '__brand">' +
       '<a class="' + cls + '__logo" href="' + href + '" title="' + title + '"' + (attrs || '') + '>' +
-        '<img src="' + LOGO + '" alt="Зерно" width="228" height="55">' +
+        '<img src="' + (файл || LOGO) + '" alt="Зерно" width="269" height="48">' +
       '</a>' +
       '<span class="' + cls + '__tagline">' + TAGLINE + '</span>' +
     '</div>';
@@ -115,7 +124,7 @@
   // разводят на «Афишу» и «Новости». Высотой панель не ограничена, поэтому разделы
   // становятся обычными пунктами, а разводящий уровень исчезает вместе с лишним шагом.
   function mobileNavHTML(){
-    var пункты = stubs(NAV_FOOTER);
+    var пункты = stubs(NAV_MOBILE);
     return '<div class="mnav" id="mobileNav" hidden>' +
       '<div class="mnav__sheet" role="dialog" aria-modal="true" aria-label="Меню">' +
         '<button class="mnav__close" type="button" aria-label="Закрыть меню">' +
@@ -164,11 +173,14 @@
       // Два знака: вертикальный — как в макете первого экрана, горизонтальный включается
       // с 1024, когда меню уезжает в бургер и шапка становится однострочной. Переключает
       // их CSS: при смене ширины окна знак меняется сразу, без пересборки разметки.
-      '<a class="hero-header__brand" href="#" data-top title="Зерно — наверх">' +
-        '<img class="hero-header__logo--vert" src="' + LOGO_VERT + '" alt="Зерно" width="205" height="100">' +
-        '<img class="hero-header__logo--hor" src="' + LOGO + '" alt="Зерно" width="228" height="55">' +
+      // Здесь знак не ссылка: первый экран и так верх страницы, вести отсюда некуда,
+      // а всплывающая подсказка над видео только мешала. В стики-шапке ссылка остаётся —
+      // там знак возвращает наверх, а на внутренних страницах будет вести на главную
+      '<div class="hero-header__brand">' +
+        '<img class="hero-header__logo--vert" src="' + LOGO_VERT + '" alt="Зерно" width="72" height="90">' +
+        '<img class="hero-header__logo--hor" src="' + LOGO_DARK + '" alt="Зерно" width="269" height="48">' +
         '<span class="hero-header__tagline">' + TAGLINE + '</span>' +
-      '</a>' +
+      '</div>' +
       '<div class="hero-header__contacts">' +
         '<span>' + ADDRESS_SHORT + '</span>' + phone() + stubs(NAV.slice(-1)) +
       '</div>' +
@@ -203,8 +215,8 @@
   // в первом — на главную. Подпись под знаком в футере одинаковая у обоих (макет 171:595)
   function footerHTML(isV2){
     var brandBlock = isV2
-      ? brand('ft', '#', 'Зерно — наверх', ' data-top')
-      : brand('ft', HOME, 'Зерно — на главную');
+      ? brand('ft', '#', 'Зерно — наверх', ' data-top', LOGO_DARK)
+      : brand('ft', HOME, 'Зерно — на главную', '', LOGO_DARK);
     return '<footer class="site-footer">' +
       '<div class="ft__in">' +
         brandBlock +

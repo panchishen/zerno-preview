@@ -56,7 +56,7 @@
    поровну независимо от длины номера, поэтому центр не съедет, если телефон когда-нибудь изменится */
 .hd__brand{ flex:1 1 0 }   /* колонка «знак + подпись»; flex:1 — тот самый приём центровки меню */
 .hd__logo{ display:block; line-height:0 }
-.hd__logo img{ width:228px; height:55px; display:block }
+.hd__logo img{ width:269px; height:48px; display:block }
 
 .hd__nav{ display:flex; align-items:center; gap:32px; flex:none }
 .hd__right{ display:flex; align-items:center; gap:32px; flex:1 1 0; justify-content:flex-end }
@@ -82,10 +82,14 @@
    Юридическое требование: знак «Зерно» не используется без подписи. Типографика вне шкалы
    проекта (8px), поэтому размеры заданы вручную. Геометрия: ширина 159 и сдвиг 69 ставят
    строку ровно под словом «ЗЕРНО» (колос занимает первые 30.4% знака шириной 228),
-   а -12px у знака поднимают её в пустое поле под словом. */
+   а -12px у знака поднимают её в пустое поле под словом.
+   Подпись временно скрыта (правка 27.08.2026): пока текстовая часть логотипа не может
+   называться «Зерно» (название не запатентовано), знак идёт временно без строки под ним —
+   заказчик убрал её и в самом макете. Разметку не удаляем: вернуть подпись значит убрать
+   display:none ниже и восстановить отрицательный отступ у знака. */
 .hd__brand, .ft__brand{ display:flex; flex-direction:column; align-items:flex-start }
-.hd__brand .hd__logo, .ft__brand .ft__logo{ margin-bottom:-12px }
 .hd__tagline, .ft__tagline{
+  display:none;
   width:159px; margin-left:69px; text-align:center; white-space:nowrap;
   font:400 8px/1.52 var(--font-body, 'Onest', system-ui, sans-serif);
   letter-spacing:.1em; text-transform:uppercase;
@@ -134,11 +138,16 @@
   text-decoration:none;
 }
 .hero-header__contacts{ flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:32px }
-.hero-header__logo--vert{ width:205px; height:100px; display:block }
+/* На первом экране знак теперь без надписи — один колос 72×90 (макет 430:1360):
+   название пока не может стоять в знаке, см. комментарий к подписи выше */
+.hero-header__logo--vert{ width:72px; height:90px; display:block }
 /* горизонтальный знак лежит в разметке рядом и включается с 1024 (см. секцию адаптива) */
 .hero-header__logo--hor{ display:none }
-/* та же обязательная подпись, но под вертикальным знаком — крупнее и по центру (макет 430:1656) */
+/* та же обязательная подпись, но под вертикальным знаком — крупнее и по центру (макет 430:1656).
+   Временно скрыта той же правкой 27.08.2026, что и hd__tagline/ft__tagline — у hero-header__brand
+   между знаком и подписью стоит gap:12px, для display:none он сам схлопывается без доп. правок. */
 .hero-header__tagline{
+  display:none;
   font:400 10px/1.52 var(--font-body, 'Onest', system-ui, sans-serif);
   letter-spacing:.1em; text-transform:uppercase;
   color:var(--text-secondary-dark, #BDB194); white-space:nowrap;
@@ -170,7 +179,10 @@
 .nav-sub::after{ content:''; position:absolute; top:100%; left:0; right:0; height:12px }
 .nav-sub__list{
   position:absolute; top:calc(100% + 12px); left:0; z-index:10;
-  width:224px; padding:8px 0; display:flex; flex-direction:column;
+  /* Ширина по содержимому, как в макете (613:886 обхватывает пункты): раньше здесь
+     стояли фиксированные 224px под «Афишу мероприятий», после сокращения до «Афиши»
+     карточка была бы вдвое шире своих строк */
+  width:max-content; padding:8px 0; display:flex; flex-direction:column;
   background:var(--input-bg, #FFFFFF);
   border-radius:8px; corner-shape:squircle;
   /* обводка внутренней тенью, а не border: в макете рамка не добавляет высоты,
@@ -210,7 +222,7 @@
 }
 .ft__brand{ flex:none }
 .ft__logo{ display:block; line-height:0 }
-.ft__logo img{ width:228px; height:55px; display:block } /* тот же размер, что в шапке */
+.ft__logo img{ width:269px; height:48px; display:block } /* тот же размер, что в шапке */
 
 .ft__col{
   flex:none; display:flex; flex-direction:column; gap:8px;
@@ -309,16 +321,12 @@
      на 100px высоты рассчитан на трёхчастную шапку с меню по бокам, а в однострочной
      «знак слева — кнопка справа» он выглядит колонной посреди пустой строки. */
   .hero-header__logo--vert{ display:none }
-  .hero-header__logo--hor{ display:block; width:228px; height:55px; margin-bottom:-12px }
-  /* подпись встаёт по геометрии горизонтального знака — те же 159 и 69, что в шапке:
-     они ставят строку ровно под словом «ЗЕРНО» */
-  /* Слово «ЗЕРНО» занимает в знаке полосу 18.7..28.3 из 48 — его середина совпадает с
-     серединой блока с точностью до 0.6px, поэтому кнопки справа встают с ним на одну
-     линию сами. Раньше здесь стоял сдвиг на 4px: знак был один, сравнивать его высоту
-     было не с чем, и подпись снизу тянула взгляд. Теперь справа две иконки, они задают
-     явную линию, и любой сдвиг от неё читается как ошибка. */
+  /* Раньше здесь стоял margin-bottom:-12px — он поднимал знак, освобождая место под
+     подписью снизу. Подпись временно скрыта (правка 27.08.2026, см. .hero-header__tagline
+     выше), поэтому без неё знак просто стоит по центру строки — вернуть подпись значит
+     вернуть и этот отступ. */
+  .hero-header__logo--hor{ display:block; width:269px; height:48px }
   .hero-header__brand{ align-items:flex-start; gap:0 }
-  .hero-header__tagline{ width:159px; margin-left:69px; text-align:center; font-size:8px }
 
   .hero-header{ justify-content:space-between; padding:16px 24px; gap:16px }
   .hero-header__brand{ flex:none }
@@ -333,14 +341,15 @@
   .ft__col{ padding-top:0 }
 }
 @media (max-width:767px){
-  /* Со звонком в шапке кнопок стало две: знак 228 + 92 на пару кнопок + отступ между
-     ними + поля 32 = 344 при доступных 328, и группа вылезала за правый край. Знак
-     уменьшаем до 190; подпись под ним пересчитана пропорционально — 159 и 69 из макета
-     это 69.7% и 30.3% ширины знака, иначе строка съезжает из-под слова «ЗЕРНО». */
+  /* Справа от знака стоят две кнопки (звонок и бургер) — это 92px плюс зазор, плюс поля
+     по 16. При жёсткой ширине знака группа кнопок вылезала за правый край уже на 320.
+     Поэтому знак резиновый: занимает остаток строки, но не уже 160 и не шире 224.
+     Вычитаем 148 = 92 кнопки + 32 поля + 24 зазор (в стики-шапке он шире, чем в hero). height:auto держит пропорцию файла. */
   .hero-header{ padding:12px 16px }
   .site-header--v2 .hd__in{ margin-inline:16px }
-  .hero-header__logo--hor, .hd__logo img{ width:190px; height:46px }
-  .hero-header__tagline, .hd__tagline{ width:132px; margin-left:57px }
+  .hero-header__logo--hor, .hd__logo img{
+    width:clamp(160px, calc(100vw - 148px), 224px); height:auto;
+  }
   .ft__in{ flex-direction:column; row-gap:32px; padding-bottom:40px }
   .ft__col a, .ft__col span{ white-space:normal }
   /* знак здесь не уменьшаем: подпись под ним привязана к его ширине (159 и 69 из макета),
