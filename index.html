@@ -299,26 +299,44 @@ body{
 .hero-header__brand{ animation:hero2-rise .7s cubic-bezier(.22,.61,.21,1) .3s both }
 .hero-header__nav, .hero-header__contacts{ animation:hero2-rise .7s cubic-bezier(.22,.61,.21,1) .5s both }
 
-/* ===== ИНФОРМЕР (макет 511:1730) =====
-   Пилюля по центру внизу экрана: белый фон, мягкая тень, крестик справа. Появляется в тот же
-   момент, что и стики-шапка — когда первый экран уходит вверх. Закрывается нажатием и больше
-   не возвращается до перезагрузки: ничего не запоминаем намеренно. */
+/* ===== ИНФОРМЕР (макет 744:3264) =====
+   Карточка по центру внизу экрана: белый фон, мягкая тень, крестик в правом верхнем углу.
+   Появляется в тот же момент, что и стики-шапка — когда первый экран уходит вверх.
+   Закрывается нажатием и больше не возвращается до перезагрузки: ничего не запоминаем намеренно.
+   Была пилюлей в одну строку — с сентябрьским текстом стала многоабзацной карточкой 764px. */
 .informer{
   position:fixed; left:50%; bottom:32px; z-index:200;
-  display:flex; align-items:center; gap:10px;
-  padding:12px 16px 12px 32px;          /* слева больше — крестик держит свой отступ сам */
-  background:#FFFFFF; border-radius:100px;
+  width:min(764px, calc(100vw - 32px));
+  /* высокий текст на невысоком экране прокручивается внутри карточки, а не уезжает за край */
+  max-height:calc(100dvh - 64px); overflow-y:auto; overscroll-behavior:contain;
+  padding:24px;
+  background:#FFFFFF; border-radius:24px; corner-shape:squircle;
   box-shadow:0 20px 15px rgba(0,0,0,.05);
   /* сдвиг по X — часть transform, поэтому центровка и движение живут в одном свойстве */
   opacity:0; transform:translate(-50%, 24px); pointer-events:none;
   transition:opacity .5s cubic-bezier(.22,.61,.21,1), transform .5s cubic-bezier(.22,.61,.21,1);
 }
 .informer.is-shown{ opacity:1; transform:translate(-50%, 0); pointer-events:auto }
+/* Типографика здесь вне шкалы проекта — 16/1.5 вместо Body/Small 16/1.52 (макет 744:3265):
+   в макете это осознанное исключение, поэтому размеры заданы вручную, а не токеном. */
 .informer__text{
-  margin:0; font:400 18px/1.6 var(--font-body); color:var(--text-primary); white-space:nowrap;
+  margin:0; padding-left:8px;   /* 24 поля карточки + 8 = макетные 32 слева */
+  font:400 16px/1.5 var(--font-body); color:var(--text-primary);
 }
+.informer__text p{ margin:0 }
+.informer__text p + p{ margin-top:12px }
+/* место под крестик освобождает только первая строка — он стоит абсолютом над ней */
+.informer__title{ font-weight:600; padding-right:48px }
+.informer__text b{ font-weight:600 }
+.informer__pre{ font-weight:500 }   /* «с» перед часами — Medium, как в макете */
+/* Телефон и адрес сайта в макете просто выделены начертанием; ссылками их делает вёрстка,
+   чтобы с телефона можно было позвонить и перейти, — вид при этом остаётся прежним */
+.informer__text a{ color:inherit; text-decoration:none; font-weight:600 }
+.informer__text a.informer__link{ color:var(--link-default) }
+.informer__text a:hover{ color:var(--link-hover) }
 .informer__close{
-  flex:none; width:32px; height:32px; padding:0; border:0; background:transparent;
+  position:absolute; top:24px; right:24px;
+  width:32px; height:32px; padding:0; border:0; background:transparent;
   color:var(--text-primary); cursor:pointer; display:grid; place-items:center;
   transition:color .2s ease;
 }
@@ -331,10 +349,12 @@ body{
   transition:opacity .3s ease, transform .3s cubic-bezier(.22,.61,.21,1);
 }
 @media (max-width:767px){
-  .informer{ left:16px; right:16px; transform:translateY(24px); padding:12px 12px 12px 20px }
+  .informer{ left:16px; right:16px; width:auto; transform:translateY(24px); padding:20px }
   .informer.is-shown{ transform:none }
   .informer.is-closing{ transform:translateY(16px) }
-  .informer__text{ white-space:normal; font-size:16px }
+  .informer__text{ padding-left:0 }
+  .informer__title{ padding-right:40px }
+  .informer__close{ top:20px; right:20px }
 }
 @media (prefers-reduced-motion: reduce){
   .informer{ transition:none }
@@ -820,7 +840,14 @@ body{
 
 <!-- информер: сообщение о тестовом режиме, закрывается крестиком (макет 511:1730) -->
 <div class="informer" id="informer" role="status">
-  <p class="informer__text">Музей временно работает в&nbsp;тестовом режиме с&nbsp;8:00 до&nbsp;16:00</p>
+  <div class="informer__text">
+    <p class="informer__title">Уважаемые гости!</p>
+    <p>В&nbsp;сентябре Музей зерна работает в&nbsp;техническом режиме: ежедневно <span class="informer__pre">с&nbsp;</span><b>8:00 до&nbsp;16:00</b>, экскурсии&nbsp;— по&nbsp;предварительной записи.</p>
+    <p>Стоимость экскурсии&nbsp;— 600&nbsp;₽. В&nbsp;неё входят 40-минутная интерактивная экскурсия и&nbsp;дегустация сета «Зерно»: уральская сытная преснушка&nbsp;— пирожок с&nbsp;секретной начинкой от&nbsp;шефа, каша на&nbsp;фундучном молоке с&nbsp;местными ягодами и&nbsp;чай по&nbsp;авторскому рецепту.</p>
+    <p>Экскурсионные группы: 9:00–11:00, 11:00–13:00, 13:00–15:00.</p>
+    <p>Запись по&nbsp;телефону <a href="tel:+79227110940">+7&nbsp;(922)&nbsp;711-09-40</a> или на&nbsp;<a class="informer__link" href="https://muzeyzerna.ru" target="_blank" rel="noopener">muzeyzerna.ru</a>.</p>
+    <p>Ждём вас в&nbsp;первом в&nbsp;России Музее зерна!</p>
+  </div>
   <button class="informer__close" type="button" aria-label="Закрыть сообщение">
     <svg viewBox="0 0 32 32" aria-hidden="true">
       <path d="M26 6.80102L16.7999 16L26 25.2001L25.2001 26L16 16.7999L6.79991 26L6 25.2001L15.199 16L6 6.80102L6.79991 6L16 15.2001L25.2001 6L26 6.80102Z"/>
