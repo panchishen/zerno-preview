@@ -223,7 +223,8 @@
         '<nav class="ft__col" aria-label="Разделы сайта">' + stubs(NAV_FOOTER) + '</nav>' +
         '<div class="ft__col">' +
           phone() +
-          '<a href="mailto:' + EMAIL + '">' + EMAIL + '</a>' +
+          // почта временно скрыта (правка 28.08.2026) — правило .ft__email в chrome.css
+          '<a class="ft__email" href="mailto:' + EMAIL + '">' + EMAIL + '</a>' +
           '<span>' + ADDRESS + '</span>' +
           // время работы временно скрыто (правка 25.08.2026): режим музея ещё не утверждён.
           // Строку не удаляем — вернуть её значит убрать одно правило .ft__hours в chrome.css
