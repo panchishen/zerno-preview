@@ -58,6 +58,9 @@
   // (правка макета 12.08.2026), музей перед рестораном — вслед за порядком блоков
   // на главной (16.08.2026). Макеты: шапки 36:36, 430:1296, 430:1361, футер 159:417
   var NAV = ['Музей', 'Ресторан', 'Мастер-классы', 'События', 'Контакты'];
+  // Ссылок на внутренние страницы в меню пока НЕТ намеренно (решение 31.08.2026):
+  // главная согласована, внутренние — ещё нет, поэтому все пункты остаются заглушками
+  // с подсказкой. Сами страницы (restaurant.html) доступны по прямому адресу.
   // В шапке архивной страницы состав прежний: её компонент (36:36) «Событий» не получил
   var NAV_ARHIVE = NAV.filter(function(t){ return t !== 'События'; });
   // «События» в шапках раскрываются списком разделов по наведению (макет Dropdown 613:886).
@@ -167,7 +170,7 @@
     '</div>';
   }
 
-  function headerHTML(){
+  function headerHTML(вПотоке){
     var isHome = !!document.getElementById('hero');
     // на главной клик по логотипу перезапускает интро, на внутренних — ведёт домой
     var brandBlock = isHome
@@ -176,7 +179,9 @@
     // «Главная» — единственный рабочий пункт меню (макет 63:257). На самой главной
     // помечен aria-current="page": и подсветка Link/Default, и подсказка для скринридера
     var home = '<a href="' + HOME + '"' + (isHome ? ' aria-current="page"' : '') + '>Главная</a>';
-    return '<header class="site-header" id="siteHeader">' +
+    // вПотоке — версия для верха внутренней страницы: уезжает вместе с контентом;
+    // id остаётся только у стики-двойника, на него завязаны restart и высота шапки
+    return '<header class="site-header' + (вПотоке ? ' site-header--flow">' : '" id="siteHeader">') +
       '<div class="hd__in">' +
         brandBlock +
         '<nav class="hd__nav" aria-label="Основное меню">' + home + stubs(NAV_ARHIVE) + '</nav>' +
@@ -214,11 +219,17 @@
     '</header>';
   }
   // «2»: стики-шапка. От первого варианта отличается раскладкой и кнопкой брони,
-  // механика появления общая — класс .site-header--reveal и проверка в init()
-  function headerV2HTML(){
-    return '<header class="site-header site-header--v2" id="siteHeader">' +
+  // механика появления общая — класс .site-header--reveal и проверка в init().
+  // Она же — шапка внутренних страниц (в двух ипостасях): вПотоке — копия без id,
+  // стоит в начале страницы и уезжает с ней; наГлавную — логотип ведёт на главную,
+  // а не наверх (правило: наверх — только на самой главной)
+  function headerV2HTML(вПотоке, наГлавную){
+    var знак = наГлавную
+      ? brand('hd', HOME, 'Зерно — на главную')
+      : brand('hd', '#', 'Зерно — наверх', ' data-top');
+    return '<header class="site-header site-header--v2' + (вПотоке ? ' site-header--flow">' : '" id="siteHeader">') +
       '<div class="hd__in">' +
-        brand('hd', '#', 'Зерно — наверх', ' data-top') +
+        знак +
         '<nav class="hd__nav" aria-label="Основное меню">' +
           stubs(NAV, true) +         // «Главной» в меню больше нет (макет 430:1296)
         '</nav>' +
@@ -289,8 +300,15 @@
     var mode = document.body.dataset.header || (hero ? 'reveal' : 'static');
     var isV2 = mode === 'v2';
 
+    // static (внутренние страницы) — тот же двухшапочный приём и та же V2-шапка,
+    // что на главной: светлая, с «Событиями», адресом и кнопкой брони. Потоковая копия
+    // стоит в начале страницы и уезжает с ней, стики-двойник выезжает после первого
+    // экрана. Логотип на внутренних ведёт на главную. Старая headerHTML остаётся
+    // шапке архивной страницы (режим reveal).
     document.body.insertAdjacentHTML('afterbegin',
-      (isV2 ? heroHeaderHTML() + headerV2HTML() : headerHTML()) + progressHTML());
+      (isV2 ? heroHeaderHTML() + headerV2HTML()
+            : mode === 'static' ? headerV2HTML(true, true) + headerV2HTML(false, true)
+            : headerHTML()) + progressHTML());
     document.body.insertAdjacentHTML('beforeend', footerHTML(isV2) + mobileNavHTML());
 
     var header = document.getElementById('siteHeader');
@@ -303,6 +321,16 @@
       addEventListener('scroll', check, { passive:true });
       addEventListener('resize', check);
       check();
+    } else if (mode === 'static'){
+      header.classList.add('site-header--reveal');
+      // момент появления — как на главной: там стики выезжает, когда первый экран
+      // (hero в 100vh) прокручен целиком. Здесь hero нет, мерило то же — высота окна
+      var checkFlow = function(){
+        header.classList.toggle('show', window.scrollY >= document.documentElement.clientHeight);
+      };
+      addEventListener('scroll', checkFlow, { passive:true });
+      addEventListener('resize', checkFlow);
+      checkFlow();
     }
 
     // href="#" у заглушек нужен только ради hover/фокуса — прыгать наверх по клику незачем.

@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зерно — Ресторан</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prosto+One&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- сквозные хедер и футер: разметку вставляет chrome.js -->
+<link rel="stylesheet" href="assets/chrome.css">
+<!-- поля форм, календарь и модалка бронирования -->
+<link rel="stylesheet" href="assets/vendor/air-datepicker.css">
+<link rel="stylesheet" href="assets/forms.css">
+<link rel="stylesheet" href="assets/booking.css">
+<!-- подсказка по наведению: атрибут data-tooltip на любом элементе -->
+<link rel="stylesheet" href="assets/tooltip.css">
+<script src="assets/vendor/air-datepicker.js" defer></script>
+<script src="assets/vendor/air-datepicker-ru.js" defer></script>
+<script src="assets/forms.js" defer></script>
+<script src="assets/booking.js" defer></script>
+<script src="assets/tooltip.js" defer></script>
+<script src="assets/chrome.js" defer></script>
+<!-- демпфер scroll-driven анимаций; без defer — инлайн-скрипты страницы зовут createScrub при парсинге -->
+<script src="assets/scrub.js"></script>
+<script>(function(){var w=document.documentElement.clientWidth;if(w>0)document.documentElement.style.setProperty('--vw',w+'px');})();</script>
+<style>
+/* ===== Зерно · токены (из зерно-цвета.tokens.json) — те же, что на главной ===== */
+:root{
+  --sand-50:#FDFAF1; --sand-100:#F9F3E4; --sand-200:#F0E6CE; --sand-300:#E4D8BD;
+  --gold-50:#FDF5E6; --gold-100:#FAEACF; --gold-400:#D3A856; --gold-500:#CB9C3F; --gold-600:#A97C19; --gold-700:#896100; --gold-800:#674800;
+  --graphite-200:#D5D1C9; --graphite-600:#5F5A52; --graphite-700:#474134; --graphite-800:#2E2A22; --graphite-900:#1D1911;
+  --text-primary:var(--graphite-700);
+  --text-secondary:var(--graphite-600);
+  --text-muted:#757068;
+  --gold-200:#F0D5A7; --gold-300:#E2BF7E; --gold-900:#493200; --gold-highlight:#F0D878;
+  --link-default:var(--gold-700); --link-hover:var(--gold-900);
+  --link-default-dark:var(--gold-400); --link-hover-dark:var(--gold-300);
+  --dark-surface-raised:var(--graphite-700);
+  --button-primary-bg:var(--gold-600); --button-primary-label:#FFFFFF;
+  --surface-page:#FDFAF1; --surface-card:var(--sand-100);
+  --sand-900:#3D372A; --text-inverse:#F9F3E4;
+  --sand-500:#BDB194; --text-secondary-dark:#BDB194;
+  --dark-bg:var(--graphite-900); --dark-gold:var(--gold-400);
+  --font-heading:'Prosto One', system-ui, sans-serif;
+  --font-body:'Onest', system-ui, sans-serif;
+  --margin:160px;
+  --vw:100vw;
+  --cw:min(var(--vw) - var(--margin)*2, 1600px);
+  --pad:calc((var(--vw) - var(--cw)) / 2);
+  --fs-h1:clamp(36px, 5.5vw, 80px);
+  --fs-h2:clamp(28px, 19.2px + 2.2vw, 48px);
+  --fs-h3:clamp(20px, 16px + 1vw, 28px);
+  --fs-h4:clamp(19px, 16px + .65vw, 24px);
+  --fs-lead:clamp(18px, 16px + .6vw, 24px);
+  --fs-body:clamp(16px, 15px + .25vw, 18px);
+  --fs-small:clamp(14px, 13.5px + .15vw, 16px);
+  /* head-gap здесь 64, а не 80 как на главной: макет ресторана (776:1577) везде
+     держит 64 между шапкой блока и содержимым — сверено по координатам всех секций */
+  --section-gap:200px; --head-gap:64px; --sub-gap:32px; --gap:24px;
+  /* Высота сквозной шапки. 88 — фолбэк на время загрузки; точное значение после вставки
+     шапки выставляет скрипт внизу страницы: она контентная и зависит от варианта знака
+     (у клиентского колос ниже — 76), жёсткое число разъезжалось бы при смене BRAND. */
+  --header-h:88px;
+}
+@media (max-width:1599px){ :root{ --margin:80px } }
+@media (max-width:1279px){ :root{ --margin:48px; --section-gap:160px; --head-gap:56px; --sub-gap:24px } }
+@media (max-width:1023px){ :root{ --margin:40px; --section-gap:120px; --head-gap:48px } }
+@media (max-width:767px){ :root{ --margin:16px; --section-gap:96px; --head-gap:40px; --sub-gap:16px; --gap:16px } }
+*{ box-sizing:border-box }
+html{ scrollbar-gutter:stable }
+body{
+  margin:0; background:var(--surface-page); color:var(--text-primary);
+  font-family:var(--font-body); font-size:var(--fs-body); line-height:1.6;
+}
+.container{ width:var(--cw); margin-inline:auto }
+img,video{ max-width:100%; display:block }
+
+/* ===== Кнопки — тот же компонент Button L, что на главной (макет 47:86) ===== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; text-decoration:none;
+  font:600 clamp(16px, 14px + .3vw, 20px)/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
+  white-space:nowrap; border-radius:8px; corner-shape:squircle; cursor:pointer; border:0;
+  transition:background .2s ease, border-color .2s ease, transform .3s cubic-bezier(.22,.61,.21,1);
+}
+.btn:hover{ transform:translateY(-4px) }
+.btn:active{ transform:none }
+.btn--primary{
+  color:#FFFFFF; background:var(--gold-600); padding:17px 32px;
+  position:relative; overflow:hidden; isolation:isolate;
+}
+.btn--primary:hover{ background:var(--gold-700) }
+.btn--primary::before{
+  content:''; position:absolute; z-index:-1; top:0; bottom:0; left:0; width:70%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+  animation:btn-sheen 5s ease-in-out infinite;
+}
+.btn--primary:hover::before{ animation-duration:2.4s }
+@keyframes btn-sheen{
+  0%{ transform:translateX(-140%) } 22%{ transform:translateX(220%) } 100%{ transform:translateX(220%) }
+}
+@media (prefers-reduced-motion: reduce){ .btn, .btn--primary::before{ transition:none; animation:none } }
+
+/* ===== ПОЯВЛЕНИЕ ЭЛЕМЕНТОВ — тот же механизм, что на главной ===== */
+.reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s cubic-bezier(.22,.61,.21,1), transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.reveal.in{ opacity:1; transform:none }
+@media (prefers-reduced-motion: reduce){ .reveal{ opacity:1; transform:none; transition:none } }
+
+/* ===== Общее: заголовок блока по центру ===== */
+main{ padding-top:var(--header-h) }
+.section{ padding:var(--section-gap) 0 0 }
+.section:last-of-type{ padding-bottom:var(--section-gap) }
+.section__head{ width:var(--cw); margin:0 auto; text-align:center }
+.section__head h2{
+  font-family:var(--font-heading); font-weight:400; font-size:var(--fs-h2); line-height:1.12;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.section__sub{ font-weight:500; font-size:var(--fs-lead); line-height:1.6; color:var(--text-primary); margin:var(--sub-gap) 0 0; text-wrap:balance }
+
+/* ===== ГЕРОЙ СТРАНИЦЫ ===== */
+/* в макете крошки стоят в 24px под шапкой (page-sections y=100 при шапке 76) — --gap даёт 24/16 */
+.rest-hero{ padding-top:var(--gap); display:flex; flex-direction:column; align-items:center; gap:var(--head-gap) }
+.breadcrumbs{ display:flex; align-items:center; gap:8px; font-size:var(--fs-small); line-height:1.52 }
+.breadcrumbs a{ color:var(--link-default); text-decoration:none }
+.breadcrumbs a:hover{ color:var(--link-hover) }
+.breadcrumbs span{ color:var(--text-muted) }
+.rest-hero__head{ display:flex; flex-direction:column; align-items:center; gap:var(--sub-gap); text-align:center }
+.rest-hero__head h1{
+  font-family:var(--font-heading); font-weight:400; font-size:var(--fs-h1); line-height:1.1;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+.rest-hero__sub{ font-weight:500; font-size:var(--fs-lead); line-height:1.6; color:var(--text-primary); margin:0; max-width:56ch; text-wrap:balance }
+/* видео absolute: с height:100% в потоке оно распирает flex-элемент до натуральной
+   высоты кадра, и aspect-ratio контейнера перестаёт работать */
+.rest-hero__media{ position:relative; width:100%; aspect-ratio:1600/640; border-radius:16px; overflow:clip; background:var(--sand-200) }
+.rest-hero__media video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+@media (max-width:767px){ .rest-hero__media{ aspect-ratio:4/5; border-radius:12px } }
+
+/* ===== МЕНЮ ===== */
+.menu-chips{
+  display:flex; gap:12px; margin-top:var(--sub-gap); justify-content:center; flex-wrap:wrap;
+}
+@media (max-width:1023px){
+  .menu-chips{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; padding-bottom:4px; scrollbar-width:none }
+  .menu-chips::-webkit-scrollbar{ display:none }
+}
+/* Радиусы чипа и бейджа — «пилюля»: в компонентах Figma (721:1171, 721:1176) стоит 100
+   при любой высоте. 999px всегда клампится до половины высоты — форма не зависит от строк. */
+.chip{
+  /* Паддинги против макетных 10/20 сдвинуты дважды: −1px по кругу (обводка в фигме
+     inside и входит в 41px высоты, CSS-border снаружи) и +1px сверху / −1px снизу —
+     оптическая центровка: у капса нет нижних выносных, и пустой descent строки
+     поднимал чернила на 1px выше центра пилюли (замерено canvas-метриками). */
+  flex:none; padding:10px 19px 8px; border-radius:999px;
+  border:1px solid var(--gold-400); background:transparent; color:var(--gold-700);
+  font:600 var(--fs-small)/1.3 var(--font-body); letter-spacing:.08em; text-transform:uppercase;
+  cursor:pointer; transition:background .2s ease, border-color .2s ease, color .2s ease;
+}
+.chip:hover{ background:var(--sand-200) }
+.chip[aria-selected="true"]{ background:var(--button-primary-bg); border-color:var(--button-primary-bg); color:var(--button-primary-label) }
+.chip[aria-selected="true"]:hover{ background:var(--gold-700) }
+
+.menu-panels{ width:var(--cw); margin:var(--head-gap) auto 0 }
+.menu-panel[hidden]{ display:none }
+
+.badge{
+  /* паддинги −1px от макетных 4/16 — та же компенсация inside-обводки, что у чипа */
+  display:inline-flex; align-items:center; padding:3px 15px; border-radius:999px;
+  border:1px solid var(--gold-400); color:var(--gold-700); font:500 var(--fs-small)/1.52 var(--font-body);
+}
+.dish-name{ font:600 20px/1.5 var(--font-body); color:var(--text-primary) }
+.dish-price{ font:600 20px/1.5 var(--font-body); color:var(--text-primary); white-space:nowrap }
+.dish-desc{ font:400 var(--fs-small)/1.52 var(--font-body); color:var(--text-secondary); margin:6px 0 0 }
+
+/* — Вкладка «Завтраки»: сетка карточек с фото — */
+.menu-cards{ display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--gap) }
+.dish-card{ background:var(--surface-card); border-radius:8px; overflow:clip; display:flex; flex-direction:column }
+.dish-card__photo{ aspect-ratio:382/264; overflow:clip }
+.dish-card__photo img{ width:100%; height:100%; object-fit:cover }
+.dish-card__info{ padding:24px; display:flex; flex-direction:column; align-items:flex-start; gap:16px }
+.dish-card__row{ display:flex; align-items:baseline; justify-content:space-between; gap:16px }
+@media (max-width:1279px){ .menu-cards{ grid-template-columns:repeat(2, 1fr) } }
+@media (max-width:767px){ .menu-cards{ grid-template-columns:1fr } }
+
+/* — Список позиций (используется во всех трёх режимах) — */
+.dish-list{ display:flex; flex-direction:column }
+/* шаг 48 между позициями, как в макете: 24 сверху + разделитель + 24 снизу */
+.dish-row{ padding:24px 0; border-bottom:1px solid var(--graphite-200) } /* цвет разделителя снят с макета (нода 779:2440) */
+.dish-row:first-child{ padding-top:0 }   /* первая позиция вровень с верхом соседней карточки */
+.dish-row:last-child{ border-bottom:0; padding-bottom:0 }
+.dish-row__line{ display:flex; align-items:baseline; justify-content:space-between; gap:16px }
+
+/* — Вкладка «Салаты и закуски»: список + крупная карточка — */
+.menu-split{ display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start }
+.dish-featured{ background:var(--surface-card); border-radius:8px; padding:32px; display:flex; flex-direction:column; gap:32px }
+.dish-featured__photo{ aspect-ratio:704/504; border-radius:4px; overflow:clip }
+.dish-featured__photo img{ width:100%; height:100%; object-fit:cover }
+.dish-featured__info{ display:flex; flex-direction:column; align-items:flex-start; gap:16px }
+@media (max-width:1023px){ .menu-split{ grid-template-columns:1fr } }
+
+/* — Остальные вкладки: два столбца прайс-листа — */
+.menu-columns{ display:grid; grid-template-columns:1fr 1fr; gap:64px }
+@media (max-width:1023px){ .menu-columns{ grid-template-columns:1fr; gap:0 } }
+
+/* ===== CTA БРОНИРОВАНИЯ (тёмная плашка) ===== */
+.rest-cta{
+  /* CTA прижат к меню (правка макета 31.08: зазор 80, а не межблочные 200) —
+     плашка читается как продолжение блока меню, а не отдельная секция */
+  width:var(--cw); margin:80px auto 0; background:var(--dark-bg); border-radius:8px;
+  padding:48px 64px 64px; display:flex; flex-direction:column; align-items:center; gap:40px; text-align:center;
+}
+.rest-cta__text h2{
+  font-family:var(--font-heading); font-weight:400; font-size:var(--fs-h3); line-height:1.28;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--dark-gold); margin:0;
+}
+.rest-cta__text p{ font-weight:500; font-size:var(--fs-lead); line-height:1.6; color:var(--text-secondary-dark); margin:8px 0 0 }
+@media (max-width:1279px){ .rest-cta{ margin-top:64px } }
+@media (max-width:767px){ .rest-cta{ margin-top:48px; padding:40px 24px 48px } }
+
+/* ===== ОТКРЫТАЯ КУХНЯ ===== */
+.kitchen-composition{ display:grid; grid-template-columns:1059fr 517fr; gap:var(--gap); margin-top:var(--head-gap) }
+.kitchen-video{ position:relative; aspect-ratio:1059/600; border-radius:9px; overflow:clip; background:var(--sand-200) }
+.kitchen-video video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+/* Колонка — две равные половины высоты видео (в макете 288 + 24 + 288 = 600):
+   аспекты фото не задаём, высоту диктует видео, кадры кропятся object-fit —
+   иначе фиксированные пропорции не добивали бы до низа и оставляли щель */
+.kitchen-column{ display:flex; flex-direction:column; gap:var(--gap) }
+.kitchen-column__photo{ position:relative; border-radius:9px; overflow:clip; background:var(--sand-200) }
+.kitchen-column__photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.kitchen-column__top{ flex:1; min-height:0 }
+.kitchen-column__row{ flex:1; min-height:0; display:flex; gap:var(--gap) }
+.kitchen-column__row .kitchen-column__photo{ flex:1 }
+.kitchen__btn-row{ display:flex; justify-content:center; margin-top:var(--head-gap) }
+@media (max-width:1023px){
+  .kitchen-composition{ grid-template-columns:1fr }
+  /* колонка ушла под видео — высоту видео она больше не наследует, фото держат макетные пропорции сами */
+  .kitchen-column__top{ flex:none; aspect-ratio:517/288 }
+  .kitchen-column__row{ flex:none }
+  .kitchen-column__row .kitchen-column__photo{ aspect-ratio:246/288 }
+}
+
+/* ===== КОМАНДА ===== */
+.team-row{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); margin-top:var(--head-gap) }
+.team-row__photo{ border-radius:8px; overflow:clip; aspect-ratio:517/600 }
+.team-row__photo img{ width:100%; height:100%; object-fit:cover }
+.team-photos{ display:flex; flex-direction:column; gap:var(--gap) }
+.team-photos .team-row__photo{ flex:1; aspect-ratio:517/288 }
+.team-text{ background:var(--surface-card); padding:48px; display:flex; flex-direction:column; gap:24px }
+.team-text h3{
+  font-family:var(--font-heading); font-weight:400; font-size:var(--fs-h4); line-height:1.36;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--gold-600); margin:0;
+}
+.team-text p{ font-size:var(--fs-body); line-height:1.6; color:var(--text-secondary); margin:0 } /* Body/Base 18, на телефоне сжимается токеном */
+@media (max-width:1023px){ .team-row{ grid-template-columns:1fr } .team-row__photo{ aspect-ratio:16/10 } }
+
+/* ===== СПЕЦИАЛЬНЫЕ ПРЕДЛОЖЕНИЯ ===== */
+.offers-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--gap); margin-top:var(--head-gap) }
+.offer-card{ background:var(--surface-card); border-radius:8px; overflow:clip; display:flex; flex-direction:column }
+.offer-card__photo{ aspect-ratio:517/282; overflow:clip }
+.offer-card__photo img{ width:100%; height:100%; object-fit:cover }
+.offer-card__info{ padding:24px; display:flex; flex-direction:column; align-items:flex-start; gap:16px }
+.offer-card__title{ font:600 20px/1.5 var(--font-body); color:var(--text-primary); margin:0 }
+.offer-card__desc{ font:400 var(--fs-small)/1.52 var(--font-body); color:var(--text-secondary); margin:0 }
+@media (max-width:1279px){ .offers-grid{ grid-template-columns:repeat(2, 1fr) } }
+@media (max-width:767px){ .offers-grid{ grid-template-columns:1fr } }
+</style>
+</head>
+<body data-header="static">
+
+<main>
+
+<!-- ===== ГЕРОЙ ===== -->
+<section class="section rest-hero container">
+  <nav class="breadcrumbs reveal" aria-label="Хлебные крошки">
+    <a href="index.html">Главная</a><span>/</span><span aria-current="page">Ресторан</span>
+  </nav>
+  <div class="rest-hero__head">
+    <h1 class="reveal">Ресторан</h1>
+    <p class="rest-hero__sub reveal">У нас можно попробовать легендарную преснушку</p>
+  </div>
+  <div class="rest-hero__media reveal">
+    <video src="assets/car-restaurant.mp4" autoplay muted loop playsinline preload="metadata"
+           aria-label="Видео: зал ресторана «Зерно»"></video>
+  </div>
+</section>
+
+<!-- ===== МЕНЮ ===== -->
+<section class="section" id="menu">
+  <div class="section__head">
+    <h2 class="reveal">Меню</h2>
+    <p class="section__sub reveal">Обеденное меню каждый будний день, вечернее — с пяти. Отдельная карта для банкетов.</p>
+    <div class="menu-chips reveal" role="tablist" aria-label="Разделы меню">
+      <button class="chip" type="button" role="tab" aria-selected="true" aria-controls="panel-breakfast" id="tab-breakfast">Завтраки</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-salads" id="tab-salads">Салаты и закуски</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-hot" id="tab-hot">Горячие блюда</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-desserts" id="tab-desserts">Десерты</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-kids" id="tab-kids">Детское</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-drinks" id="tab-drinks">Напитки</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-alco" id="tab-alco">Алкоголь</button>
+    </div>
+  </div>
+
+  <div class="menu-panels">
+
+    <!-- Завтраки: сетка карточек с фото -->
+    <div class="menu-panel menu-cards" id="panel-breakfast" role="tabpanel" aria-labelledby="tab-breakfast">
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__info">
+          <span class="badge">От шефа</span>
+          <div>
+            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
+            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+          </div>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__info">
+          <span class="badge">От шефа</span>
+          <div>
+            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
+            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+          </div>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__info">
+          <span class="badge">От шефа</span>
+          <div>
+            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
+            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+          </div>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__info">
+          <span class="badge">От шефа</span>
+          <div>
+            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
+            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+          </div>
+        </div>
+      </article>
+      <!-- второй ряд — в макете две menu-category по 4 карточки (779:2119 и 779:2308) -->
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__info">
+          <span class="badge">От шефа</span>
+          <div>
+            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
+            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+          </div>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__info">
+          <span class="badge">От шефа</span>
+          <div>
+            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
+            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+          </div>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__info">
+          <span class="badge">От шефа</span>
+          <div>
+            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
+            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+          </div>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__info">
+          <span class="badge">От шефа</span>
+          <div>
+            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
+            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Салаты и закуски: список + крупная карточка -->
+    <div class="menu-panel menu-split" id="panel-salads" role="tabpanel" aria-labelledby="tab-salads" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+      <div class="dish-featured reveal">
+        <div class="dish-featured__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-featured__info">
+          <span class="badge">От шефа</span>
+          <div>
+            <div class="dish-row__line"><span class="dish-name">Тальятелле</span><span class="dish-price">540 ₽</span></div>
+            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Горячие блюда, Десерты, Детское, Напитки, Алкоголь: прайс-лист в два столбца -->
+    <div class="menu-panel menu-columns" id="panel-hot" role="tabpanel" aria-labelledby="tab-hot" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+    </div>
+
+    <div class="menu-panel menu-columns" id="panel-desserts" role="tabpanel" aria-labelledby="tab-desserts" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+    </div>
+
+    <div class="menu-panel menu-columns" id="panel-kids" role="tabpanel" aria-labelledby="tab-kids" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+    </div>
+
+    <div class="menu-panel menu-columns" id="panel-drinks" role="tabpanel" aria-labelledby="tab-drinks" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+    </div>
+
+    <div class="menu-panel menu-columns" id="panel-alco" role="tabpanel" aria-labelledby="tab-alco" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CTA брони — часть блока меню (макет 779:2620) -->
+  <div class="rest-cta reveal">
+    <div class="rest-cta__text">
+      <h2>Столик можно занять заранее</h2>
+      <p>На обед, ужин или отдельный повод. Перезвоним и подтвердим бронь.</p>
+    </div>
+    <button class="btn btn--primary" type="button" data-table-open>Забронировать стол</button>
+  </div>
+</section>
+
+<!-- ===== ОТКРЫТАЯ КУХНЯ ===== -->
+<section class="section container" id="kitchen">
+  <div class="section__head">
+    <h2 class="reveal">Открытая кухня</h2>
+    <p class="section__sub reveal">Кухня не спрятана за стеной: видно, как повара работают у огня и собирают каждую тарелку — от заготовки до подачи.</p>
+  </div>
+  <div class="kitchen-composition">
+    <div class="kitchen-video reveal">
+      <video src="assets/car-masterclass.mp4" autoplay muted loop playsinline preload="metadata"
+             aria-label="Видео: повара за работой на открытой кухне"></video>
+    </div>
+    <div class="kitchen-column reveal">
+      <div class="kitchen-column__photo kitchen-column__top"><img src="assets/restaurant/kitchen-hall.jpg" alt="Зал ресторана «Зерно»" loading="lazy"></div>
+      <div class="kitchen-column__row">
+        <div class="kitchen-column__photo"><img src="assets/restaurant/kitchen-couple.jpg" alt="Гости за ужином" loading="lazy"></div>
+        <div class="kitchen-column__photo"><img src="assets/restaurant/lobby.jpg" alt="Вход в «Зерно»" loading="lazy"></div>
+      </div>
+    </div>
+  </div>
+  <div class="kitchen__btn-row reveal">
+    <button class="btn btn--primary" type="button" data-class-open>Записаться на мастер-класс</button>
+  </div>
+</section>
+
+<!-- ===== КОМАНДА ===== -->
+<section class="section container" id="team">
+  <div class="team-row">
+    <div class="team-row__photo reveal"><img src="assets/restaurant/lobby.jpg" alt="Портрет шеф-повара" loading="lazy"></div>
+    <div class="team-photos reveal">
+      <div class="team-row__photo"><img src="assets/restaurant/lobby.jpg" alt="Команда «Зерна»" loading="lazy"></div>
+      <div class="team-row__photo"><img src="assets/restaurant/lobby.jpg" alt="Команда «Зерна»" loading="lazy"></div>
+    </div>
+    <div class="team-text reveal">
+      <h3>Имя Фамилия</h3>
+      <p>Собрал меню вокруг местных продуктов: мука своего помола, овощи и мясо от уральских фермеров.</p>
+      <p>Смена начинается за час до гостей — с заготовок и бульонов. К открытию на кухне уже всё готово.</p>
+      <p>Повара, официанты, бариста — многие работают вместе с самого открытия. Кухня у нас на виду, так что познакомиться можно прямо за обедом.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== СПЕЦИАЛЬНЫЕ ПРЕДЛОЖЕНИЯ ===== -->
+<section class="section container" id="offers">
+  <div class="section__head"><h2 class="reveal">Специальные предложения</h2></div>
+  <div class="offers-grid">
+    <article class="offer-card reveal">
+      <div class="offer-card__photo"><img src="assets/restaurant/dish.jpg" alt="День рождения в «Зерне»" loading="lazy"></div>
+      <div class="offer-card__info">
+        <span class="badge">До 31.09.2026</span>
+        <div><p class="offer-card__title">День рождения в «Зерне»</p><p class="offer-card__desc">Краткое описание</p></div>
+      </div>
+    </article>
+    <article class="offer-card reveal">
+      <div class="offer-card__photo"><img src="assets/restaurant/dish.jpg" alt="Свадьба в «Зерне»" loading="lazy"></div>
+      <div class="offer-card__info">
+        <span class="badge">До 31.09.2026</span>
+        <div><p class="offer-card__title">Свадьба в «Зерне»</p><p class="offer-card__desc">Краткое описание</p></div>
+      </div>
+    </article>
+    <article class="offer-card reveal">
+      <div class="offer-card__photo"><img src="assets/restaurant/couple-evening.jpg" alt="Вечер на двоих" loading="lazy"></div>
+      <div class="offer-card__info">
+        <span class="badge">До 31.09.2026</span>
+        <div><p class="offer-card__title">Вечер на двоих</p><p class="offer-card__desc">Краткое описание</p></div>
+      </div>
+    </article>
+    <article class="offer-card reveal">
+      <div class="offer-card__photo"><img src="assets/restaurant/dish.jpg" alt="День рождения в «Зерне»" loading="lazy"></div>
+      <div class="offer-card__info">
+        <span class="badge">До 31.09.2026</span>
+        <div><p class="offer-card__title">День рождения в «Зерне»</p><p class="offer-card__desc">Краткое описание</p></div>
+      </div>
+    </article>
+    <article class="offer-card reveal">
+      <div class="offer-card__photo"><img src="assets/restaurant/dish.jpg" alt="Свадьба в «Зерне»" loading="lazy"></div>
+      <div class="offer-card__info">
+        <span class="badge">До 31.09.2026</span>
+        <div><p class="offer-card__title">Свадьба в «Зерне»</p><p class="offer-card__desc">Краткое описание</p></div>
+      </div>
+    </article>
+    <article class="offer-card reveal">
+      <div class="offer-card__photo"><img src="assets/restaurant/couple-evening.jpg" alt="Вечер на двоих" loading="lazy"></div>
+      <div class="offer-card__info">
+        <span class="badge">До 31.09.2026</span>
+        <div><p class="offer-card__title">Вечер на двоих</p><p class="offer-card__desc">Краткое описание</p></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== Окно «Бронирование» — кнопка «Забронировать» в шапке (разметка с главной) ===== -->
+<div class="booking" id="booking" role="dialog" aria-modal="true" aria-labelledby="booking-title"
+     data-state="form" aria-hidden="true">
+  <div class="booking__card">
+    <button class="booking__close" type="button" data-booking-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="booking__form-wrap">
+      <h2 class="booking__title" id="booking-title">Бронирование</h2>
+      <form class="booking-form" novalidate>
+        <label class="field">
+          <input class="field__control" type="text" name="name" placeholder="Введите имя" autocomplete="name" required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field">
+          <input class="field__control" type="tel" name="phone" placeholder="+7 (___) ___-__-__" autocomplete="tel" data-phone required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field field--icon">
+          <span class="field__box">
+            <select class="field__control" name="subject" required>
+              <option value="" disabled selected>Что бронируете?</option>
+              <option>Экскурсию в музей</option>
+              <option>Столик в ресторане</option>
+              <option>Место на мастер-класс</option>
+            </select>
+            <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.4 5.3 8.7l1.4-1.4 5.3 5.3 5.3-5.3 1.4 1.4z"/></svg></span>
+          </span>
+          <span class="field__hint"></span>
+        </label>
+        <div class="booking-form__row">
+          <label class="field">
+            <input class="field__control" type="text" name="guests" placeholder="Посетителей" data-guests required>
+            <span class="field__hint"></span>
+          </label>
+          <label class="field field--icon">
+            <span class="field__box">
+              <input class="field__control" type="text" name="date" placeholder="дд.мм.гггг" data-date required>
+              <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1zM4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9H4zm16-2V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v1h16z"/><path d="M7 12h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 16h2v2H7zm4 0h2v2h-2z"/></svg></span>
+            </span>
+            <span class="field__hint"></span>
+          </label>
+        </div>
+        <button class="btn btn--primary" type="submit">Забронировать</button>
+        <div class="booking__consent">
+          <div class="booking__consent-row">
+            <input class="checkbox" type="checkbox" id="booking-consent" name="consent" autocomplete="off" data-consent required>
+            <label class="booking__consent-text" for="booking-consent">Даю согласие на&nbsp;обработку моих персональных данных в&nbsp;соответствии с&nbsp;<a href="#" data-soon>политикой обработки персональных данных</a></label>
+          </div>
+          <span class="field__hint"></span>
+        </div>
+      </form>
+    </div>
+    <div class="booking__success">
+      <div class="booking__success-head">
+        <h2 class="booking__title">Заявка принята!</h2>
+        <p class="booking__success-text">Мы свяжемся с&nbsp;вами в&nbsp;ближайшее рабочее время, чтобы подтвердить заявку и&nbsp;уточнить детали.</p>
+      </div>
+      <button class="btn btn--primary" type="button" data-booking-close>Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Окно «Бронирование стола» — кнопка в CTA меню ===== -->
+<div class="booking" id="booking-table" role="dialog" aria-modal="true" aria-labelledby="booking-table-title"
+     data-state="form" aria-hidden="true">
+  <div class="booking__card">
+    <button class="booking__close" type="button" data-booking-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="booking__form-wrap">
+      <h2 class="booking__title" id="booking-table-title">Бронирование стола</h2>
+      <form class="booking-form" novalidate>
+        <label class="field">
+          <input class="field__control" type="text" name="name" placeholder="Введите имя" autocomplete="name" required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field">
+          <input class="field__control" type="tel" name="phone" placeholder="Номер телефона" autocomplete="tel" data-phone required>
+          <span class="field__hint"></span>
+        </label>
+        <div class="booking-form__row">
+          <label class="field">
+            <input class="field__control" type="text" name="guests" placeholder="Посетителей" data-guests required>
+            <span class="field__hint"></span>
+          </label>
+          <label class="field field--icon">
+            <span class="field__box">
+              <input class="field__control" type="text" name="date" placeholder="дд.мм.гггг" data-date required>
+              <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1zM4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9H4zm16-2V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v1h16z"/><path d="M7 12h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 16h2v2H7zm4 0h2v2h-2z"/></svg></span>
+            </span>
+            <span class="field__hint"></span>
+          </label>
+        </div>
+        <button class="btn btn--primary" type="submit">Записаться</button>
+        <div class="booking__consent">
+          <div class="booking__consent-row">
+            <input class="checkbox" type="checkbox" id="booking-table-consent" name="consent" autocomplete="off" data-consent required>
+            <label class="booking__consent-text" for="booking-table-consent">Даю согласие на&nbsp;обработку моих персональных данных в&nbsp;соответствии с&nbsp;<a href="#" data-soon>политикой обработки персональных данных</a></label>
+          </div>
+          <span class="field__hint"></span>
+        </div>
+      </form>
+    </div>
+    <div class="booking__success">
+      <div class="booking__success-head">
+        <h2 class="booking__title">Заявка принята!</h2>
+        <p class="booking__success-text">Мы свяжемся с&nbsp;вами в&nbsp;ближайшее рабочее время, чтобы подтвердить заявку и&nbsp;уточнить детали.</p>
+      </div>
+      <button class="btn btn--primary" type="button" data-booking-close>Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Окно «Запись на мастер-класс» — кнопка в блоке кухни ===== -->
+<div class="booking" id="booking-class" role="dialog" aria-modal="true" aria-labelledby="booking-class-title"
+     data-state="form" aria-hidden="true">
+  <div class="booking__card">
+    <button class="booking__close" type="button" data-booking-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="booking__form-wrap">
+      <h2 class="booking__title" id="booking-class-title">Запись на мастер-класс</h2>
+      <form class="booking-form" novalidate>
+        <label class="field">
+          <input class="field__control" type="text" name="name" placeholder="Введите имя" autocomplete="name" required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field">
+          <input class="field__control" type="tel" name="phone" placeholder="Номер телефона" autocomplete="tel" data-phone required>
+          <span class="field__hint"></span>
+        </label>
+        <div class="booking-form__row">
+          <label class="field">
+            <input class="field__control" type="text" name="guests" placeholder="Посетителей" data-guests required>
+            <span class="field__hint"></span>
+          </label>
+          <label class="field field--icon">
+            <span class="field__box">
+              <input class="field__control" type="text" name="date" placeholder="дд.мм.гггг" data-date required>
+              <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1zM4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9H4zm16-2V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v1h16z"/><path d="M7 12h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 16h2v2H7zm4 0h2v2h-2z"/></svg></span>
+            </span>
+            <span class="field__hint"></span>
+          </label>
+        </div>
+        <button class="btn btn--primary" type="submit">Записаться</button>
+        <div class="booking__consent">
+          <div class="booking__consent-row">
+            <input class="checkbox" type="checkbox" id="booking-class-consent" name="consent" autocomplete="off" data-consent required>
+            <label class="booking__consent-text" for="booking-class-consent">Даю согласие на&nbsp;обработку моих персональных данных в&nbsp;соответствии с&nbsp;<a href="#" data-soon>политикой обработки персональных данных</a></label>
+          </div>
+          <span class="field__hint"></span>
+        </div>
+      </form>
+    </div>
+    <div class="booking__success">
+      <div class="booking__success-head">
+        <h2 class="booking__title">Заявка принята!</h2>
+        <p class="booking__success-text">Мы свяжемся с&nbsp;вами в&nbsp;ближайшее рабочее время, чтобы подтвердить заявку и&nbsp;уточнить детали.</p>
+      </div>
+      <button class="btn btn--primary" type="button" data-booking-close>Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // ===== Точная высота шапки → --header-h =====
+  // Шапку вставляет chrome.js на DOMContentLoaded; setTimeout(0) гарантирует, что наш
+  // замер случится после его init() независимо от порядка подписки на событие.
+  function мерить(){
+    var шапка = document.getElementById('siteHeader');
+    if (шапка) document.documentElement.style.setProperty('--header-h', шапка.offsetHeight + 'px');
+  }
+  if (document.readyState === 'loading'){
+    addEventListener('DOMContentLoaded', function(){ setTimeout(мерить, 0); });
+  } else setTimeout(мерить, 0);
+
+  // ===== Вкладки меню: одна активная панель, переключение чипами =====
+  var chips = document.querySelectorAll('#menu [role="tab"]');
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      if (chip.getAttribute('aria-selected') === 'true') return;
+      chips.forEach(function(c){
+        c.setAttribute('aria-selected', 'false');
+        document.getElementById(c.getAttribute('aria-controls')).hidden = true;
+      });
+      chip.setAttribute('aria-selected', 'true');
+      var panel = document.getElementById(chip.getAttribute('aria-controls'));
+      panel.hidden = false;
+      panel.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  // ===== Появление элементов: тот же механизм, что на главной =====
+  var items = [].slice.call(document.querySelectorAll('.reveal'));
+  if (!items.length) return;
+
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    items.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+
+  var STEP = 0.2, CAP = 1.2;
+  var delay = function(n){ return Math.min(n * STEP, CAP).toFixed(2) + 's'; };
+  var order = new Map(items.map(function(el, i){ return [el, i]; }));
+  var io = new IntersectionObserver(function(entries, obs){
+    entries.filter(function(e){ return e.isIntersecting; })
+      .sort(function(a, b){ return order.get(a.target) - order.get(b.target); })
+      .forEach(function(e, n){
+        e.target.style.transitionDelay = delay(n);
+        e.target.classList.add('in');
+        obs.unobserve(e.target);
+      });
+  }, { threshold: 0.15, rootMargin: '0px 0px -22% 0px' });
+
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    items.forEach(function(el){ io.observe(el); });
+  }); });
+})();
+</script>
+
+</body>
+</html>
