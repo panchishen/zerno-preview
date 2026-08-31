@@ -272,7 +272,7 @@
         '<div class="ft__col ft__col--secondary">' +
           '<a href="#" data-soon>Политика обработки персональных данных</a>' +
           '<span>2026 © ООО «Объединение «Союзпищепром»</span>' +
-          '<span>Комплексное продвижение — <a href="#" data-soon>Алькон</a></span>' +
+          '<span>Комплексное продвижение — <a href="https://www.alkon.pro/" target="_blank" rel="noopener">Алькон</a></span>' +
         '</div>' +
       '</div>' +
     '</footer>';
