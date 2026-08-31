@@ -299,61 +299,76 @@ body{
 .hero-header__brand{ animation:hero2-rise .7s cubic-bezier(.22,.61,.21,1) .3s both }
 .hero-header__nav, .hero-header__contacts{ animation:hero2-rise .7s cubic-bezier(.22,.61,.21,1) .5s both }
 
-/* ===== ИНФОРМЕР (макет 744:3264) =====
-   Карточка по центру внизу экрана: белый фон, мягкая тень, крестик в правом верхнем углу.
-   Появляется в тот же момент, что и стики-шапка — когда первый экран уходит вверх.
-   Закрывается нажатием и больше не возвращается до перезагрузки: ничего не запоминаем намеренно.
-   Была пилюлей в одну строку — с сентябрьским текстом стала многоабзацной карточкой 764px. */
+/* ===== ИНФОРМЕР (макет 511:1730) =====
+   Пилюля по центру внизу экрана: белый фон, мягкая тень, крестик справа. Появляется в тот же
+   момент, что и стики-шапка — когда первый экран уходит вверх. Закрывается нажатием и больше
+   не возвращается до перезагрузки: ничего не запоминаем намеренно.
+   Ниже, под классом .informer--card, лежит сентябрьский вариант — карточка с длинным текстом
+   (макет 744:3264). Он никуда не делся: вернуть его значит дописать класс в разметке
+   и вставить туда абзацы, они сохранены комментарием рядом с информером. */
 .informer{
   position:fixed; left:50%; bottom:32px; z-index:200;
-  width:min(764px, calc(100vw - 32px));
-  /* высокий текст на невысоком экране прокручивается внутри карточки, а не уезжает за край */
-  max-height:calc(100dvh - 64px); overflow-y:auto; overscroll-behavior:contain;
-  padding:24px;
-  background:#FFFFFF; border-radius:24px; corner-shape:squircle;
+  display:flex; align-items:center; gap:10px;
+  padding:12px 16px 12px 32px;          /* слева больше — крестик держит свой отступ сам */
+  background:#FFFFFF; border-radius:100px;
   box-shadow:0 20px 15px rgba(0,0,0,.05);
   /* сдвиг по X — часть transform, поэтому центровка и движение живут в одном свойстве */
   opacity:0; transform:translate(-50%, 24px); pointer-events:none;
   transition:opacity .5s cubic-bezier(.22,.61,.21,1), transform .5s cubic-bezier(.22,.61,.21,1);
 }
 .informer.is-shown{ opacity:1; transform:translate(-50%, 0); pointer-events:auto }
-/* Типографика здесь вне шкалы проекта — 16/1.5 вместо Body/Small 16/1.52 (макет 744:3265):
-   в макете это осознанное исключение, поэтому размеры заданы вручную, а не токеном. */
 .informer__text{
-  margin:0; padding-left:8px;   /* 24 поля карточки + 8 = макетные 32 слева */
-  font:400 16px/1.5 var(--font-body); color:var(--text-primary);
+  margin:0; font:400 18px/1.6 var(--font-body); color:var(--text-primary); white-space:nowrap;
 }
-.informer__text p{ margin:0 }
-.informer__text p + p{ margin-top:12px }
-/* место под крестик освобождает только первая строка — он стоит абсолютом над ней */
-.informer__title{ font-weight:600; padding-right:48px }
-.informer__text b{ font-weight:600 }
-.informer__pre{ font-weight:500 }   /* «с» перед часами — Medium, как в макете */
-/* Телефон и адрес сайта в макете просто выделены начертанием; ссылками их делает вёрстка,
-   чтобы с телефона можно было позвонить и перейти, — вид при этом остаётся прежним */
-.informer__text a{ color:inherit; text-decoration:none; font-weight:600 }
-.informer__text a.informer__link{ color:var(--link-default) }
-.informer__text a:hover{ color:var(--link-hover) }
 .informer__close{
-  position:absolute; top:24px; right:24px;
-  width:32px; height:32px; padding:0; border:0; background:transparent;
+  flex:none; width:32px; height:32px; padding:0; border:0; background:transparent;
   color:var(--text-primary); cursor:pointer; display:grid; place-items:center;
   transition:color .2s ease;
 }
 .informer__close svg{ width:32px; height:32px; display:block; fill:currentColor }
 .informer__close:hover{ color:var(--gold-700) } /* меняется только сам крестик, подложки нет */
 .informer__close:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
+
+/* ===== ИНФОРМЕР · карточка с длинным текстом (макет 744:3264) =====
+   Сентябрьский вариант: включается классом .informer--card на самом информере.
+   Типографика здесь вне шкалы проекта — 16/1.5 вместо Body/Small 16/1.52; в макете это
+   осознанное исключение, поэтому размеры заданы вручную, а не токеном. */
+.informer--card{
+  display:block; width:min(764px, calc(100vw - 32px)); padding:24px;
+  border-radius:24px; corner-shape:squircle;
+  /* высокий текст на невысоком экране прокручивается внутри карточки, а не уезжает за край */
+  max-height:calc(100dvh - 64px); overflow-y:auto; overscroll-behavior:contain;
+}
+.informer--card .informer__text{
+  padding-left:8px;   /* 24 поля карточки + 8 = макетные 32 слева */
+  font:400 16px/1.5 var(--font-body); white-space:normal;
+}
+.informer--card .informer__text p{ margin:0 }
+.informer--card .informer__text p + p{ margin-top:12px }
+/* место под крестик освобождает только первая строка — он стоит абсолютом над ней */
+.informer--card .informer__title{ font-weight:600; padding-right:48px }
+.informer--card .informer__text b{ font-weight:600 }
+.informer--card .informer__pre{ font-weight:500 }   /* «с» перед часами — Medium, как в макете */
+/* Телефон и адрес сайта в макете просто выделены начертанием; ссылками их делает вёрстка,
+   чтобы с телефона можно было позвонить и перейти, — вид при этом остаётся прежним */
+.informer--card .informer__text a{ color:inherit; text-decoration:none; font-weight:600 }
+.informer--card .informer__text a.informer__link{ color:var(--link-default) }
+.informer--card .informer__text a:hover{ color:var(--link-hover) }
+.informer--card .informer__close{ position:absolute; top:24px; right:24px }
 /* закрытие: та же пружина, только вниз */
 .informer.is-closing{
   opacity:0; transform:translate(-50%, 16px); pointer-events:none;
   transition:opacity .3s ease, transform .3s cubic-bezier(.22,.61,.21,1);
 }
 @media (max-width:767px){
-  .informer{ left:16px; right:16px; width:auto; transform:translateY(24px); padding:20px }
+  .informer{ left:16px; right:16px; transform:translateY(24px); padding:12px 12px 12px 20px }
+  .informer--card{ width:auto; padding:20px }
   .informer.is-shown{ transform:none }
   .informer.is-closing{ transform:translateY(16px) }
-  .informer__text{ padding-left:0 }
-  .informer__title{ padding-right:40px }
+  .informer__text{ white-space:normal; font-size:16px }
+  .informer--card .informer__text{ padding-left:0 }
+  .informer--card .informer__title{ padding-right:40px }
+  .informer--card .informer__close{ top:20px; right:20px }
   .informer__close{ top:20px; right:20px }
 }
 @media (prefers-reduced-motion: reduce){
@@ -743,6 +758,11 @@ body{
 .review-modal{
   position:fixed; inset:0; z-index:300;
   display:grid; place-items:safe center;
+  /* Колонка minmax(0,1fr), а не auto (по умолчанию): иначе трек растягивается до
+     максимальной ширины карточки (500px), max-width:100% на карточке считается уже
+     от него — и на узком экране окно вылезало за правый край вместе с крестиком.
+     Тот же приём, что в booking.css */
+  grid-template-columns:minmax(0, 1fr);
   padding:48px; overflow-y:auto; overscroll-behavior:contain;
   background:rgba(28,26,23,.8);
   opacity:0; visibility:hidden;
@@ -797,6 +817,62 @@ body{
   .review-modal__card{ transform:none }
 }
 
+/* ===== ОКНО «О МУЗЕЕ» (макет 764:1187) =====
+   Открывается кнопкой «Больше о музее» в блоке о музее. Устройство окна то же, что у окна
+   отзыва: подложка прокручивает длинный текст, крестик стоит снаружи у верхнего правого угла. */
+.about-modal{
+  position:fixed; inset:0; z-index:300;
+  display:grid; place-items:safe center;
+  /* см. комментарий у .review-modal — тот же приём против переполнения на узком экране */
+  grid-template-columns:minmax(0, 1fr);
+  padding:48px; overflow-y:auto; overscroll-behavior:contain;
+  background:rgba(28,26,23,.8);
+  opacity:0; visibility:hidden;
+  transition:opacity .25s ease, visibility .25s;
+}
+.about-modal.is-open{ opacity:1; visibility:visible }
+.about-modal__card{
+  position:relative; width:500px; max-width:100%;
+  max-height:calc(100dvh - 96px);
+  background:#FFFFFF; border-radius:8px; corner-shape:squircle;
+  padding:43px 32px; display:flex; flex-direction:column;
+  transform:translateY(16px) scale(.98);
+  transition:transform .25s cubic-bezier(.22,.61,.21,1);
+}
+.about-modal.is-open .about-modal__card{ transform:none }
+.about-modal__text{
+  margin:0; font:400 var(--fs-body)/1.6 var(--font-body); color:var(--text-primary);
+  min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  padding-right:12px; margin-right:-12px; scrollbar-width:thin;
+}
+.about-modal__text p{ margin:0 }
+/* в макете абзацы разведены пустой строкой — здесь это интервал 24, не 0.8em из окна отзыва:
+   там текст короче и плотнее, тут — справочный список с телефоном и часами, ему нужен воздух */
+.about-modal__text p + p{ margin-top:24px }
+.about-modal__title{ font-weight:700 }
+.about-modal__text a{ color:inherit; text-decoration:none; font-weight:700 }
+.about-modal__text a.about-modal__link{ color:var(--link-default) }
+.about-modal__text a:hover{ color:var(--link-hover) }
+.about-modal__close{
+  position:absolute; left:100%; bottom:100%;
+  width:32px; height:32px; padding:0; border:0; background:transparent;
+  color:#FFFFFF; cursor:pointer; display:grid; place-items:center;
+  transition:color .2s ease;
+}
+.about-modal__close svg{ width:20px; height:20px; display:block; fill:currentColor }
+.about-modal__close:hover{ color:var(--gold-300) }
+.about-modal__close:focus-visible{ outline:2px solid var(--gold-400); outline-offset:3px }
+@media (max-width:559px){
+  .about-modal{ padding:16px }
+  .about-modal__card{ padding:32px 20px; max-height:calc(100dvh - 32px) }
+  .about-modal__close{ left:auto; right:12px; bottom:auto; top:12px; color:var(--text-primary) }
+  .about-modal__close:hover{ color:var(--gold-700) }
+}
+@media (prefers-reduced-motion: reduce){
+  .about-modal, .about-modal__card, .about-modal__close{ transition:none }
+  .about-modal__card{ transform:none }
+}
+
 /* CTA отзывов (макет 229:380): подпись + пилюли-ссылки на площадки с отзывами.
    Пилюли перекрываются на 16px, Яндекс сверху; ховер — как у secondary-кнопки
    (фон gold-50) + подъём на 4px, задняя пилюля при ховере встаёт на передний план (230:450) */
@@ -839,15 +915,19 @@ body{
 <div class="grain-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 
 <!-- информер: сообщение о тестовом режиме, закрывается крестиком (макет 511:1730) -->
+<!-- Сентябрьский вариант информера (макет 744:3264). Чтобы вернуть: дописать информеру
+     класс informer--card и заменить строку текста этими абзацами.
+<div class="informer__text">
+  <p class="informer__title">Уважаемые гости!</p>
+  <p>В&nbsp;сентябре Музей зерна работает в&nbsp;техническом режиме: ежедневно <span class="informer__pre">с&nbsp;</span><b>8:00 до&nbsp;16:00</b>, экскурсии&nbsp;— по&nbsp;предварительной записи.</p>
+  <p>Стоимость экскурсии&nbsp;— 600&nbsp;₽. В&nbsp;неё входят 40-минутная интерактивная экскурсия и&nbsp;дегустация сета «Зерно»: уральская сытная преснушка&nbsp;— пирожок с&nbsp;секретной начинкой от&nbsp;шефа, каша на&nbsp;фундучном молоке с&nbsp;местными ягодами и&nbsp;чай по&nbsp;авторскому рецепту.</p>
+  <p>Экскурсионные группы: 9:00–11:00, 11:00–13:00, 13:00–15:00.</p>
+  <p>Запись по&nbsp;телефону <a href="tel:+79227110940">+7&nbsp;(922)&nbsp;711-09-40</a> или на&nbsp;<a class="informer__link" href="https://muzeyzerna.ru" target="_blank" rel="noopener">muzeyzerna.ru</a>.</p>
+  <p>Ждём вас в&nbsp;первом в&nbsp;России Музее зерна!</p>
+</div>
+-->
 <div class="informer" id="informer" role="status">
-  <div class="informer__text">
-    <p class="informer__title">Уважаемые гости!</p>
-    <p>В&nbsp;сентябре Музей зерна работает в&nbsp;техническом режиме: ежедневно <span class="informer__pre">с&nbsp;</span><b>8:00 до&nbsp;16:00</b>, экскурсии&nbsp;— по&nbsp;предварительной записи.</p>
-    <p>Стоимость экскурсии&nbsp;— 600&nbsp;₽. В&nbsp;неё входят 40-минутная интерактивная экскурсия и&nbsp;дегустация сета «Зерно»: уральская сытная преснушка&nbsp;— пирожок с&nbsp;секретной начинкой от&nbsp;шефа, каша на&nbsp;фундучном молоке с&nbsp;местными ягодами и&nbsp;чай по&nbsp;авторскому рецепту.</p>
-    <p>Экскурсионные группы: 9:00–11:00, 11:00–13:00, 13:00–15:00.</p>
-    <p>Запись по&nbsp;телефону <a href="tel:+79227110940">+7&nbsp;(922)&nbsp;711-09-40</a> или на&nbsp;<a class="informer__link" href="https://muzeyzerna.ru" target="_blank" rel="noopener">muzeyzerna.ru</a>.</p>
-    <p>Ждём вас в&nbsp;первом в&nbsp;России Музее зерна!</p>
-  </div>
+  <p class="informer__text">Музей временно работает в&nbsp;тестовом режиме с&nbsp;8:00 до&nbsp;16:00</p>
   <button class="informer__close" type="button" aria-label="Закрыть сообщение">
     <svg viewBox="0 0 32 32" aria-hidden="true">
       <path d="M26 6.80102L16.7999 16L26 25.2001L25.2001 26L16 16.7999L6.79991 26L6 25.2001L15.199 16L6 6.80102L6.79991 6L16 15.2001L25.2001 6L26 6.80102Z"/>
@@ -969,7 +1049,7 @@ body{
   </div>
   <div class="btn-row museum-cta-row reveal" id="museumCtaRow">
       <button class="btn btn--primary" type="button">Записаться на&nbsp;экскурсию</button>
-      <button class="btn btn--secondary" type="button">Больше о&nbsp;музее</button>
+      <button class="btn btn--secondary" type="button" data-about-open>Больше о&nbsp;музее</button>
   </div>
 </section>
 
@@ -1204,6 +1284,14 @@ body{
 
 <!-- ===== Окно «весь отзыв» (макет 653:1785) =====
      Содержимое подставляет скрипт: текст, аватар и имя берутся из карточки, по которой кликнули -->
+<!-- ===== Окно «о музее» (макет 764:1187) — текст тот же, что в информере первого экрана ===== -->
+<div class="about-modal" id="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-modal-title" aria-hidden="true">
+  <div class="about-modal__card">
+    <button class="about-modal__close" type="button" data-about-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="about-modal__text" id="about-modal-title"><p class="about-modal__title">Уважаемые гости!</p><p>В&nbsp;сентябре Музей зерна работает в&nbsp;техническом режиме: ежедневно с&nbsp;8:00 до&nbsp;16:00, экскурсии&nbsp;— по&nbsp;предварительной записи.</p><p>Стоимость экскурсии&nbsp;— 600&nbsp;₽. В&nbsp;неё входят 40-минутная интерактивная экскурсия и&nbsp;дегустация сета «Зерно»: уральская сытная преснушка&nbsp;— пирожок с&nbsp;секретной начинкой от&nbsp;шефа, каша на&nbsp;фундучном молоке с&nbsp;местными ягодами и&nbsp;чай по&nbsp;авторскому рецепту.</p><p>Экскурсионные группы: 9:00–11:00, 11:00–13:00, 13:00–15:00.</p><p>Запись по&nbsp;телефону <a href="tel:+79227110940">8&nbsp;(922)&nbsp;711-09-40</a> или на&nbsp;<a class="about-modal__link" href="https://muzeyzerna.ru" target="_blank" rel="noopener">muzeyzerna.ru</a>.</p><p>Ждём вас в&nbsp;первом в&nbsp;России Музее зерна!</p></div>
+  </div>
+</div>
+
 <div class="review-modal" id="review-modal" role="dialog" aria-modal="true" aria-label="Отзыв гостя" aria-hidden="true">
   <div class="review-modal__card">
     <button class="review-modal__close" type="button" data-review-close aria-label="Закрыть отзыв"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
@@ -1222,6 +1310,43 @@ body{
   // 1) показать «Читать весь отзыв» только там, где текст действительно не поместился;
   // 2) открыть окно с полным текстом. Текст в карточке лежит целиком — обрезка чисто
   //    визуальная, поэтому окну достаточно скопировать разметку, дублировать её не нужно.
+  // ——— окно «о музее» (макет 764:1187): текст статичный, разметка уже в HTML ———
+  (function(){
+    var окно = document.getElementById('about-modal');
+    var кнопки = document.querySelectorAll('[data-about-open]');
+    if (!окно || !кнопки.length) return;
+    var вернутьФокус = null;
+    function открыть(){
+      вернутьФокус = document.activeElement;
+      окно.classList.add('is-open');
+      окно.removeAttribute('aria-hidden');
+      document.body.style.overflow = 'hidden';
+      окно.querySelector('.about-modal__close').focus();
+    }
+    function закрыть(){
+      окно.classList.remove('is-open');
+      окно.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (вернутьФокус && вернутьФокус.focus) вернутьФокус.focus();
+    }
+    кнопки.forEach(function(б){ б.addEventListener('click', открыть); });
+    окно.addEventListener('click', function(e){
+      if (e.target === окно || e.target.closest('[data-about-close]')) закрыть();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && окно.classList.contains('is-open')) закрыть();
+    });
+    окно.addEventListener('keydown', function(e){
+      if (e.key !== 'Tab') return;
+      var фокусируемые = окно.querySelectorAll('button, [href], input, select, textarea');
+      var видимые = [].filter.call(фокусируемые, function(el){ return !el.disabled && el.offsetParent !== null; });
+      if (!видимые.length) return;
+      var первый = видимые[0], последний = видимые[видимые.length - 1];
+      if (e.shiftKey && document.activeElement === первый){ e.preventDefault(); последний.focus(); }
+      else if (!e.shiftKey && document.activeElement === последний){ e.preventDefault(); первый.focus(); }
+    });
+  })();
+
   var окно = document.getElementById('review-modal');
   var карточки = [].slice.call(document.querySelectorAll('.reviews-card'));
   if (!окно || !карточки.length) return;
