@@ -164,8 +164,7 @@ main{ padding-top:var(--header-h) }
   line-height:1.2; letter-spacing:.07em; text-transform:uppercase; color:var(--gold-600); margin:0;
 }
 .director__quote{ font-weight:500; font-size:var(--fs-lead); line-height:1.6; color:var(--text-primary); margin:0 }
-.director__name{ font-weight:700; font-size:var(--fs-lead); line-height:1.6; color:var(--text-primary); margin:0 }
-.director__title{ font-size:var(--fs-body); line-height:1.6; color:var(--text-secondary); margin:0 }
+/* подпись (имя + должность) — общая с блоком шефа, правила ниже, в его секции */
 @media (max-width:1279px){ .director{ gap:48px } }
 @media (max-width:1023px){
   .director{ grid-template-columns:1fr; gap:var(--head-gap) }
@@ -205,15 +204,19 @@ main{ padding-top:var(--header-h) }
   border:1px solid var(--gold-400); color:var(--gold-700); font:500 var(--fs-small)/1.52 var(--font-body);
 }
 .dish-name{ font:600 20px/1.5 var(--font-body); color:var(--text-primary) }
-.dish-price{ font:600 20px/1.5 var(--font-body); color:var(--text-primary); white-space:nowrap }
+/* цена золотая (правка макета 01.09: UI/Price перекрашен в gold/700) */
+.dish-price{ font:600 20px/1.5 var(--font-body); color:var(--gold-700); white-space:nowrap }
 .dish-desc{ font:400 var(--fs-small)/1.52 var(--font-body); color:var(--text-secondary); margin:6px 0 0 }
 
 /* — Вкладка «Завтраки»: сетка карточек с фото — */
 .menu-cards{ display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--gap) }
 .dish-card{ background:var(--surface-card); border-radius:8px; overflow:clip; display:flex; flex-direction:column }
-.dish-card__photo{ aspect-ratio:382/264; overflow:clip }
-.dish-card__photo img{ width:100%; height:100%; object-fit:cover }
-.dish-card__info{ padding:24px; display:flex; flex-direction:column; align-items:flex-start; gap:16px }
+/* Высота фото ограничена 250 (правка макета 01.09: height + max-height 250).
+   Пропорция ведёт на узких экранах, где карточка уже макетных 382, а max-height
+   не даёт кадру вырасти, когда карточка шире — например в две колонки на планшете. */
+.dish-card__photo{ position:relative; aspect-ratio:382/250; max-height:250px; overflow:clip }
+.dish-card__photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.dish-card__info{ padding:24px }
 .dish-card__row{ display:flex; align-items:baseline; justify-content:space-between; gap:16px }
 @media (max-width:1279px){ .menu-cards{ grid-template-columns:repeat(2, 1fr) } }
 @media (max-width:767px){ .menu-cards{ grid-template-columns:1fr } }
@@ -229,8 +232,9 @@ main{ padding-top:var(--header-h) }
 /* — Вкладка «Салаты и закуски»: список + крупная карточка — */
 .menu-split{ display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start }
 .dish-featured{ background:var(--surface-card); border-radius:8px; padding:32px; display:flex; flex-direction:column; gap:32px }
-.dish-featured__photo{ aspect-ratio:704/504; border-radius:4px; overflow:clip }
-.dish-featured__photo img{ width:100%; height:100%; object-fit:cover }
+/* витрина: фото ограничено 480 (правка макета 01.09, было 504) */
+.dish-featured__photo{ position:relative; aspect-ratio:704/480; max-height:480px; border-radius:4px; overflow:clip }
+.dish-featured__photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
 .dish-featured__info{ display:flex; flex-direction:column; align-items:flex-start; gap:16px }
 @media (max-width:1023px){ .menu-split{ grid-template-columns:1fr } }
 
@@ -275,19 +279,64 @@ main{ padding-top:var(--header-h) }
   .kitchen-column__row .kitchen-column__photo{ aspect-ratio:246/288 }
 }
 
-/* ===== КОМАНДА ===== */
-.team-row{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--gap); margin-top:var(--head-gap) }
-.team-row__photo{ border-radius:8px; overflow:clip; aspect-ratio:517/600 }
-.team-row__photo img{ width:100%; height:100%; object-fit:cover }
+/* ===== БЛОК ШЕФА (макет 776:1780, переработан 01.09) =====
+   Ряд из трёх колонок 517: портрет 700 высотой, две фотографии команды по 338
+   (338 + 24 + 338 = 700 — вровень с портретом) и карточка обращения.
+   Заголовка у блока больше нет: вместо него знак-колос в самой карточке. */
+/* minmax(0,1fr), а не 1fr: у портрета задана пропорция, и когда ряд выше неё
+   (карточка с текстом тянет ряд вниз), его min-content ширина растёт вместе с
+   высотой — колонка портрета отбирала ширину у соседних и три колонки разъезжались */
+.team-row{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--gap); margin-top:var(--head-gap) }
+.team-row__photo{ position:relative; border-radius:8px; overflow:clip; background:var(--sand-200); aspect-ratio:517/700 }
+.team-row__photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+/* половинки тянутся по высоте портрета, а не по своей пропорции: иначе на части
+   ширин колонка не добивала до низа ряда (та же механика, что в блоке кухни) */
 .team-photos{ display:flex; flex-direction:column; gap:var(--gap) }
-.team-photos .team-row__photo{ flex:1; aspect-ratio:517/288 }
-.team-text{ background:var(--surface-card); padding:48px; display:flex; flex-direction:column; gap:24px }
-.team-text h3{
-  font-family:var(--font-heading); font-weight:400; font-size:var(--fs-h4); line-height:1.36;
-  letter-spacing:.06em; text-transform:uppercase; color:var(--gold-600); margin:0;
+.team-photos .team-row__photo{ flex:1; min-height:0; aspect-ratio:auto }
+.chef-text{
+  background:var(--surface-card); padding:48px;
+  display:flex; flex-direction:column; align-items:center; gap:24px;
 }
-.team-text p{ font-size:var(--fs-body); line-height:1.6; color:var(--text-secondary); margin:0 } /* Body/Base 18, на телефоне сжимается токеном */
-@media (max-width:1023px){ .team-row{ grid-template-columns:1fr } .team-row__photo{ aspect-ratio:16/10 } }
+/* Колос «прорастает» — та же механика, что у иконок музея на главной: у каждого пути
+   pathLength=1, штрих длиной в весь путь сдвинут за его конец, анимация возвращает
+   сдвиг к нулю. Порядок снизу вверх: стебель, три пары листьев, остриё. Стартует,
+   когда проявилась сама карточка (класс .in ставит наблюдатель прокрутки). */
+.chef-text__icon{ display:block; width:64px; height:64px; flex:none; color:var(--gold-600); overflow:visible }
+.chef-text__icon path{ fill:none; stroke:currentColor; stroke-width:2 }
+@keyframes wheat-draw{ to{ stroke-dashoffset:0 } }
+@media (prefers-reduced-motion: no-preference){
+  .chef-text__icon path{ stroke-dasharray:1; stroke-dashoffset:1 }
+  .chef-text.in .chef-text__icon path{
+    animation:wheat-draw .45s cubic-bezier(.22,.61,.21,1) forwards;
+    animation-delay:calc(.35s + var(--wd, 0s)); /* .35с — чтобы сначала проступила карточка */
+  }
+  /* пары листьев растут одновременно слева и справа */
+  .chef-text__icon path:nth-child(1){ --wd:0s }                                      /* стебель */
+  .chef-text__icon path:nth-child(2), .chef-text__icon path:nth-child(5){ --wd:.1s }  /* нижняя пара */
+  .chef-text__icon path:nth-child(3), .chef-text__icon path:nth-child(6){ --wd:.2s }  /* средняя */
+  .chef-text__icon path:nth-child(4), .chef-text__icon path:nth-child(7){ --wd:.3s }  /* верхняя */
+  .chef-text__icon path:nth-child(8){ --wd:.4s }                                     /* остриё */
+}
+.chef-text__bio{ display:flex; flex-direction:column; gap:16px; width:100% }
+/* обращение — Body/Lead 24 обычным начертанием, вторичным цветом (макет 776:1784) */
+.chef-text__quote{ font-size:var(--fs-lead); line-height:1.6; color:var(--text-secondary); margin:0 }
+/* Подпись под обращением устроена одинаково у директора и у шефа */
+.director__name, .chef__name{ font-weight:700; font-size:var(--fs-lead); line-height:1.6; color:var(--text-primary); margin:0 }
+.director__title, .chef__title{ font-size:var(--fs-body); line-height:1.6; color:var(--text-secondary); margin:0 }
+/* 1024–1599: три колонки в узком контейнере — обращение 24px попадает в строку
+   256–360px, вытягивается вдвое-втрое и растягивает за собой весь ряд. Поэтому
+   фото остаются парой, а карточка обращения уходит под них во всю ширину.
+   Порог 1599 — ступень сетки проекта: с 1600 контейнер даёт колонке 368+. */
+@media (max-width:1599px){
+  .team-row{ grid-template-columns:repeat(2, minmax(0, 1fr)) }
+  .chef-text{ grid-column:1 / -1 }
+}
+@media (max-width:1023px){
+  .team-row{ grid-template-columns:1fr }
+  .team-row__photo{ aspect-ratio:16/10 }
+  /* колонка встала под портрет — половинки снова держат пропорцию сами */
+  .team-photos .team-row__photo{ flex:none; aspect-ratio:517/338 }
+}
 
 /* ===== СПЕЦИАЛЬНЫЕ ПРЕДЛОЖЕНИЯ ===== */
 .offers-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--gap); margin-top:var(--head-gap) }
@@ -356,84 +405,59 @@ main{ padding-top:var(--header-h) }
     <!-- Завтраки: сетка карточек с фото -->
     <div class="menu-panel menu-cards" id="panel-breakfast" role="tabpanel" aria-labelledby="tab-breakfast">
       <article class="dish-card reveal">
-        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-presnushka.jpg" alt="Уральская преснушка" loading="lazy"></div>
         <div class="dish-card__info">
-          <span class="badge">От шефа</span>
-          <div>
-            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
-            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
-          </div>
+          <div class="dish-card__row"><span class="dish-name">Уральская преснушка</span><span class="dish-price">320 ₽</span></div>
+          <p class="dish-desc">Сытный пирожок из пресного теста · 150 г</p>
         </div>
       </article>
       <article class="dish-card reveal">
-        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-kasha.jpg" alt="Каша на фундучном молоке" loading="lazy"></div>
         <div class="dish-card__info">
-          <span class="badge">От шефа</span>
-          <div>
-            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
-            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
-          </div>
+          <div class="dish-card__row"><span class="dish-name">Каша на фундучном молоке</span><span class="dish-price">290 ₽</span></div>
+          <p class="dish-desc">Крупа собственного помола и лесные ягоды · 280 г</p>
         </div>
       </article>
       <article class="dish-card reveal">
-        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-syrniki.jpg" alt="Сырники с полбой" loading="lazy"></div>
         <div class="dish-card__info">
-          <span class="badge">От шефа</span>
-          <div>
-            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
-            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
-          </div>
+          <div class="dish-card__row"><span class="dish-name">Сырники с полбой</span><span class="dish-price">340 ₽</span></div>
+          <p class="dish-desc">Сметана и ягодный соус · 220 г</p>
         </div>
       </article>
       <article class="dish-card reveal">
-        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-omlet.jpg" alt="Омлет с лесными грибами" loading="lazy"></div>
         <div class="dish-card__info">
-          <span class="badge">От шефа</span>
-          <div>
-            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
-            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
-          </div>
-        </div>
-      </article>
-      <!-- второй ряд — в макете две menu-category по 4 карточки (779:2119 и 779:2308) -->
-      <article class="dish-card reveal">
-        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
-        <div class="dish-card__info">
-          <span class="badge">От шефа</span>
-          <div>
-            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
-            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
-          </div>
+          <div class="dish-card__row"><span class="dish-name">Омлет с лесными грибами</span><span class="dish-price">380 ₽</span></div>
+          <p class="dish-desc">Зелень и пармезан · 200 г</p>
         </div>
       </article>
       <article class="dish-card reveal">
-        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-bliny.jpg" alt="Блины на гречневой закваске" loading="lazy"></div>
         <div class="dish-card__info">
-          <span class="badge">От шефа</span>
-          <div>
-            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
-            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
-          </div>
+          <div class="dish-card__row"><span class="dish-name">Блины на гречневой закваске</span><span class="dish-price">350 ₽</span></div>
+          <p class="dish-desc">Сметана, мёд или красная икра · 200 г</p>
         </div>
       </article>
       <article class="dish-card reveal">
-        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-boul.jpg" alt="Творожный боул" loading="lazy"></div>
         <div class="dish-card__info">
-          <span class="badge">От шефа</span>
-          <div>
-            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
-            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
-          </div>
+          <div class="dish-card__row"><span class="dish-name">Творожный боул</span><span class="dish-price">360 ₽</span></div>
+          <p class="dish-desc">Ягоды, мёд, поджаренная полба · 220 г</p>
         </div>
       </article>
       <article class="dish-card reveal">
-        <div class="dish-card__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-poshot.jpg" alt="Яйца пашот на пшеничной оладье" loading="lazy"></div>
         <div class="dish-card__info">
-          <span class="badge">От шефа</span>
-          <div>
-            <div class="dish-card__row"><span class="dish-name">Тальятелле на своей муке</span><span class="dish-price">540 ₽</span></div>
-            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
-          </div>
+          <div class="dish-card__row"><span class="dish-name">Яйца пашот на пшеничной оладье</span><span class="dish-price">420 ₽</span></div>
+          <p class="dish-desc">Соус голландез и шпинат · 180 г</p>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-myusli.jpg" alt="Мюсли собственного помола" loading="lazy"></div>
+        <div class="dish-card__info">
+          <div class="dish-card__row"><span class="dish-name">Мюсли собственного помола</span><span class="dish-price">310 ₽</span></div>
+          <p class="dish-desc">Йогурт и сезонные фрукты · 200 г</p>
         </div>
       </article>
     </div>
@@ -441,39 +465,42 @@ main{ padding-top:var(--header-h) }
     <!-- Салаты и закуски: список + крупная карточка -->
     <div class="menu-panel menu-split" id="panel-salads" role="tabpanel" aria-labelledby="tab-salads" hidden>
       <div class="dish-list">
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Салат с печёной свёклой</span><span class="dish-price">420 ₽</span></div><p class="dish-desc">Козий сыр и жареные тыквенные семечки · 210 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Овощи с грядки</span><span class="dish-price">340 ₽</span></div><p class="dish-desc">Сезонный набор от фермеров, соус на мацони · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Сельдь с печёным картофелем</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Маринованный лук и масло холодного отжима · 230 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Тартар из говядины</span><span class="dish-price">590 ₽</span></div><p class="dish-desc">Каперсы, руккола, гренки на пшеничной муке · 180 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Паштет из куриной печени</span><span class="dish-price">380 ₽</span></div><p class="dish-desc">Брусничный конфитюр, поджаренная полба · 150 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Капрезе с томлёными томатами</span><span class="dish-price">420 ₽</span></div><p class="dish-desc">Моцарелла и песто из черемши · 220 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Сырная тарелка</span><span class="dish-price">390–540 ₽</span></div><p class="dish-desc">Три сыра, мёд и грецкий орех · 180 г</p></div>
       </div>
       <div class="dish-featured reveal">
-        <div class="dish-featured__photo"><img src="assets/restaurant/dish.jpg" alt="Тальятелле на своей муке" loading="lazy"></div>
+        <div class="dish-featured__photo"><img src="assets/restaurant/dish-set-zakusok.jpg" alt="Сет уральских закусок" loading="lazy"></div>
         <div class="dish-featured__info">
-          <span class="badge">От шефа</span>
+          <span class="badge">Фирменное</span>
           <div>
-            <div class="dish-row__line"><span class="dish-name">Тальятелле</span><span class="dish-price">540 ₽</span></div>
-            <p class="dish-desc">Паста ручной раскатки, томлёные томаты и пармезан · 320 г</p>
+            <div class="dish-row__line"><span class="dish-name">Сет уральских закусок</span><span class="dish-price">790 ₽</span></div>
+            <p class="dish-desc">Ассорти закусок, гриссини на своей муке и домашние лимонады · на двоих</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Горячие блюда, Десерты, Детское, Напитки, Алкоголь: прайс-лист в два столбца -->
+    <!-- Горячие блюда, Десерты, Детское, Напитки, Алкоголь: прайс-лист в два столбца.
+         Реальные позиции макет даёт только для «Горячих блюд» — остальные вкладки
+         повторяют тот же набор, как и в самом макете (одна раскладка на все пять). -->
     <div class="menu-panel menu-columns" id="panel-hot" role="tabpanel" aria-labelledby="tab-hot" hidden>
       <div class="dish-list">
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
       </div>
       <div class="dish-list">
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
       </div>
     </div>
 
@@ -483,12 +510,13 @@ main{ padding-top:var(--header-h) }
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
       </div>
       <div class="dish-list">
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
       </div>
     </div>
 
@@ -498,12 +526,13 @@ main{ padding-top:var(--header-h) }
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
       </div>
       <div class="dish-list">
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
       </div>
     </div>
 
@@ -513,12 +542,13 @@ main{ padding-top:var(--header-h) }
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
       </div>
       <div class="dish-list">
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
       </div>
     </div>
 
@@ -528,15 +558,15 @@ main{ padding-top:var(--header-h) }
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
         <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
       </div>
       <div class="dish-list">
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
-        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
       </div>
     </div>
-
   </div>
 
   <!-- CTA брони — часть блока меню (макет 779:2620) -->
@@ -576,16 +606,29 @@ main{ padding-top:var(--header-h) }
 <!-- ===== КОМАНДА ===== -->
 <section class="section container" id="team">
   <div class="team-row">
-    <div class="team-row__photo reveal"><img src="assets/restaurant/lobby.jpg" alt="Портрет шеф-повара" loading="lazy"></div>
+    <div class="team-row__photo reveal"><img src="assets/restaurant/chef.jpg" alt="Шеф-повар ресторана «Зерно»" loading="lazy"></div>
     <div class="team-photos reveal">
-      <div class="team-row__photo"><img src="assets/restaurant/lobby.jpg" alt="Команда «Зерна»" loading="lazy"></div>
-      <div class="team-row__photo"><img src="assets/restaurant/lobby.jpg" alt="Команда «Зерна»" loading="lazy"></div>
+      <div class="team-row__photo"><img src="assets/restaurant/team-crew.jpg" alt="Команда ресторана «Зерно»" loading="lazy"></div>
+      <div class="team-row__photo"><img src="assets/restaurant/team-kitchen.jpg" alt="Повара за работой на кухне" loading="lazy"></div>
     </div>
-    <div class="team-text reveal">
-      <h3>Имя Фамилия</h3>
-      <p>Собрал меню вокруг местных продуктов: мука своего помола, овощи и мясо от уральских фермеров.</p>
-      <p>Смена начинается за час до гостей — с заготовок и бульонов. К открытию на кухне уже всё готово.</p>
-      <p>Повара, официанты, бариста — многие работают вместе с самого открытия. Кухня у нас на виду, так что познакомиться можно прямо за обедом.</p>
+    <div class="chef-text reveal">
+      <svg class="chef-text__icon" viewBox="0 0 64 64" aria-hidden="true">
+        <path pathLength="1" d="M32 62L32 54"/>
+        <path pathLength="1" d="M32 52C32 45.3726 37.3726 40 44 40H46V42C46 48.6274 40.6274 54 34 54H32V52Z"/>
+        <path pathLength="1" d="M32 40C32 33.3726 37.3726 28 44 28H46V30C46 36.6274 40.6274 42 34 42H32V40Z"/>
+        <path pathLength="1" d="M32 28C32 21.3726 37.3726 16 44 16H46V18C46 24.6274 40.6274 30 34 30H32V28Z"/>
+        <path pathLength="1" d="M32 52C32 45.3726 26.6274 40 20 40H18V42C18 48.6274 23.3726 54 30 54H32V52Z"/>
+        <path pathLength="1" d="M32 40C32 33.3726 26.6274 28 20 28H18V30C18 36.6274 23.3726 42 30 42H32V40Z"/>
+        <path pathLength="1" d="M32 28C32 21.3726 26.6274 16 20 16H18V18C18 24.6274 23.3726 30 30 30H32V28Z"/>
+        <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
+      </svg>
+      <div class="chef-text__bio">
+        <p class="chef-text__quote">Я собрал меню вокруг местных продуктов: мука своего помола, овощи и&nbsp;мясо от&nbsp;уральских фермеров. Смена начинается за&nbsp;час до&nbsp;гостей&nbsp;— с&nbsp;заготовок и&nbsp;бульонов. К&nbsp;открытию на&nbsp;кухне уже всё готово. Повара, официанты, бариста&nbsp;— многие работают вместе с&nbsp;самого открытия. Кухня у&nbsp;нас на&nbsp;виду, так что познакомиться можно прямо за&nbsp;обедом.</p>
+        <div>
+          <p class="chef__name">Имя Фамилия</p>
+          <p class="chef__title">Шеф-повар ресторана</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
