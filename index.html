@@ -513,6 +513,14 @@ body{
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:5; line-clamp:5; overflow:hidden;
 }
 .event-card__btn{ margin-top:auto; align-self:flex-start } /* в макете кнопка компактная, 44px */
+/* Многоабзацное описание: абзацы внутри общего блока, чтобы обрезка по строкам считала их вместе */
+.event-card__desc p{ margin:0 }
+.event-card__desc p + p{ margin-top:.5em }
+
+/* Новости живут на карточках афиши, но лимиты строк у них свои (макет 482:1620):
+   заголовок — две строки, описание — восемь. У афиши потолки остались прежними. */
+#news .event-card__title{ -webkit-line-clamp:2; line-clamp:2 }
+#news .event-card__desc{ -webkit-line-clamp:8; line-clamp:8 }
 /* Чем уже карточка, тем меньше в неё влезает текста: обрезаем раньше, чтобы описание
    не упиралось в кнопку. Числа подобраны по самой длинной карточке — «Мастер-класс». */
 @media (max-width:1023px){
@@ -1154,46 +1162,52 @@ body{
 <section class="s-events" id="news">
   <div class="events__head">
     <h2 class="reveal">Новости</h2>
-    <p class="events__sub reveal">Путеводитель по&nbsp;самым вкусным событиям месяца</p>
   </div>
   <div class="events-car reveal" id="news-car" aria-label="Карусель новостей. Листайте перетаскиванием или колесом мыши">
     <article class="event-card">
-      <video src="assets/car-restaurant.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <img src="assets/news-1.jpg" alt="Съёмки программы «Можно! С Можаевым» в Музее зерна" loading="lazy">
       <div class="event-card__shade"></div>
       <div class="event-card__inner">
-        <p class="event-card__label">Ресторан</p>
-        <h3 class="event-card__title">Здоровые привычки внедряем каждый день</h3>
-        <p class="event-card__desc">Вам не&nbsp;нужно думать о&nbsp;пользе блюда&nbsp;— мы&nbsp;сделали это за&nbsp;вас. Позвольте себе открыть уральскую кухню заново.</p>
+        <p class="event-card__label">25 августа</p>
+        <h3 class="event-card__title">Яков Можаев: музей зерна глазами эксперта</h3>
+        <p class="event-card__desc">В&nbsp;рамках программы «Можно! С&nbsp;Можаевым» Музей зерна посетил гастроном-эксперт Яков Можаев. Он высоко оценил концепцию музея, попробовал дегустационный сет и&nbsp;назвал фирменную преснушку «прекрасной гастрономической мыслью». Эксперт отметил, что основы полезного питания заложены именно русской кухней — каши, хлеб, зерновые продукты. Выпуск о&nbsp;Челябинске выйдет осенью, а&nbsp;музей скоро откроется для посетителей.</p>
         <button class="btn btn--primary btn--m event-card__btn" type="button" data-tooltip="Страница в разработке">Подробнее</button>
       </div>
     </article>
     <article class="event-card">
-      <img src="assets/car-events.jpg" alt="">
+      <img src="assets/news-2.jpg" alt="Здание Музея зерна в день открытия" loading="lazy">
       <div class="event-card__shade"></div>
       <div class="event-card__inner">
-        <p class="event-card__label">21 августа</p>
-        <h3 class="event-card__title">Музыка позднего лета</h3>
-        <p class="event-card__desc">Живая музыка, приглушённый свет и&nbsp;бокал вина&nbsp;— провожаем август не&nbsp;спеша. Столики у&nbsp;окна разбирают первыми, торопитесь!</p>
+        <p class="event-card__label">4 сентября</p>
+        <h3 class="event-card__title">Торжественное открытие музея</h3>
+        <div class="event-card__desc">
+          <p>В&nbsp;этот день Музей зерна официально откроет двери для всех. Это будет начало новой гастрономической и&nbsp;культурной традиции на Урале.</p>
+          <p>В&nbsp;числе первых гостей музея — официальные лица Челябинска. Мы проведём экскурсию и&nbsp;угостим авторским меню от шеф-повара Дмитрия Кузьмина.</p>
+          <p>Мы готовим для гостей встречу со вкусом, историей и&nbsp;атмосферой.</p>
+        </div>
         <button class="btn btn--primary btn--m event-card__btn" type="button" data-tooltip="Страница в разработке">Подробнее</button>
       </div>
     </article>
     <article class="event-card">
-      <video src="assets/car-masterclass.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <img src="assets/news-3.jpg" alt="Экскурсия у карты «Путешествие зерна»" loading="lazy">
       <div class="event-card__shade"></div>
       <div class="event-card__inner">
-        <p class="event-card__label">18 сентября</p>
-        <h3 class="event-card__title">Мастер-класс</h3>
-        <p class="event-card__desc">С&nbsp;шеф-поваром ресторана «Зерно» вы&nbsp;научитесь не&nbsp;просто готовить, вы&nbsp;проживёте историю: от&nbsp;выбора ингредиентов до&nbsp;финального приготовления. Бронируйте место заранее.</p>
+        <p class="event-card__label">5 сентября</p>
+        <h3 class="event-card__title">Блогеры Челябинска — в&nbsp;Музее зерна!</h3>
+        <div class="event-card__desc">
+          <p>В&nbsp;этот день блогеры Челябинска придут к&nbsp;нам в&nbsp;музей. Они попробуют уральскую преснушку, которая уже успела покорить Якова Можаева, а&nbsp;также другие блюда, которые возрождают забытые вкусы нашего региона.</p>
+          <p>Следите за новостями и&nbsp;анонсами!</p>
+        </div>
         <button class="btn btn--primary btn--m event-card__btn" type="button" data-tooltip="Страница в разработке">Подробнее</button>
       </div>
     </article>
     <article class="event-card">
-      <img src="assets/car-menu.jpg" alt="">
+      <img src="assets/news-4.jpg" alt="Гости у входа в Музей зерна" loading="lazy">
       <div class="event-card__shade"></div>
       <div class="event-card__inner">
-        <p class="event-card__label">Меню</p>
-        <h3 class="event-card__title">Уральское блюдо на&nbsp;вашей тарелке&nbsp;— это история, в&nbsp;которой вековые традиции сочетаются с&nbsp;заботой о&nbsp;вашем здоровье</h3>
-        <p class="event-card__desc">Мы&nbsp;бережно храним наследие предков и&nbsp;культивируем здоровое питание. Наше меню создано с&nbsp;учётом уральских традиций и&nbsp;полезного сочетания ингредиентов.</p>
+        <p class="event-card__label">6 сентября</p>
+        <h3 class="event-card__title">День открытых дверей!</h3>
+        <p class="event-card__desc">В&nbsp;этот день Музей примет одну экскурсионную группу челябинцев и&nbsp;гостей города. Мы уверены: этот день запомнится каждому гостю. Впереди — много тёплых встреч, интересных разговоров и, конечно, вкусной еды.</p>
         <button class="btn btn--primary btn--m event-card__btn" type="button" data-tooltip="Страница в разработке">Подробнее</button>
       </div>
     </article>
