@@ -339,14 +339,18 @@ main{ padding-top:var(--header-h) }
 }
 
 /* ===== СПЕЦИАЛЬНЫЕ ПРЕДЛОЖЕНИЯ ===== */
-.offers-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--gap); margin-top:var(--head-gap) }
+/* minmax(0,1fr) — как и в блоке шефа: у фото задана пропорция, и в ряду, который
+   выше её, min-content колонки растёт вместе с высотой и колонки разъезжаются */
+.offers-grid{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--gap); margin-top:var(--head-gap) }
 .offer-card{ background:var(--surface-card); border-radius:8px; overflow:clip; display:flex; flex-direction:column }
-.offer-card__photo{ aspect-ratio:517/282; overflow:clip }
-.offer-card__photo img{ width:100%; height:100%; object-fit:cover }
+/* фото ограничено 320 (правка макета 01.09, было 282) — пропорция ведёт на узких
+   экранах, max-height держит потолок, когда карточка шире макетных 517 */
+.offer-card__photo{ position:relative; aspect-ratio:517/320; max-height:320px; overflow:clip }
+.offer-card__photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
 .offer-card__info{ padding:24px; display:flex; flex-direction:column; align-items:flex-start; gap:16px }
 .offer-card__title{ font:600 20px/1.5 var(--font-body); color:var(--text-primary); margin:0 }
-.offer-card__desc{ font:400 var(--fs-small)/1.52 var(--font-body); color:var(--text-secondary); margin:0 }
-@media (max-width:1279px){ .offers-grid{ grid-template-columns:repeat(2, 1fr) } }
+.offer-card__desc{ font:400 var(--fs-small)/1.52 var(--font-body); color:var(--text-secondary); margin:6px 0 0 }
+@media (max-width:1279px){ .offers-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)) } }
 @media (max-width:767px){ .offers-grid{ grid-template-columns:1fr } }
 </style>
 </head>
@@ -638,45 +642,45 @@ main{ padding-top:var(--header-h) }
   <div class="section__head"><h2 class="reveal">Специальные предложения</h2></div>
   <div class="offers-grid">
     <article class="offer-card reveal">
-      <div class="offer-card__photo"><img src="assets/restaurant/dish.jpg" alt="День рождения в «Зерне»" loading="lazy"></div>
+      <div class="offer-card__photo"><img src="assets/restaurant/offer-birthday.jpg" alt="День рождения в «Зерне»" loading="lazy"></div>
       <div class="offer-card__info">
-        <span class="badge">До 31.09.2026</span>
-        <div><p class="offer-card__title">День рождения в «Зерне»</p><p class="offer-card__desc">Краткое описание</p></div>
+        <span class="badge">До 31.12.2026</span>
+        <div><p class="offer-card__title">День рождения в «Зерне»</p><p class="offer-card__desc">Отдельный зал на&nbsp;40 гостей, банкетное меню от&nbsp;шефа и&nbsp;торт на&nbsp;заказ. Берём на&nbsp;себя рассадку, музыку и&nbsp;оформление&nbsp;— вам остаётся только прийти.</p></div>
       </div>
     </article>
     <article class="offer-card reveal">
-      <div class="offer-card__photo"><img src="assets/restaurant/dish.jpg" alt="Свадьба в «Зерне»" loading="lazy"></div>
+      <div class="offer-card__photo"><img src="assets/restaurant/offer-wedding.jpg" alt="Свадьба в «Зерне»" loading="lazy"></div>
       <div class="offer-card__info">
-        <span class="badge">До 31.09.2026</span>
-        <div><p class="offer-card__title">Свадьба в «Зерне»</p><p class="offer-card__desc">Краткое описание</p></div>
+        <span class="badge">До 30.06.2027</span>
+        <div><p class="offer-card__title">Свадьба в «Зерне»</p><p class="offer-card__desc">Выездная регистрация в&nbsp;зале с&nbsp;панорамными окнами и&nbsp;банкет до&nbsp;80 гостей. Меню собираем вместе с&nbsp;вами, депозит фиксируем за&nbsp;полгода&nbsp;— цена не&nbsp;изменится.</p></div>
       </div>
     </article>
     <article class="offer-card reveal">
-      <div class="offer-card__photo"><img src="assets/restaurant/couple-evening.jpg" alt="Вечер на двоих" loading="lazy"></div>
+      <div class="offer-card__photo"><img src="assets/restaurant/offer-evening.jpg" alt="Вечер на двоих" loading="lazy"></div>
       <div class="offer-card__info">
-        <span class="badge">До 31.09.2026</span>
-        <div><p class="offer-card__title">Вечер на двоих</p><p class="offer-card__desc">Краткое описание</p></div>
+        <span class="badge">До 30.11.2026</span>
+        <div><p class="offer-card__title">Вечер на двоих</p><p class="offer-card__desc">Сет из&nbsp;пяти подач, бокал игристого и&nbsp;стол у&nbsp;окна. Бронируем на&nbsp;любой вечер, кроме пятницы и&nbsp;субботы&nbsp;— в&nbsp;эти дни в&nbsp;зале шумно.</p></div>
       </div>
     </article>
     <article class="offer-card reveal">
-      <div class="offer-card__photo"><img src="assets/restaurant/dish.jpg" alt="День рождения в «Зерне»" loading="lazy"></div>
+      <div class="offer-card__photo"><img src="assets/restaurant/offer-lunch.jpg" alt="Бизнес-ланч" loading="lazy"></div>
       <div class="offer-card__info">
-        <span class="badge">До 31.09.2026</span>
-        <div><p class="offer-card__title">День рождения в «Зерне»</p><p class="offer-card__desc">Краткое описание</p></div>
+        <span class="badge">Ежедневно</span>
+        <div><p class="offer-card__title">Бизнес-ланч</p><p class="offer-card__desc">Три блюда на&nbsp;выбор за&nbsp;450&nbsp;₽, с&nbsp;понедельника по&nbsp;пятницу с&nbsp;12:00 до&nbsp;16:00. Готовим порционно, ждать не&nbsp;придётся&nbsp;— уложимся в&nbsp;обеденный перерыв.</p></div>
       </div>
     </article>
     <article class="offer-card reveal">
-      <div class="offer-card__photo"><img src="assets/restaurant/dish.jpg" alt="Свадьба в «Зерне»" loading="lazy"></div>
+      <div class="offer-card__photo"><img src="assets/restaurant/offer-tour.jpg" alt="Экскурсия с обедом" loading="lazy"></div>
       <div class="offer-card__info">
-        <span class="badge">До 31.09.2026</span>
-        <div><p class="offer-card__title">Свадьба в «Зерне»</p><p class="offer-card__desc">Краткое описание</p></div>
+        <span class="badge">Будни</span>
+        <div><p class="offer-card__title">Экскурсия с обедом</p><p class="offer-card__desc">Часовая экскурсия по&nbsp;Музею зерна и&nbsp;обед в&nbsp;ресторане следом. Для групп от&nbsp;четырёх человек, по&nbsp;предварительной записи. 1&nbsp;200&nbsp;₽ с&nbsp;гостя.</p></div>
       </div>
     </article>
     <article class="offer-card reveal">
-      <div class="offer-card__photo"><img src="assets/restaurant/couple-evening.jpg" alt="Вечер на двоих" loading="lazy"></div>
+      <div class="offer-card__photo"><img src="assets/restaurant/offer-family.jpg" alt="Семейное воскресенье" loading="lazy"></div>
       <div class="offer-card__info">
-        <span class="badge">До 31.09.2026</span>
-        <div><p class="offer-card__title">Вечер на двоих</p><p class="offer-card__desc">Краткое описание</p></div>
+        <span class="badge">Каждое воскресенье</span>
+        <div><p class="offer-card__title">Семейное воскресенье</p><p class="offer-card__desc">Каждое воскресенье с&nbsp;11:00: детское меню, мастер-класс на&nbsp;кухне и&nbsp;место, где ребёнку можно шуметь. Взрослым&nbsp;— кофе и&nbsp;спокойный завтрак.</p></div>
       </div>
     </article>
   </div>
