@@ -36,3 +36,6 @@ assets/avatars/av17.jpg
 assets/avatars/av18.jpg
 assets/avatars/av19.jpg
 assets/avatars/av20.jpg
+
+# Служебный конфиг локального сервера предпросмотра
+.claude/

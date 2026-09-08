@@ -118,7 +118,8 @@
 }
 .offer-modal__close svg{ width:20px; height:20px; display:block; fill:currentColor }
 .offer-modal__close:hover{ color:var(--gold-300) }
-.offer-modal__close:focus-visible{ outline:2px solid var(--gold-400); outline-offset:3px }
+/* рамки фокуса по проекту сняты со всего, кроме полей ввода (сброс в chrome.css) —
+   своей у крестика нет намеренно; программный перевод фокуса при этом остаётся */
 @media (max-width:639px){
   .offer-modal{ padding:16px }
   .offer-modal__card{ padding:32px 20px; max-height:calc(100dvh - 32px); gap:24px }
