@@ -497,6 +497,32 @@
     showBar();
   }
 
-  if (document.readyState === 'loading') addEventListener('DOMContentLoaded', init);
-  else init();
+  /* Ленивые видео: тег держит адрес в data-src и получает src только когда подъезжает
+     к экрану. Так первый экран не делит канал с роликами, до которых ещё далеко скроллить.
+     Видео первого экрана размечены обычным src — сюда не попадают и грузятся сразу.
+     Уехало за экран — ставим на паузу: крутить декодер за кадром незачем. */
+  function lazyVideo(){
+    var list = document.querySelectorAll('video[data-src]');
+    if (!list.length) return;
+    var включить = function(v){
+      if (!v.getAttribute('src')) v.setAttribute('src', v.getAttribute('data-src'));
+      var p = v.play();
+      if (p && p.catch) p.catch(function(){}); // автозапуск могут отклонить — молча переживаем
+    };
+    if (!('IntersectionObserver' in window)){ // старый браузер: отдаём всё сразу, как было раньше
+      Array.prototype.forEach.call(list, включить);
+      return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) включить(e.target);
+        else if (!e.target.paused) e.target.pause();
+      });
+    }, { rootMargin: '200px' }); // запас: ролик успевает стартовать до того, как его увидят
+    Array.prototype.forEach.call(list, function(v){ io.observe(v); });
+  }
+
+  function запуск(){ init(); lazyVideo(); }
+  if (document.readyState === 'loading') addEventListener('DOMContentLoaded', запуск);
+  else запуск();
 })();
