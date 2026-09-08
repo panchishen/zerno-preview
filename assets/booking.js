@@ -276,4 +276,7 @@
   инициализировать(document.getElementById('booking-tour'),  '[data-tour-open]');
   инициализировать(document.getElementById('booking-table'), '[data-table-open]');
   инициализировать(document.getElementById('booking-class'), '[data-class-open]');
+  // Аренда зала — кнопка в CTA страницы «Мастер-классы» (master-classes.html).
+  // На остальных страницах этого окна нет — инициализировать() тихо выходит на null.
+  инициализировать(document.getElementById('booking-hall'),  '[data-hall-open]');
 })();

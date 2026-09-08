@@ -242,6 +242,10 @@
   padding:32px 0 48px;
 }
 .ft__brand{ flex:none }
+/* Меню футера — две колонки по 4 пункта (макет 744:3174). Обёртка <nav> нужна только
+   для скринридера: display:contents убирает её бокс, и обе колонки становятся
+   собственными элементами flex .ft__in — зазоры между всеми блоками остаются равными */
+.ft__nav{ display:contents }
 .ft__logo{ display:block; line-height:0 }
 .ft__logo img{ width:269px; height:48px; display:block } /* тот же размер, что в шапке */
 

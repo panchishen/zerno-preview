@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зерно — Меню ресторана</title>
+<meta name="description" content="Меню ресторана «Зерно»: завтраки, салаты и закуски, горячие блюда, десерты и напитки. Своя мука и крупы, продукты уральских ферм.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prosto+One&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- сквозные хедер и футер: разметку вставляет chrome.js -->
+<link rel="stylesheet" href="assets/chrome.css">
+<!-- поля форм, календарь и модалка бронирования -->
+<link rel="stylesheet" href="assets/vendor/air-datepicker.css">
+<link rel="stylesheet" href="assets/forms.css">
+<link rel="stylesheet" href="assets/booking.css">
+<!-- подсказка по наведению: атрибут data-tooltip на любом элементе -->
+<link rel="stylesheet" href="assets/tooltip.css">
+<!-- база внутренних страниц: токены, кнопки, hero, чипы, карточки, CTA -->
+<link rel="stylesheet" href="assets/page.css">
+<script src="assets/vendor/air-datepicker.js" defer></script>
+<script src="assets/vendor/air-datepicker-ru.js" defer></script>
+<script src="assets/forms.js" defer></script>
+<script src="assets/booking.js" defer></script>
+<script src="assets/tooltip.js" defer></script>
+<script src="assets/chrome.js" defer></script>
+<script src="assets/page.js" defer></script>
+<!-- демпфер scroll-driven анимаций -->
+<script src="assets/scrub.js"></script>
+<script>(function(){var w=document.documentElement.clientWidth;if(w>0)document.documentElement.style.setProperty('--vw',w+'px');})();</script>
+<style>
+/* ===== МЕНЮ (макет 880:1910) =====
+   Чипы категорий стоят в первом экране, под ними — раскладка активной вкладки.
+   Раскладок три: сетка карточек с фото (Завтраки), список + витрина
+   (Салаты и закуски) и прайс-лист в два столбца (все остальные). */
+/* панели — отдельный ребёнок героя, зазор до чипов даёт его gap (64), своего отступа не нужно */
+.menu-panels{ width:100% }
+.menu-panel[hidden]{ display:none }
+
+.dish-name{ font:600 20px/1.5 var(--font-body); color:var(--text-primary) }
+/* цена золотая (UI/Price в макете перекрашен в gold/700) */
+.dish-price{ font:600 20px/1.5 var(--font-body); color:var(--gold-700); white-space:nowrap }
+.dish-desc{ font:400 var(--fs-small)/1.52 var(--font-body); color:var(--text-secondary); margin:6px 0 0 }
+
+/* — Завтраки: сетка карточек с фото — */
+.menu-cards{ display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:var(--gap) }
+.dish-card{ background:var(--surface-card); border-radius:8px; overflow:clip; display:flex; flex-direction:column }
+/* высота фото ограничена 250: пропорция ведёт на узких экранах, max-height держит
+   потолок, когда карточка шире макетных 382 (например в две колонки на планшете) */
+.dish-card__photo{ position:relative; aspect-ratio:382/250; max-height:250px; overflow:clip; background:var(--sand-200) }
+.dish-card__photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.dish-card__info{ padding:24px }
+.dish-card__row{ display:flex; align-items:baseline; justify-content:space-between; gap:16px }
+@media (max-width:1279px){ .menu-cards{ grid-template-columns:repeat(2, minmax(0, 1fr)) } }
+@media (max-width:767px){ .menu-cards{ grid-template-columns:1fr } }
+
+/* — Список позиций: шаг 48 (24 сверху + разделитель + 24 снизу) — */
+.dish-list{ display:flex; flex-direction:column }
+.dish-row{ padding:24px 0; border-bottom:1px solid var(--graphite-200) }
+.dish-row:first-child{ padding-top:0 }
+.dish-row:last-child{ border-bottom:0; padding-bottom:0 }
+.dish-row__line{ display:flex; align-items:baseline; justify-content:space-between; gap:16px }
+
+/* — Салаты и закуски: список + витрина с фото — */
+.menu-split{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:64px; align-items:start }
+.dish-featured{ background:var(--surface-card); border-radius:8px; padding:32px; display:flex; flex-direction:column; gap:32px }
+.dish-featured__photo{ position:relative; aspect-ratio:704/480; max-height:480px; border-radius:4px; overflow:clip; background:var(--sand-200) }
+.dish-featured__photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.dish-featured__info{ display:flex; flex-direction:column; align-items:flex-start; gap:16px }
+@media (max-width:1023px){ .menu-split{ grid-template-columns:1fr; gap:var(--head-gap) } }
+
+/* — Остальные вкладки: два столбца прайс-листа — */
+.menu-columns{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:64px }
+@media (max-width:1023px){ .menu-columns{ grid-template-columns:1fr; gap:0 } }
+
+/* CTA завершает блок предложений — прижат к нему, а не отбит межблочным шагом */
+.section-offers .cta{ margin-top:var(--section-gap) }
+</style>
+</head>
+<body data-header="static">
+
+<main>
+
+<!-- ===== ГЕРОЙ И МЕНЮ (макет 880:1912) ===== -->
+<section class="section page-hero container" id="menu">
+  <nav class="breadcrumbs reveal" aria-label="Хлебные крошки">
+    <a href="index.html">Главная</a><span>/</span><span aria-current="page">Меню</span>
+  </nav>
+  <div class="page-hero__head">
+    <h1 class="reveal">Меню</h1>
+    <p class="page-hero__sub reveal">У&nbsp;нас можно попробовать легендарную преснушку</p>
+    <div class="chips menu-chips reveal" role="tablist" aria-label="Разделы меню">
+      <button class="chip" type="button" role="tab" aria-selected="true" aria-controls="panel-breakfast" id="tab-breakfast">Завтраки</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-salads" id="tab-salads">Салаты и закуски</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-hot" id="tab-hot">Горячие блюда</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-desserts" id="tab-desserts">Десерты</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-kids" id="tab-kids">Детское</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-drinks" id="tab-drinks">Напитки</button>
+      <button class="chip" type="button" role="tab" aria-selected="false" aria-controls="panel-alco" id="tab-alco">Алкоголь</button>
+    </div>
+  </div>
+
+  <div class="menu-panels">
+    <div class="menu-panel menu-cards" id="panel-breakfast" role="tabpanel" aria-labelledby="tab-breakfast">
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-presnushka.jpg" alt="Уральская преснушка" loading="lazy"></div>
+        <div class="dish-card__info">
+          <div class="dish-card__row"><span class="dish-name">Уральская преснушка</span><span class="dish-price">320 ₽</span></div>
+          <p class="dish-desc">Сытный пирожок из пресного теста · 150 г</p>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-kasha.jpg" alt="Каша на фундучном молоке" loading="lazy"></div>
+        <div class="dish-card__info">
+          <div class="dish-card__row"><span class="dish-name">Каша на фундучном молоке</span><span class="dish-price">290 ₽</span></div>
+          <p class="dish-desc">Крупа собственного помола и лесные ягоды · 280 г</p>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-syrniki.jpg" alt="Сырники с полбой" loading="lazy"></div>
+        <div class="dish-card__info">
+          <div class="dish-card__row"><span class="dish-name">Сырники с полбой</span><span class="dish-price">340 ₽</span></div>
+          <p class="dish-desc">Сметана и ягодный соус · 220 г</p>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-omlet.jpg" alt="Омлет с лесными грибами" loading="lazy"></div>
+        <div class="dish-card__info">
+          <div class="dish-card__row"><span class="dish-name">Омлет с лесными грибами</span><span class="dish-price">380 ₽</span></div>
+          <p class="dish-desc">Зелень и пармезан · 200 г</p>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-bliny.jpg" alt="Блины на гречневой закваске" loading="lazy"></div>
+        <div class="dish-card__info">
+          <div class="dish-card__row"><span class="dish-name">Блины на гречневой закваске</span><span class="dish-price">350 ₽</span></div>
+          <p class="dish-desc">Сметана, мёд или красная икра · 200 г</p>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-boul.jpg" alt="Творожный боул" loading="lazy"></div>
+        <div class="dish-card__info">
+          <div class="dish-card__row"><span class="dish-name">Творожный боул</span><span class="dish-price">360 ₽</span></div>
+          <p class="dish-desc">Ягоды, мёд, поджаренная полба · 220 г</p>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-poshot.jpg" alt="Яйца пашот на пшеничной оладье" loading="lazy"></div>
+        <div class="dish-card__info">
+          <div class="dish-card__row"><span class="dish-name">Яйца пашот на пшеничной оладье</span><span class="dish-price">420 ₽</span></div>
+          <p class="dish-desc">Соус голландез и шпинат · 180 г</p>
+        </div>
+      </article>
+      <article class="dish-card reveal">
+        <div class="dish-card__photo"><img src="assets/restaurant/dish-myusli.jpg" alt="Мюсли собственного помола" loading="lazy"></div>
+        <div class="dish-card__info">
+          <div class="dish-card__row"><span class="dish-name">Мюсли собственного помола</span><span class="dish-price">310 ₽</span></div>
+          <p class="dish-desc">Йогурт и сезонные фрукты · 200 г</p>
+        </div>
+      </article>
+    </div>
+
+    <!-- Салаты и закуски: список позиций и витрина с фото -->
+    <div class="menu-panel menu-split" id="panel-salads" role="tabpanel" aria-labelledby="tab-salads" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Салат с печёной свёклой</span><span class="dish-price">420 ₽</span></div><p class="dish-desc">Козий сыр и жареные тыквенные семечки · 210 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Овощи с грядки</span><span class="dish-price">340 ₽</span></div><p class="dish-desc">Сезонный набор от фермеров, соус на мацони · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Сельдь с печёным картофелем</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Маринованный лук и масло холодного отжима · 230 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Тартар из говядины</span><span class="dish-price">590 ₽</span></div><p class="dish-desc">Каперсы, руккола, гренки на пшеничной муке · 180 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Паштет из куриной печени</span><span class="dish-price">380 ₽</span></div><p class="dish-desc">Брусничный конфитюр, поджаренная полба · 150 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Капрезе с томлёными томатами</span><span class="dish-price">420 ₽</span></div><p class="dish-desc">Моцарелла и песто из черемши · 220 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Сырная тарелка</span><span class="dish-price">390–540 ₽</span></div><p class="dish-desc">Три сыра, мёд и грецкий орех · 180 г</p></div>
+      </div>
+      <div class="dish-featured reveal">
+        <div class="dish-featured__photo"><img src="assets/restaurant/dish-set-zakusok.jpg" alt="Сет уральских закусок" loading="lazy"></div>
+        <div class="dish-featured__info">
+          <span class="badge">Фирменное</span>
+          <div>
+            <div class="dish-row__line"><span class="dish-name">Сет уральских закусок</span><span class="dish-price">790 ₽</span></div>
+            <p class="dish-desc">Ассорти закусок, гриссини на своей муке и домашние лимонады · на двоих</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Горячие блюда и следующие вкладки: прайс-лист в два столбца. Реальные позиции
+         макет даёт только «Горячим блюдам» — остальные повторяют их набор, как в макете. -->
+    <div class="menu-panel menu-columns" id="panel-hot" role="tabpanel" aria-labelledby="tab-hot" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
+      </div>
+    </div>
+
+    <div class="menu-panel menu-columns" id="panel-desserts" role="tabpanel" aria-labelledby="tab-desserts" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
+      </div>
+    </div>
+
+    <div class="menu-panel menu-columns" id="panel-kids" role="tabpanel" aria-labelledby="tab-kids" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
+      </div>
+    </div>
+
+    <div class="menu-panel menu-columns" id="panel-drinks" role="tabpanel" aria-labelledby="tab-drinks" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
+      </div>
+    </div>
+
+    <div class="menu-panel menu-columns" id="panel-alco" role="tabpanel" aria-labelledby="tab-alco" hidden>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Томлёная говядина</span><span class="dish-price">690 ₽</span></div><p class="dish-desc">Шесть часов в печи, с корнеплодами и соусом · 320 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Свинина на кости</span><span class="dish-price">720 ₽</span></div><p class="dish-desc">Сутки в маринаде, доводим на углях · 350 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Форель на пшеничном ризотто</span><span class="dish-price">840 ₽</span></div><p class="dish-desc">Ризотто на дроблёной пшенице своего помола · 290 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Полба с белыми грибами</span><span class="dish-price">460 ₽</span></div><p class="dish-desc">Сливки, жареный лук, пармезан · 250 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Судак с гречишным кремом</span><span class="dish-price">780 ₽</span></div><p class="dish-desc">Филе на пару, крем из зелёной гречки и щавелевое масло · 260 г</p></div>
+      </div>
+      <div class="dish-list">
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Цыплёнок из печи</span><span class="dish-price">620 ₽</span></div><p class="dish-desc">Половина цыплёнка, печёные овощи · 400 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Пельмени с говядиной</span><span class="dish-price">480 ₽</span></div><p class="dish-desc">Лепим сами, подаём со сметаной · 300 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Голубцы с томлёной говядиной</span><span class="dish-price">490 ₽</span></div><p class="dish-desc">Молодая капуста и сметана · 280 г</p></div>
+        <div class="dish-row reveal"><div class="dish-row__line"><span class="dish-name">Драники</span><span class="dish-price">390 ₽</span></div><p class="dish-desc">Со сметаной и зелёным луком · 250 г</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== СПЕЦИАЛЬНЫЕ ПРЕДЛОЖЕНИЯ (макет 880:2046) ===== -->
+<section class="section container section-offers" id="offers">
+  <div class="section__head"><h2 class="reveal">Специальные предложения</h2></div>
+  <div class="cards" style="margin-top:var(--head-gap)">
+      <article class="card reveal">
+        <div class="card__photo"><img src="assets/restaurant/offer-birthday.jpg" alt="День рождения в «Зерне»" loading="lazy"></div>
+        <div class="card__info">
+          <div class="card__top">
+            <span class="badge">До 31.12.2026</span>
+            <div class="card__text">
+              <h3 class="card__title">День рождения в «Зерне»</h3>
+              <p class="card__desc">Отдельный зал на&nbsp;40 гостей, банкетное меню от&nbsp;шефа и&nbsp;торт на&nbsp;заказ. Берём на&nbsp;себя рассадку, музыку и&nbsp;оформление&nbsp;— вам остаётся только прийти.</p>
+            </div>
+          </div>
+          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card__photo"><img src="assets/restaurant/offer-wedding.jpg" alt="Свадьба в «Зерне»" loading="lazy"></div>
+        <div class="card__info">
+          <div class="card__top">
+            <span class="badge">До 30.06.2027</span>
+            <div class="card__text">
+              <h3 class="card__title">Свадьба в «Зерне»</h3>
+              <p class="card__desc">Выездная регистрация в&nbsp;зале с&nbsp;панорамными окнами и&nbsp;банкет до&nbsp;80 гостей. Меню собираем вместе с&nbsp;вами, депозит фиксируем за&nbsp;полгода&nbsp;— цена не&nbsp;изменится.</p>
+            </div>
+          </div>
+          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card__photo"><img src="assets/restaurant/offer-evening.jpg" alt="Вечер на двоих" loading="lazy"></div>
+        <div class="card__info">
+          <div class="card__top">
+            <span class="badge">До 30.11.2026</span>
+            <div class="card__text">
+              <h3 class="card__title">Вечер на двоих</h3>
+              <p class="card__desc">Сет из&nbsp;пяти подач, бокал игристого и&nbsp;стол у&nbsp;окна. Бронируем на&nbsp;любой вечер, кроме пятницы и&nbsp;субботы&nbsp;— в&nbsp;эти дни в&nbsp;зале шумно.</p>
+            </div>
+          </div>
+          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card__photo"><img src="assets/restaurant/offer-lunch.jpg" alt="Бизнес-ланч" loading="lazy"></div>
+        <div class="card__info">
+          <div class="card__top">
+            <span class="badge">Ежедневно</span>
+            <div class="card__text">
+              <h3 class="card__title">Бизнес-ланч</h3>
+              <p class="card__desc">Три блюда на&nbsp;выбор за&nbsp;450&nbsp;₽, с&nbsp;понедельника по&nbsp;пятницу с&nbsp;12:00 до&nbsp;16:00. Готовим порционно, ждать не&nbsp;придётся&nbsp;— уложимся в&nbsp;обеденный перерыв.</p>
+            </div>
+          </div>
+          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card__photo"><img src="assets/restaurant/offer-tour.jpg" alt="Экскурсия с обедом" loading="lazy"></div>
+        <div class="card__info">
+          <div class="card__top">
+            <span class="badge">Будни</span>
+            <div class="card__text">
+              <h3 class="card__title">Экскурсия с обедом</h3>
+              <p class="card__desc">Часовая экскурсия по&nbsp;Музею зерна и&nbsp;обед в&nbsp;ресторане следом. Для групп от&nbsp;четырёх человек, по&nbsp;предварительной записи. 1&nbsp;200&nbsp;₽ с&nbsp;гостя.</p>
+            </div>
+          </div>
+          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card__photo"><img src="assets/restaurant/offer-family.jpg" alt="Семейное воскресенье" loading="lazy"></div>
+        <div class="card__info">
+          <div class="card__top">
+            <span class="badge">Каждое воскресенье</span>
+            <div class="card__text">
+              <h3 class="card__title">Семейное воскресенье</h3>
+              <p class="card__desc">Каждое воскресенье с&nbsp;11:00: детское меню, мастер-класс на&nbsp;кухне и&nbsp;место, где ребёнку можно шуметь. Взрослым&nbsp;— кофе и&nbsp;спокойный завтрак.</p>
+            </div>
+          </div>
+          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+        </div>
+      </article>
+  </div>
+
+  <!-- CTA брони — завершает страницу (макет 966:1579) -->
+  <div class="cta reveal">
+    <div>
+      <h2>Столик можно занять заранее</h2>
+      <p>На обед, ужин или отдельный повод. Перезвоним и подтвердим бронь.</p>
+    </div>
+    <button class="btn btn--primary" type="button" data-table-open>Забронировать стол</button>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== Окно «Бронирование» — кнопка «Забронировать» в шапке ===== -->
+<div class="booking" id="booking" role="dialog" aria-modal="true" aria-labelledby="booking-title"
+     data-state="form" aria-hidden="true">
+  <div class="booking__card">
+    <button class="booking__close" type="button" data-booking-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="booking__form-wrap">
+      <h2 class="booking__title" id="booking-title">Бронирование</h2>
+      <form class="booking-form" novalidate>
+        <label class="field">
+          <input class="field__control" type="text" name="name" placeholder="Введите имя" autocomplete="name" required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field">
+          <input class="field__control" type="tel" name="phone" placeholder="+7 (___) ___-__-__" autocomplete="tel" data-phone required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field field--icon">
+          <span class="field__box">
+            <select class="field__control" name="subject" required>
+              <option value="" disabled selected>Что бронируете?</option>
+              <option>Экскурсию в музей</option>
+              <option>Столик в ресторане</option>
+              <option>Место на мастер-класс</option>
+            </select>
+            <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.4 5.3 8.7l1.4-1.4 5.3 5.3 5.3-5.3 1.4 1.4z"/></svg></span>
+          </span>
+          <span class="field__hint"></span>
+        </label>
+        <div class="booking-form__row">
+          <label class="field">
+            <input class="field__control" type="text" name="guests" placeholder="Посетителей" data-guests required>
+            <span class="field__hint"></span>
+          </label>
+          <label class="field field--icon">
+            <span class="field__box">
+              <input class="field__control" type="text" name="date" placeholder="дд.мм.гггг" data-date required>
+              <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1zM4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9H4zm16-2V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v1h16z"/><path d="M7 12h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 16h2v2H7zm4 0h2v2h-2z"/></svg></span>
+            </span>
+            <span class="field__hint"></span>
+          </label>
+        </div>
+        <button class="btn btn--primary" type="submit">Забронировать</button>
+        <div class="booking__consent">
+          <div class="booking__consent-row">
+            <input class="checkbox" type="checkbox" id="booking-consent" name="consent" autocomplete="off" data-consent required>
+            <label class="booking__consent-text" for="booking-consent">Даю согласие на&nbsp;обработку моих персональных данных в&nbsp;соответствии с&nbsp;<a href="#" data-soon>политикой обработки персональных данных</a></label>
+          </div>
+          <span class="field__hint"></span>
+        </div>
+      </form>
+    </div>
+    <div class="booking__success">
+      <div class="booking__success-head">
+        <h2 class="booking__title">Заявка принята!</h2>
+        <p class="booking__success-text">Мы свяжемся с&nbsp;вами в&nbsp;ближайшее рабочее время, чтобы подтвердить заявку и&nbsp;уточнить детали.</p>
+      </div>
+      <button class="btn btn--primary" type="button" data-booking-close>Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Окно «Бронирование стола» — кнопка в CTA ===== -->
+<div class="booking" id="booking-table" role="dialog" aria-modal="true" aria-labelledby="booking-table-title"
+     data-state="form" aria-hidden="true">
+  <div class="booking__card">
+    <button class="booking__close" type="button" data-booking-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="booking__form-wrap">
+      <h2 class="booking__title" id="booking-table-title">Бронирование стола</h2>
+      <form class="booking-form" novalidate>
+        <label class="field">
+          <input class="field__control" type="text" name="name" placeholder="Введите имя" autocomplete="name" required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field">
+          <input class="field__control" type="tel" name="phone" placeholder="Номер телефона" autocomplete="tel" data-phone required>
+          <span class="field__hint"></span>
+        </label>
+        <div class="booking-form__row">
+          <label class="field">
+            <input class="field__control" type="text" name="guests" placeholder="Посетителей" data-guests required>
+            <span class="field__hint"></span>
+          </label>
+          <label class="field field--icon">
+            <span class="field__box">
+              <input class="field__control" type="text" name="date" placeholder="дд.мм.гггг" data-date required>
+              <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1zM4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9H4zm16-2V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v1h16z"/><path d="M7 12h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 16h2v2H7zm4 0h2v2h-2z"/></svg></span>
+            </span>
+            <span class="field__hint"></span>
+          </label>
+        </div>
+        <button class="btn btn--primary" type="submit">Записаться</button>
+        <div class="booking__consent">
+          <div class="booking__consent-row">
+            <input class="checkbox" type="checkbox" id="booking-table-consent" name="consent" autocomplete="off" data-consent required>
+            <label class="booking__consent-text" for="booking-table-consent">Даю согласие на&nbsp;обработку моих персональных данных в&nbsp;соответствии с&nbsp;<a href="#" data-soon>политикой обработки персональных данных</a></label>
+          </div>
+          <span class="field__hint"></span>
+        </div>
+      </form>
+    </div>
+    <div class="booking__success">
+      <div class="booking__success-head">
+        <h2 class="booking__title">Заявка принята!</h2>
+        <p class="booking__success-text">Мы свяжемся с&nbsp;вами в&nbsp;ближайшее рабочее время, чтобы подтвердить заявку и&nbsp;уточнить детали.</p>
+      </div>
+      <button class="btn btn--primary" type="button" data-booking-close>Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // ===== Вкладки меню: одна активная панель, переключение чипами =====
+  var чипы = document.querySelectorAll('#menu [role="tab"]');
+  чипы.forEach(function(чип){
+    чип.addEventListener('click', function(){
+      if (чип.getAttribute('aria-selected') === 'true') return;
+      чипы.forEach(function(c){
+        c.setAttribute('aria-selected', 'false');
+        document.getElementById(c.getAttribute('aria-controls')).hidden = true;
+      });
+      чип.setAttribute('aria-selected', 'true');
+      var панель = document.getElementById(чип.getAttribute('aria-controls'));
+      панель.hidden = false;
+      // панель была скрыта, наблюдатель прокрутки её не видел — показываем содержимое сразу
+      панель.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

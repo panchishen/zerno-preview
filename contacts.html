@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зерно — Контакты</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prosto+One&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- сквозные хедер и футер: разметку вставляет chrome.js -->
+<link rel="stylesheet" href="assets/chrome.css">
+<!-- поля форм, календарь и модалка бронирования (её открывает кнопка шапки и CTA страницы) -->
+<link rel="stylesheet" href="assets/vendor/air-datepicker.css">
+<link rel="stylesheet" href="assets/forms.css">
+<link rel="stylesheet" href="assets/booking.css">
+<!-- подсказка по наведению: атрибут data-tooltip на любом элементе -->
+<link rel="stylesheet" href="assets/tooltip.css">
+<script src="assets/vendor/air-datepicker.js" defer></script>
+<script src="assets/vendor/air-datepicker-ru.js" defer></script>
+<script src="assets/forms.js" defer></script>
+<script src="assets/booking.js" defer></script>
+<script src="assets/tooltip.js" defer></script>
+<script src="assets/chrome.js" defer></script>
+<!-- демпфер scroll-driven анимаций; без defer — chrome.js зовёт createScrub для полосы прогресса -->
+<script src="assets/scrub.js"></script>
+<script>(function(){var w=document.documentElement.clientWidth;if(w>0)document.documentElement.style.setProperty('--vw',w+'px');})();</script>
+<style>
+/* ===== Зерно · токены (из зерно-цвета.tokens.json) — те же, что на главной и в ресторане ===== */
+:root{
+  --sand-50:#FDFAF1; --sand-100:#F9F3E4; --sand-200:#F0E6CE; --sand-300:#E4D8BD;
+  --gold-50:#FDF5E6; --gold-100:#FAEACF; --gold-400:#D3A856; --gold-500:#CB9C3F; --gold-600:#A97C19; --gold-700:#896100; --gold-800:#674800;
+  --graphite-200:#D5D1C9; --graphite-600:#5F5A52; --graphite-700:#474134; --graphite-800:#2E2A22; --graphite-900:#1D1911;
+  --text-primary:var(--graphite-700);
+  --text-secondary:var(--graphite-600);
+  --text-muted:#757068;
+  --gold-200:#F0D5A7; --gold-300:#E2BF7E; --gold-900:#493200; --gold-highlight:#F0D878;
+  --link-default:var(--gold-700); --link-hover:var(--gold-900);
+  --link-default-dark:var(--gold-400); --link-hover-dark:var(--gold-300);
+  --button-primary-bg:var(--gold-600); --button-primary-label:#FFFFFF;
+  --surface-page:#FDFAF1; --surface-card:var(--sand-100);
+  --sand-900:#3D372A; --text-inverse:#F9F3E4;
+  --sand-500:#BDB194; --text-secondary-dark:#BDB194;
+  --dark-bg:var(--graphite-900); --dark-gold:var(--gold-400);
+  --font-heading:'Prosto One', system-ui, sans-serif;
+  --font-body:'Onest', system-ui, sans-serif;
+  --margin:160px;
+  --vw:100vw;
+  --cw:min(var(--vw) - var(--margin)*2, 1600px);
+  --fs-h1:clamp(36px, 5.5vw, 80px);
+  --fs-h2:clamp(28px, 19.2px + 2.2vw, 48px);
+  --fs-h3:clamp(20px, 16px + 1vw, 28px);
+  --fs-lead:clamp(18px, 16px + .6vw, 24px);
+  --fs-item:clamp(18px, 16px + .25vw, 20px);   /* UI/Item Title S 20 — значения контактов */
+  --fs-body:clamp(16px, 15px + .25vw, 18px);
+  --fs-small:clamp(14px, 13.5px + .15vw, 16px);
+  /* Отступы этой страницы намеренно уже привычных 200 (макет 998:1802, правка заказчика 07.09):
+     между смысловыми блоками 120, внутри блока контактов 48 — карта читается как продолжение
+     карточек, а не как отдельная секция. На остальных страницах шаг остаётся 200. */
+  --section-gap:200px; --block-gap:120px; --inner-gap:48px; --head-gap:64px; --sub-gap:32px; --gap:24px;
+  --card-pad:40px;
+  /* Высота сквозной шапки: 88 — фолбэк на время загрузки, точное значение меряет скрипт внизу */
+  --header-h:88px;
+}
+@media (max-width:1599px){ :root{ --margin:80px } }
+@media (max-width:1279px){ :root{ --margin:48px; --section-gap:160px; --block-gap:96px; --inner-gap:40px; --head-gap:56px; --sub-gap:24px; --card-pad:32px } }
+@media (max-width:1023px){ :root{ --margin:40px; --section-gap:120px; --block-gap:80px; --inner-gap:32px; --head-gap:48px } }
+@media (max-width:767px){ :root{ --margin:16px; --section-gap:96px; --block-gap:64px; --inner-gap:24px; --head-gap:40px; --sub-gap:16px; --gap:16px; --card-pad:24px } }
+*{ box-sizing:border-box }
+html{ scrollbar-gutter:stable }
+body{
+  margin:0; background:var(--surface-page); color:var(--text-primary);
+  font-family:var(--font-body); font-size:var(--fs-body); line-height:1.6;
+}
+.container{ width:var(--cw); margin-inline:auto }
+img,video{ max-width:100%; display:block }
+
+/* ===== Кнопки — компонент Button L (макет 47:86) ===== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; text-decoration:none;
+  font:600 clamp(16px, 14px + .3vw, 20px)/1.1 var(--font-body); letter-spacing:.06em; text-transform:uppercase;
+  white-space:nowrap; border-radius:8px; corner-shape:squircle; cursor:pointer; border:0;
+  transition:background .2s ease, border-color .2s ease, color .2s ease, transform .3s cubic-bezier(.22,.61,.21,1);
+}
+.btn:hover{ transform:translateY(-4px) }
+.btn:active{ transform:none }
+.btn--primary{
+  color:#FFFFFF; background:var(--gold-600); padding:17px 32px;
+  position:relative; overflow:hidden; isolation:isolate;
+}
+.btn--primary:hover{ background:var(--gold-700) }
+.btn--primary::before{
+  content:''; position:absolute; z-index:-1; top:0; bottom:0; left:0; width:70%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+  animation:btn-sheen 5s ease-in-out infinite;
+}
+.btn--primary:hover::before{ animation-duration:2.4s }
+@keyframes btn-sheen{
+  0%{ transform:translateX(-140%) } 22%{ transform:translateX(220%) } 100%{ transform:translateX(220%) }
+}
+/* Secondary L (контурная): паддинги на 1px меньше primary — обводка в макете inside и входит
+   в высоту 56, CSS-border добавляется снаружи */
+.btn--secondary{
+  color:var(--gold-600); background:transparent; border:1px solid var(--gold-400); padding:16px 31px;
+}
+.btn--secondary:hover{ border-color:var(--gold-500); background:var(--gold-50) }
+.btn--secondary:active{ border-color:var(--gold-600); background:var(--gold-100) }
+@media (prefers-reduced-motion: reduce){ .btn, .btn--primary::before{ transition:none; animation:none } }
+
+/* ===== ПОЯВЛЕНИЕ ЭЛЕМЕНТОВ — тот же механизм, что на главной ===== */
+.reveal{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .8s cubic-bezier(.22,.61,.21,1), transform .8s cubic-bezier(.22,.61,.21,1);
+}
+.reveal.in{ opacity:1; transform:none }
+@media (prefers-reduced-motion: reduce){ .reveal{ opacity:1; transform:none; transition:none } }
+
+/* ===== КАРКАС СТРАНИЦЫ =====
+   Крошки стоят в 24px под шапкой (в макете page-sections y=100 при шапке 76). */
+main{ padding-top:var(--header-h) }
+.contacts-page{
+  padding:var(--gap) 0 var(--section-gap);
+  display:flex; flex-direction:column; gap:var(--block-gap);
+}
+
+/* ===== ГЕРОЙ ===== */
+.c-hero{ display:flex; flex-direction:column; align-items:center; gap:var(--head-gap) }
+.breadcrumbs{ display:flex; align-items:center; gap:8px; font-size:var(--fs-small); line-height:1.52 }
+.breadcrumbs a{ color:var(--link-default); text-decoration:none }
+.breadcrumbs a:hover{ color:var(--link-hover) }
+.breadcrumbs span{ color:var(--text-muted) }
+.c-hero__head{ display:flex; flex-direction:column; align-items:center; gap:var(--sub-gap); text-align:center }
+.c-hero__head h1{
+  font-family:var(--font-heading); font-weight:400; font-size:var(--fs-h1); line-height:1.1;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--gold-600); margin:0; text-wrap:balance;
+}
+/* подзаголовок идёт во всю ширину контейнера (правка макета 07.09: одна строка на 1600,
+   без узкой колонки) — ограничения ширины нет, переносами управляет text-wrap */
+.c-hero__sub{ font-weight:500; font-size:var(--fs-lead); line-height:1.6; color:var(--text-primary); margin:0; text-wrap:balance }
+
+/* ===== БЛОК КОНТАКТОВ: карточки + карта (макет 999:1860) ===== */
+.c-block{ display:flex; flex-direction:column; gap:var(--inner-gap) }
+/* Две равные колонки: в макете карточка 788 и столбец 788 при контейнере 1600 и зазоре 24.
+   minmax(0,1fr) — чтобы длинный адрес не раздувал колонку сверх доли. */
+.c-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--gap); align-items:stretch }
+.card{ background:var(--surface-card); border-radius:8px; corner-shape:squircle; padding:var(--card-pad) }
+
+/* — левая карточка: адрес, часы, телефон, почта, соцсети — */
+.c-card{ display:flex; flex-direction:column; gap:var(--gap) }
+.c-item{ display:flex; flex-direction:column; gap:8px }
+/* подпись — UI/Label (капс, трекинг 8%), но вторичным цветом, а не золотом:
+   золото на этой странице занято ссылками, иначе подпись и ссылка не различаются */
+.c-label{
+  font:600 var(--fs-small)/1.3 var(--font-body); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-secondary); margin:0;
+}
+/* Все значения набраны одинаково — UI/Item Title S 20 SemiBold (правка макета 07.09:
+   адрес больше не заголовок Prosto One капсом, а такая же строка, как часы и телефон) */
+.c-value{ font:600 var(--fs-item)/1.5 var(--font-body); color:var(--text-primary); margin:0 }
+.c-note{ font-size:var(--fs-body); line-height:1.6; color:var(--text-secondary); margin:0 }
+/* ссылка (телефон, почта, соцсети) — стиль Link/Default, наведение Link/Hover; подчёркивания
+   в проекте не используем, состояние несёт цвет */
+a.c-value{ color:var(--link-default); text-decoration:none; transition:color .2s ease }
+a.c-value:hover{ color:var(--link-hover) }
+.c-socials{ display:flex; flex-wrap:wrap; gap:var(--gap) }
+
+/* — правая колонка: три карточки «как добраться» по содержимому (правка макета 07.09:
+   были равные трети, стали HUG — карточка «на транспорте» выше двух соседних).
+   Левая карточка тянется до высоты этой колонки: align-items:stretch у сетки. — */
+.c-directions{ display:flex; flex-direction:column; gap:var(--gap) }
+.c-direction{ display:flex; flex-direction:column; gap:8px }
+.c-direction p{ margin:0 }
+.c-direction__text{ color:var(--text-primary) }
+
+/* — карта: Яндекс JS API, пропорция макета 1600×600 — */
+.c-map{
+  position:relative; width:100%; aspect-ratio:1600 / 600;
+  border-radius:16px; corner-shape:squircle; overflow:hidden; background:var(--sand-100);
+}
+.c-map iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; display:block }
+.c-btn-row{ display:flex; justify-content:center }
+
+/* ===== АДАПТИВ ===== */
+/* ≤1023: колонки складываются — карточка контактов во всю ширину, карточки маршрута под ней */
+@media (max-width:1023px){
+  .c-grid{ grid-template-columns:1fr }
+  .c-map{ aspect-ratio:3 / 2 }   /* плоская 8:3 на узком экране нечитаема */
+}
+@media (max-width:767px){
+  .c-map{ aspect-ratio:auto; height:min(70vh, 460px) }
+  .c-socials{ gap:16px }
+  .c-btn-row .btn{ width:100% }   /* кнопка маршрута во всю ширину — палец попадает наверняка */
+}
+</style>
+</head>
+<body data-header="static">
+
+<main>
+<section class="contacts-page container">
+
+  <!-- ===== ГЕРОЙ ===== -->
+  <div class="c-hero">
+    <nav class="breadcrumbs reveal" aria-label="Хлебные крошки">
+      <a href="index.html">Главная</a><span>/</span><span aria-current="page">Контакты</span>
+    </nav>
+    <div class="c-hero__head">
+      <h1 class="reveal">Контакты</h1>
+      <p class="c-hero__sub reveal">В&nbsp;историческом центре Челябинска, у&nbsp;реки Миасс. Ресторан, музей и&nbsp;конференц-зал&nbsp;— в&nbsp;одном здании.</p>
+    </div>
+  </div>
+
+  <!-- ===== КАРТОЧКИ + КАРТА ===== -->
+  <div class="c-block">
+    <div class="c-grid">
+
+      <div class="card c-card reveal">
+        <div class="c-item">
+          <p class="c-label">Адрес</p>
+          <p class="c-value">Свердловский проспект, 40А</p>
+          <p class="c-note">Челябинск, исторический центр, у&nbsp;реки Миасс</p>
+        </div>
+        <div class="c-item">
+          <p class="c-label">Время работы</p>
+          <p class="c-value">8:00–22:00, без выходных</p>
+        </div>
+        <div class="c-item">
+          <p class="c-label">Телефон</p>
+          <a class="c-value" href="tel:+79227110940">8 (922) 711-09-40</a>
+        </div>
+        <div class="c-item">
+          <p class="c-label">Почта</p>
+          <a class="c-value" href="mailto:muzey_zerno@spp.ru">muzey_zerno@spp.ru</a>
+        </div>
+        <div class="c-item">
+          <p class="c-label">Соцсети</p>
+          <!-- страниц в соцсетях у ресторана пока нет — те же заглушки data-soon, что в футере -->
+          <div class="c-socials">
+            <a class="c-value" href="#" data-soon>ВКонтакте</a>
+            <a class="c-value" href="#" data-soon>Telegram</a>
+            <a class="c-value" href="#" data-soon>MAX</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="c-directions">
+        <div class="card c-direction reveal">
+          <p class="c-label">На машине</p>
+          <p class="c-direction__text">Ориентир&nbsp;— Дворец спорта «Юность». Наземная парковка у&nbsp;здания на&nbsp;Свердловском проспекте, 40А.</p>
+        </div>
+        <div class="card c-direction reveal">
+          <p class="c-label">На транспорте</p>
+          <p class="c-direction__text">Остановка «Дворец спорта Юность»&nbsp;— 3&nbsp;минуты пешком: троллейбусы 7, 12, 17, автобусы 15, 35, 40, 58, 80, трамвай 2. Остановка «Труда»&nbsp;— 5&nbsp;минут: автобусы 51, 64, 78, троллейбус 14.</p>
+        </div>
+        <div class="card c-direction reveal">
+          <p class="c-label">Пешком</p>
+          <p class="c-direction__text">От&nbsp;площади Революции&nbsp;— около 20&nbsp;минут по&nbsp;Свердловскому проспекту в&nbsp;сторону реки. От&nbsp;Торгового центра&nbsp;— 8&nbsp;минут, от&nbsp;Дворца спорта «Юность»&nbsp;— 3.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- карта строится через JS API (зум колесом отключён, только кнопки);
+         если API не загрузится — скрипт ниже подставит обычный iframe-виджет -->
+    <div class="c-map reveal" id="scMap" role="application"
+         aria-label="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></div>
+
+    <!-- rtext=~точка — маршрут «от моего местоположения»: на телефоне ссылка откроет
+         приложение Яндекс Карт, без него — веб-версию -->
+    <div class="c-btn-row reveal">
+      <a class="btn btn--secondary" href="https://yandex.ru/maps/?rtext=~55.168600,61.386200" target="_blank" rel="noopener">Построить маршрут</a>
+    </div>
+  </div>
+
+</section>
+</main>
+
+<!-- ===== Универсальное окно бронирования — его открывает кнопка «Забронировать» в шапке ===== -->
+<div class="booking" id="booking" role="dialog" aria-modal="true" aria-labelledby="booking-title"
+     data-state="form" aria-hidden="true">
+  <div class="booking__card">
+    <button class="booking__close" type="button" data-booking-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="booking__form-wrap">
+      <h2 class="booking__title" id="booking-title">Бронирование</h2>
+      <form class="booking-form" novalidate>
+        <label class="field">
+          <input class="field__control" type="text" name="name" placeholder="Введите имя" autocomplete="name" required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field">
+          <input class="field__control" type="tel" name="phone" placeholder="+7 (___) ___-__-__" autocomplete="tel" data-phone required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field field--icon">
+          <span class="field__box">
+            <select class="field__control" name="subject" required>
+              <option value="" disabled selected>Что бронируете?</option>
+              <option>Экскурсию в музей</option>
+              <option>Столик в ресторане</option>
+              <option>Место на мастер-класс</option>
+            </select>
+            <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.4 5.3 8.7l1.4-1.4 5.3 5.3 5.3-5.3 1.4 1.4z"/></svg></span>
+          </span>
+          <span class="field__hint"></span>
+        </label>
+        <div class="booking-form__row">
+          <label class="field">
+            <input class="field__control" type="text" name="guests" placeholder="Посетителей" data-guests required>
+            <span class="field__hint"></span>
+          </label>
+          <label class="field field--icon">
+            <span class="field__box">
+              <input class="field__control" type="text" name="date" placeholder="дд.мм.гггг" data-date required>
+              <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1zM4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9H4zm16-2V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v1h16z"/><path d="M7 12h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 16h2v2H7zm4 0h2v2h-2z"/></svg></span>
+            </span>
+            <span class="field__hint"></span>
+          </label>
+        </div>
+        <button class="btn btn--primary" type="submit">Забронировать</button>
+        <div class="booking__consent">
+          <div class="booking__consent-row">
+            <input class="checkbox" type="checkbox" id="booking-consent" name="consent" autocomplete="off" data-consent required>
+            <label class="booking__consent-text" for="booking-consent">Даю согласие на&nbsp;обработку моих персональных данных в&nbsp;соответствии с&nbsp;<a href="#" data-soon>политикой обработки персональных данных</a></label>
+          </div>
+          <span class="field__hint"></span>
+        </div>
+      </form>
+    </div>
+    <div class="booking__success">
+      <div class="booking__success-head">
+        <h2 class="booking__title">Заявка принята!</h2>
+        <p class="booking__success-text">Мы свяжемся с&nbsp;вами в&nbsp;ближайшее рабочее время, чтобы подтвердить заявку и&nbsp;уточнить детали.</p>
+      </div>
+      <button class="btn btn--primary" type="button" data-booking-close>Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // ===== Точная высота шапки → --header-h =====
+  // Шапку вставляет chrome.js на DOMContentLoaded; setTimeout(0) гарантирует, что замер
+  // случится после его init() независимо от порядка подписки на событие.
+  function мерить(){
+    var шапка = document.getElementById('siteHeader');
+    if (шапка) document.documentElement.style.setProperty('--header-h', шапка.offsetHeight + 'px');
+  }
+  if (document.readyState === 'loading'){
+    addEventListener('DOMContentLoaded', function(){ setTimeout(мерить, 0); });
+  } else setTimeout(мерить, 0);
+})();
+</script>
+
+<script>
+(function(){
+  // Карта: Яндекс JS API вместо iframe-виджета — только так можно отключить зум колесом,
+  // оставив кнопки «+/−». behaviors без scrollZoom/dblClickZoom: колесо над картой
+  // прокручивает страницу, а не масштабирует карту. drag и пинч на таче сохранены.
+  const box = document.getElementById('scMap');
+  if (!box) return;
+  const COORDS = [55.1686, 61.3862]; // Свердловский просп., 40А (JS API: [широта, долгота])
+
+  function fallbackIframe(){ // страховка: API недоступен — прежний виджет (с зумом колесом)
+    box.innerHTML = '<iframe src="https://yandex.ru/map-widget/v1/?ll=61.386200%2C55.168600&z=16&pt=61.386200,55.168600,pm2rdm&l=map" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Карта: Зерно — Свердловский проспект, 40А, Челябинск"></iframe>';
+  }
+
+  function init(){
+    ymaps.ready(function(){
+      try {
+        const map = new ymaps.Map(box, {
+          // зум 16 — квартал вокруг здания: на странице контактов важно «где вход», а не обзор
+          // города (обзорный зум 12 остался в блоке контактов на главной)
+          center: COORDS, zoom: 16,
+          controls: ['zoomControl'],
+          behaviors: ['drag', 'multiTouch']
+        }, { suppressMapOpenBlock: true });
+        map.geoObjects.add(new ymaps.Placemark(COORDS, {
+          hintContent: 'Зерно',
+          balloonContent: 'Свердловский проспект, 40А'
+        }, { preset: 'islands#redIcon' }));
+      } catch(e){ fallbackIframe(); }
+    });
+  }
+
+  function load(){ // API подгружается, когда секция уже близко — аналог loading="lazy"
+    const s = document.createElement('script');
+    s.src = 'https://api-maps.yandex.ru/2.1/?lang=ru_RU';
+    s.onload = function(){ window.ymaps ? init() : fallbackIframe(); };
+    s.onerror = fallbackIframe;
+    document.head.appendChild(s);
+  }
+
+  new IntersectionObserver(function(entries, obs){
+    if (entries[0].isIntersecting){ obs.disconnect(); load(); }
+  }, { rootMargin: '600px' }).observe(box);
+})();
+</script>
+
+<script>
+(function(){
+  // ===== Появление элементов: тот же механизм, что на главной =====
+  var items = [].slice.call(document.querySelectorAll('.reveal'));
+  if (!items.length) return;
+
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    items.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+
+  var STEP = 0.2, CAP = 1.2;
+  var delay = function(n){ return Math.min(n * STEP, CAP).toFixed(2) + 's'; };
+  var order = new Map(items.map(function(el, i){ return [el, i]; }));
+  var io = new IntersectionObserver(function(entries, obs){
+    entries.filter(function(e){ return e.isIntersecting; })
+      .sort(function(a, b){ return order.get(a.target) - order.get(b.target); })
+      .forEach(function(e, n){
+        e.target.style.transitionDelay = delay(n);
+        e.target.classList.add('in');
+        obs.unobserve(e.target);
+      });
+  }, { threshold: 0.15, rootMargin: '0px 0px -22% 0px' });
+
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    items.forEach(function(el){ io.observe(el); });
+  }); });
+})();
+</script>
+
+</body>
+</html>

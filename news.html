@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зерно — Новости</title>
+<meta name="description" content="Новости Музея зерна и ресторана «Зерно»: открытия, гости, меню и расписание экскурсий.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prosto+One&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- сквозные хедер и футер: разметку вставляет chrome.js -->
+<link rel="stylesheet" href="assets/chrome.css">
+<!-- поля форм, календарь и модалка бронирования -->
+<link rel="stylesheet" href="assets/vendor/air-datepicker.css">
+<link rel="stylesheet" href="assets/forms.css">
+<link rel="stylesheet" href="assets/booking.css">
+<!-- подсказка по наведению: атрибут data-tooltip на любом элементе -->
+<link rel="stylesheet" href="assets/tooltip.css">
+<!-- база внутренних страниц: токены, кнопки, hero, карточки -->
+<link rel="stylesheet" href="assets/page.css">
+<script src="assets/vendor/air-datepicker.js" defer></script>
+<script src="assets/vendor/air-datepicker-ru.js" defer></script>
+<script src="assets/forms.js" defer></script>
+<script src="assets/booking.js" defer></script>
+<script src="assets/tooltip.js" defer></script>
+<script src="assets/chrome.js" defer></script>
+<script src="assets/page.js" defer></script>
+<!-- демпфер scroll-driven анимаций: chrome.js зовёт createScrub у стики-шапки -->
+<script src="assets/scrub.js"></script>
+<script>(function(){var w=document.documentElement.clientWidth;if(w>0)document.documentElement.style.setProperty('--vw',w+'px');})();</script>
+</head>
+
+<body data-header="static">
+
+<main>
+
+<!-- ===== ГЕРОЙ (макет 970:1834) ===== -->
+<section class="section page-hero container">
+  <nav class="breadcrumbs reveal" aria-label="Хлебные крошки">
+    <a href="index.html">Главная</a><span>/</span><span aria-current="page">Новости</span>
+  </nav>
+  <div class="page-hero__head">
+    <h1 class="reveal">Новости</h1>
+    <p class="page-hero__sub reveal">Что происходит в&nbsp;музее и&nbsp;ресторане: гости, открытия, новые блюда и&nbsp;расписание экскурсий.</p>
+  </div>
+</section>
+
+<!-- ===== ЛЕНТА НОВОСТЕЙ (макет 970:1920) ===== -->
+<section class="section section--after-hero container" id="news">
+  <div class="events-list" style="gap:var(--gap)">
+    <section class="month" data-batch data-hidden="false" aria-label="Новости за сентябрь">
+      <div class="cards">
+        <article class="card reveal">
+          <div class="card__photo">
+            <img src="assets/news-1.jpg" alt="Съёмки программы «Можно! С Можаевым» в Музее зерна" loading="lazy">
+          </div>
+          <div class="card__info">
+            <div class="card__top">
+              <p class="card__date">25 августа</p>
+              <div class="card__text">
+                <h2 class="card__title">Яков Можаев: музей зерна глазами эксперта</h2>
+                <p class="card__desc">В&nbsp;рамках программы «Можно! С&nbsp;Можаевым» музей посетил гастроном-эксперт. Он&nbsp;попробовал дегустационный сет и&nbsp;назвал преснушку «прекрасной гастрономической мыслью».</p>
+              </div>
+            </div>
+            <a class="card__link" href="news-article.html">Подробнее</a>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__photo">
+            <img src="assets/news-2.jpg" alt="Здание Музея зерна в день открытия" loading="lazy">
+          </div>
+          <div class="card__info">
+            <div class="card__top">
+              <p class="card__date">4 сентября</p>
+              <div class="card__text">
+                <h2 class="card__title">Торжественное открытие музея</h2>
+                <p class="card__desc">Музей зерна открыл двери. Первыми гостями стали официальные лица Челябинска&nbsp;— экскурсия и&nbsp;авторское меню от&nbsp;шефа Дмитрия Кузьмина.</p>
+              </div>
+            </div>
+            <a class="card__link" href="news-article.html">Подробнее</a>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__photo">
+            <img src="assets/news-3.jpg" alt="Экскурсия у карты «Путешествие зерна»" loading="lazy">
+          </div>
+          <div class="card__info">
+            <div class="card__top">
+              <p class="card__date">5 сентября</p>
+              <div class="card__text">
+                <h2 class="card__title">Блогеры Челябинска&nbsp;— в&nbsp;Музее зерна</h2>
+                <p class="card__desc">Гости попробовали уральскую преснушку и&nbsp;блюда, которые возвращают забытые вкусы региона. Их&nbsp;разборы&nbsp;— в&nbsp;наших соцсетях.</p>
+              </div>
+            </div>
+            <a class="card__link" href="news-article.html">Подробнее</a>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__photo">
+            <img src="assets/news-4.jpg" alt="Гости у входа в Музей зерна" loading="lazy">
+          </div>
+          <div class="card__info">
+            <div class="card__top">
+              <p class="card__date">6 сентября</p>
+              <div class="card__text">
+                <h2 class="card__title">День открытых дверей</h2>
+                <p class="card__desc">Музей принял первую экскурсионную группу челябинцев и&nbsp;гостей города. Дольше всего задержались у&nbsp;микроскопов.</p>
+              </div>
+            </div>
+            <a class="card__link" href="news-article.html">Подробнее</a>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__photo">
+            <img src="assets/restaurant/dish-set-zakusok.jpg" alt="Сет уральских закусок" loading="lazy">
+          </div>
+          <div class="card__info">
+            <div class="card__top">
+              <p class="card__date">12 сентября</p>
+              <div class="card__text">
+                <h2 class="card__title">Осеннее меню в&nbsp;ресторане</h2>
+                <p class="card__desc">Шеф обновил карту: тыква, грибы и&nbsp;уральские крупы. Часть блюд&nbsp;— из&nbsp;того самого зерна, что показывают в&nbsp;залах музея.</p>
+              </div>
+            </div>
+            <a class="card__link" href="news-article.html">Подробнее</a>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__photo">
+            <img src="assets/museum-elevator.jpg" alt="Макет элеватора в Музее зерна" loading="lazy">
+          </div>
+          <div class="card__info">
+            <div class="card__top">
+              <p class="card__date">20 сентября</p>
+              <div class="card__text">
+                <h2 class="card__title">Расписание экскурсий на&nbsp;октябрь</h2>
+                <p class="card__desc">Сеансы в&nbsp;9:00, 11:00 и&nbsp;13:00, дегустация включена. Запись открыта&nbsp;— по&nbsp;телефону и&nbsp;на&nbsp;странице афиши.</p>
+              </div>
+            </div>
+            <a class="card__link" href="news-article.html">Подробнее</a>
+          </div>
+        </article>
+      </div>
+    </section>
+    <!-- вторая порция раскрывается кнопкой «Показать ещё» -->
+    <section class="month" data-batch data-hidden="true" hidden aria-label="Более ранние новости">
+      <div class="cards">
+        <article class="card reveal">
+          <div class="card__photo">
+            <img src="assets/museum-lab.jpg" alt="Лаборатория Музея зерна" loading="lazy">
+          </div>
+          <div class="card__info">
+            <div class="card__top">
+              <p class="card__date">28 сентября</p>
+              <div class="card__text">
+                <h2 class="card__title">Экскурсии для школьных групп</h2>
+                <p class="card__desc">Собрали программу под класс: короткая экскурсия, лаборатория и&nbsp;обед в&nbsp;ресторане. Записываем группы от&nbsp;десяти человек.</p>
+              </div>
+            </div>
+            <a class="card__link" href="news-article.html">Подробнее</a>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__photo">
+            <img src="assets/conf2.jpg" alt="Конференц-зал Музея зерна" loading="lazy">
+          </div>
+          <div class="card__info">
+            <div class="card__top">
+              <p class="card__date">2 октября</p>
+              <div class="card__text">
+                <h2 class="card__title">Конференц-зал открыт для аренды</h2>
+                <p class="card__desc">Сто мест, проектор и&nbsp;кофе-брейк из&nbsp;нашего ресторана. Зал уже принял первые лекции о&nbsp;еде и&nbsp;здоровье.</p>
+              </div>
+            </div>
+            <a class="card__link" href="news-article.html">Подробнее</a>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__photo">
+            <img src="assets/museum-personalities.jpg" alt="Зал «Люди своего времени»" loading="lazy">
+          </div>
+          <div class="card__info">
+            <div class="card__top">
+              <p class="card__date">9 октября</p>
+              <div class="card__text">
+                <h2 class="card__title">Люди своего времени: новый зал</h2>
+                <p class="card__desc">Кузнецов, Григорович, Берестов&nbsp;— зал о&nbsp;тех, кто строил мукомольное дело на&nbsp;Урале. Вошёл в&nbsp;основную экскурсию.</p>
+              </div>
+            </div>
+            <a class="card__link" href="news-article.html">Подробнее</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <div class="more-row">
+    <button class="btn btn--secondary btn--m" type="button" data-more>Показать ещё</button>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== Окно «Бронирование» — кнопка «Забронировать» в шапке (разметка с главной) ===== -->
+<div class="booking" id="booking" role="dialog" aria-modal="true" aria-labelledby="booking-title"
+     data-state="form" aria-hidden="true">
+  <div class="booking__card">
+    <button class="booking__close" type="button" data-booking-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="booking__form-wrap">
+      <h2 class="booking__title" id="booking-title">Бронирование</h2>
+      <form class="booking-form" novalidate>
+        <label class="field">
+          <input class="field__control" type="text" name="name" placeholder="Введите имя" autocomplete="name" required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field">
+          <input class="field__control" type="tel" name="phone" placeholder="+7 (___) ___-__-__" autocomplete="tel" data-phone required>
+          <span class="field__hint"></span>
+        </label>
+        <label class="field field--icon">
+          <span class="field__box">
+            <select class="field__control" name="subject" required>
+              <option value="" disabled selected>Что бронируете?</option>
+              <option>Экскурсию в музей</option>
+              <option>Столик в ресторане</option>
+              <option>Место на мастер-класс</option>
+            </select>
+            <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.4 5.3 8.7l1.4-1.4 5.3 5.3 5.3-5.3 1.4 1.4z"/></svg></span>
+          </span>
+          <span class="field__hint"></span>
+        </label>
+        <div class="booking-form__row">
+          <label class="field">
+            <input class="field__control" type="text" name="guests" placeholder="Посетителей" data-guests required>
+            <span class="field__hint"></span>
+          </label>
+          <label class="field field--icon">
+            <span class="field__box">
+              <input class="field__control" type="text" name="date" placeholder="дд.мм.гггг" data-date required>
+              <span class="field__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1zM4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9H4zm16-2V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v1h16z"/><path d="M7 12h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 16h2v2H7zm4 0h2v2h-2z"/></svg></span>
+            </span>
+            <span class="field__hint"></span>
+          </label>
+        </div>
+        <button class="btn btn--primary" type="submit">Забронировать</button>
+        <div class="booking__consent">
+          <div class="booking__consent-row">
+            <input class="checkbox" type="checkbox" id="booking-consent" name="consent" autocomplete="off" data-consent required>
+            <label class="booking__consent-text" for="booking-consent">Даю согласие на&nbsp;обработку моих персональных данных в&nbsp;соответствии с&nbsp;<a href="#" data-soon>политикой обработки персональных данных</a></label>
+          </div>
+          <span class="field__hint"></span>
+        </div>
+      </form>
+    </div>
+    <div class="booking__success">
+      <div class="booking__success-head">
+        <h2 class="booking__title">Заявка принята!</h2>
+        <p class="booking__success-text">Мы свяжемся с&nbsp;вами в&nbsp;ближайшее рабочее время, чтобы подтвердить заявку и&nbsp;уточнить детали.</p>
+      </div>
+      <button class="btn btn--primary" type="button" data-booking-close>Закрыть</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

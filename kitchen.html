@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Зерно — Ресторан</title>
+<title>Зерно — Открытая кухня</title>
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#ffffff">
+<meta name="description" content="Открытая кухня Музея зерна: мастер-классы по выходным, группы до восьми человек. Учим готовить ресторанные блюда дома — на обычной плите и из обычных продуктов.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prosto+One&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,7 +21,7 @@
 <link rel="stylesheet" href="assets/booking.css">
 <!-- подсказка по наведению: атрибут data-tooltip на любом элементе -->
 <link rel="stylesheet" href="assets/tooltip.css">
-<!-- база внутренних страниц: токены, кнопки, hero, карточки -->
+<!-- база внутренних страниц: токены, кнопки, секции, hero, CTA -->
 <link rel="stylesheet" href="assets/page.css">
 <script src="assets/vendor/air-datepicker.js" defer></script>
 <script src="assets/vendor/air-datepicker-ru.js" defer></script>
@@ -29,19 +30,27 @@
 <script src="assets/tooltip.js" defer></script>
 <script src="assets/chrome.js" defer></script>
 <script src="assets/page.js" defer></script>
-<!-- демпфер scroll-driven анимаций; без defer — инлайн-скрипты страницы зовут createScrub при парсинге -->
+<!-- демпфер scroll-driven анимаций: его createScrub зовёт chrome.js (шапка), поэтому без defer -->
 <script src="assets/scrub.js"></script>
+<!-- --vw ставится до первой отрисовки, иначе сетка успевает лечь по фолбэку 100vw -->
 <script>(function(){var w=document.documentElement.clientWidth;if(w>0)document.documentElement.style.setProperty('--vw',w+'px');})();</script>
 <style>
-/* ===== ГАЛЕРЕЯ ПЕРВОГО ЭКРАНА (макет 880:3156) =====
-   Видео 1600×640 и под ним ряд из трёх кадров: широкий 787 и два по 382,
-   все высотой 570. Доли ряда взяты из макета, поэтому он тянется целиком. */
-.hero-gallery{ display:flex; flex-direction:column; gap:var(--gap); width:100% }
-.hero-row{ display:grid; grid-template-columns:787fr 382fr 382fr; gap:var(--gap) }
-.hero-row__cell{ position:relative; border-radius:8px; overflow:clip; background:var(--sand-200) }
+/* ==========================================================================
+   Открытая кухня (макет 880:2192). Общее — в assets/page.css, здесь только
+   галерея героя и ряд «карточка с рассказом + две колонки фотографий».
+   Обе конструкции повторяют «Ресторан»: там те же сетки 788/382/382 и 517×3.
+   ========================================================================== */
+
+/* ===== ГЕРОЙ: широкий кадр + ряд «фото 788 / фото 382 / фото 382» ===== */
+.hero-gallery{ width:100%; display:flex; flex-direction:column; gap:var(--gap) }
+.hero-row{ display:grid; grid-template-columns:788fr 382fr 382fr; gap:var(--gap) }
+.hero-row__cell{
+  position:relative; border-radius:8px; corner-shape:squircle;
+  overflow:clip; background:var(--sand-200);
+}
 .hero-row__cell img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
-/* пропорции кадров: широкий 787:570, узкие 382:570 */
-.hero-row__cell--wide{ aspect-ratio:787/570 }
+/* пропорции кадров: широкий 788:570, узкие 382:570 */
+.hero-row__cell--wide{ aspect-ratio:788/570 }
 .hero-row__cell--narrow{ aspect-ratio:382/570 }
 @media (max-width:1023px){
   /* три кадра в строку становятся слишком узкими: широкий занимает всю ширину,
@@ -54,39 +63,42 @@
   .hero-row__cell--narrow{ aspect-ratio:4/3 }
 }
 
-/* ===== КОМАНДА (макет 880:3166) =====
-   Ряд из трёх колонок 517: портрет 700 высотой, две фотографии по 338
-   (338 + 24 + 338 = 700 — вровень с портретом) и карточка обращения.
+/* ===== КАК ПРОХОДЯТ МАСТЕР-КЛАССЫ (макет 884:3352) =====
+   Ряд из трёх колонок 517: карточка с рассказом шефа и две колонки
+   по две фотографии 338 (338 + 24 + 338 = 700 — высота ряда в макете).
    Шаг внутри секции — 80, а не общий head-gap 64: так в макете. */
-.section-team{ --team-gap:80px }
-@media (max-width:1279px){ .section-team{ --team-gap:64px } }
-@media (max-width:767px){ .section-team{ --team-gap:48px } }
-/* minmax(0,1fr), а не 1fr: у портрета задана пропорция, и когда ряд выше неё,
-   его min-content ширина растёт вместе с высотой — колонки разъезжались */
-.team-row{
+.section-class{ --class-gap:80px }
+@media (max-width:1279px){ .section-class{ --class-gap:64px } }
+@media (max-width:767px){ .section-class{ --class-gap:48px } }
+.class-row{
   display:grid; grid-template-columns:repeat(3, minmax(0, 1fr));
-  gap:var(--gap); margin-top:var(--team-gap);
+  gap:var(--gap); margin-top:var(--class-gap);
 }
-.section-team .cta{ margin-top:var(--team-gap) }
-.team-row__photo{ position:relative; border-radius:8px; overflow:clip; background:var(--sand-200) }
-.team-row__photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
-/* Портрет. Пропорцию макета (517:700) держит распорка-псевдоэлемент, а не
-   aspect-ratio: с ним высота фиксируется намертво и колонка не растягивается —
-   портрет обрывался выше низа ряда, когда обращение оказывалось длиннее.
-   Так пропорция работает как минимум высоты, а height:100% добивает до низа. */
-.team-row > .team-row__photo{ height:100% }
-.team-row > .team-row__photo::before{ content:''; display:block; padding-top:135.4% }
-/* половинки делят высоту колонки поровну — колонка тянется по ряду вместе с портретом */
-.team-photos{ display:flex; flex-direction:column; gap:var(--gap) }
-.team-photos .team-row__photo{ flex:1; min-height:0 }
+.section-class .cta{ margin-top:var(--class-gap) }
+/* высоту ряда задают фотографии, карточка с текстом тянется за ними */
+.class-photos{ display:flex; flex-direction:column; gap:var(--gap) }
+.class-photo{
+  position:relative; aspect-ratio:517/338; border-radius:8px; corner-shape:squircle;
+  overflow:clip; background:var(--sand-200);
+}
+.class-photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+/* 1024–1599: три колонки зажимают рассказ 24px в строку 280–370px, он вытягивается
+   вдвое и растягивает весь ряд. Порог тот же, что у карточки шефа на «Ресторане»:
+   карточка уходит на всю ширину, фотографии остаются парами. */
+@media (max-width:1599px){
+  .class-row{ grid-template-columns:repeat(2, minmax(0, 1fr)) }
+  .class-row .chef-text{ grid-column:1 / -1 }
+}
+@media (max-width:767px){ .class-row{ grid-template-columns:1fr } }
 
+/* ===== Карточка с рассказом шефа (та же, что в блоке команды «Ресторана») ===== */
 .chef-text{
-  background:var(--surface-card); padding:48px;
+  background:var(--surface-card); border-radius:8px; corner-shape:squircle; padding:48px;
   display:flex; flex-direction:column; align-items:center; gap:24px;
 }
-/* Колос «прорастает» — та же механика, что у иконок музея на главной: у каждого пути
-   pathLength=1, штрих длиной в весь путь сдвинут за его конец, анимация возвращает
-   сдвиг к нулю. Порядок снизу вверх: стебель, три пары листьев, остриё. */
+/* Колос «прорастает»: у каждого пути pathLength=1, штрих длиной в весь путь сдвинут
+   за его конец, анимация возвращает сдвиг к нулю. Порядок снизу вверх:
+   стебель, три пары листьев, остриё. */
 .chef-text__icon{ display:block; width:64px; height:64px; flex:none; color:var(--gold-600); overflow:visible }
 .chef-text__icon path{ fill:none; stroke:currentColor; stroke-width:2 }
 @keyframes wheat-draw{ to{ stroke-dashoffset:0 } }
@@ -103,61 +115,46 @@
   .chef-text__icon path:nth-child(8){ --wd:.4s }                                     /* остриё */
 }
 .chef-text__bio{ display:flex; flex-direction:column; gap:16px; width:100% }
-/* обращение — Body/Lead 24 обычным начертанием, вторичным цветом */
+/* рассказ — Body/Lead 24 обычным начертанием, вторичным цветом */
 .chef-text__quote{ font-size:var(--fs-lead); line-height:1.6; color:var(--text-secondary); margin:0 }
+.chef-text__quote + .chef-text__quote{ margin-top:1.6em }
 .chef__name{ font-weight:700; font-size:var(--fs-lead); line-height:1.6; color:var(--text-primary); margin:0 }
 .chef__title{ font-size:var(--fs-body); line-height:1.6; color:var(--text-secondary); margin:0 }
-/* 1024–1599: три колонки зажимают обращение 24px в строку 256–360px, оно вытягивается
-   вдвое-втрое и растягивает весь ряд. Фото остаются парой, обращение уходит под них. */
-@media (max-width:1599px){
-  .team-row{ grid-template-columns:repeat(2, minmax(0, 1fr)) }
-  .chef-text{ grid-column:1 / -1 }
-}
-@media (max-width:1023px){
-  .team-row{ grid-template-columns:1fr }
-  /* всё встало в столбик: портрет во всю ширину берёт пейзажную пропорцию,
-     половинки — свою макетную, тянуться им больше не за чем */
-  .team-row > .team-row__photo::before{ padding-top:62.5% }   /* 16:10 */
-  .team-photos .team-row__photo{ flex:none; aspect-ratio:517/338 }
-  .chef-text{ padding:32px }
-}
+@media (max-width:767px){ .chef-text{ padding:32px 24px } }
 </style>
 </head>
 <body data-header="static">
 
 <main>
 
-<!-- ===== ГЕРОЙ: заголовок и галерея (макет 776:1579) ===== -->
-<section class="section page-hero container" id="hero-about">
+<!-- ===== ГЕРОЙ ===== -->
+<section class="section page-hero container">
   <nav class="breadcrumbs reveal" aria-label="Хлебные крошки">
-    <a href="index.html">Главная</a><span>/</span><span aria-current="page">Ресторан</span>
+    <a href="index.html">Главная</a><span>/</span><span aria-current="page">Открытая кухня</span>
   </nav>
   <div class="page-hero__head">
-    <h1 class="reveal">Ресторан</h1>
-    <p class="page-hero__sub reveal">Своя мука и&nbsp;крупы, продукты уральских ферм&nbsp;— от&nbsp;завтрака до&nbsp;ужина</p>
+    <h1 class="reveal">Открытая кухня</h1>
+    <p class="page-hero__sub reveal">Учим готовить ресторанные блюда дома&nbsp;— на&nbsp;обычной плите и&nbsp;из&nbsp;продуктов, которые есть в&nbsp;любом магазине.</p>
   </div>
   <div class="hero-gallery">
     <div class="page-media reveal">
-      <video src="assets/car-restaurant.mp4" autoplay muted loop playsinline preload="metadata"
-             aria-label="Видео: зал ресторана «Зерно»"></video>
+      <!-- тот же ролик, что в карусели на главной; hero.jpg — его первый кадр, стоит постером -->
+      <video src="assets/car-masterclass.mp4" poster="assets/kitchen/hero.jpg"
+             autoplay muted loop playsinline preload="metadata"
+             aria-label="Видео: повара на открытой кухне перед началом мастер-класса"></video>
     </div>
     <div class="hero-row reveal">
-      <div class="hero-row__cell hero-row__cell--wide"><img src="assets/restaurant/hero-hall.jpg" alt="Зал ресторана с росписью по стене" loading="lazy"></div>
+      <div class="hero-row__cell hero-row__cell--wide"><img src="assets/kitchen/hall.jpg" alt="Зал ресторана «Зерно» с окнами во всю стену" loading="lazy"></div>
       <div class="hero-row__cell hero-row__cell--narrow"><img src="assets/restaurant/hero-wine.jpg" alt="Официант разливает вино гостям" loading="lazy"></div>
       <div class="hero-row__cell hero-row__cell--narrow"><img src="assets/restaurant/hero-table.jpg" alt="Сервированный стол с рыбой и белым вином" loading="lazy"></div>
     </div>
   </div>
 </section>
 
-<!-- ===== КОМАНДА (макет 880:3166) ===== -->
-<section class="section container section-team" id="team">
-  <div class="section__head"><h2 class="reveal">Команда ресторана</h2></div>
-  <div class="team-row">
-    <div class="team-row__photo reveal"><img src="assets/restaurant/chef.jpg" alt="Шеф-повар ресторана «Зерно»" loading="lazy"></div>
-    <div class="team-photos reveal">
-      <div class="team-row__photo"><img src="assets/restaurant/team-crew.jpg" alt="Команда ресторана «Зерно»" loading="lazy"></div>
-      <div class="team-row__photo"><img src="assets/restaurant/team-kitchen.jpg" alt="Повара за работой на кухне" loading="lazy"></div>
-    </div>
+<!-- ===== КАК ПРОХОДЯТ МАСТЕР-КЛАССЫ ===== -->
+<section class="section container section-class" id="process">
+  <div class="section__head"><h2 class="reveal">Как проходят мастер-классы</h2></div>
+  <div class="class-row">
     <div class="chef-text reveal">
       <svg class="chef-text__icon" viewBox="0 0 64 64" aria-hidden="true">
         <path pathLength="1" d="M32 62L32 54"/>
@@ -170,28 +167,39 @@
         <path pathLength="1" d="M33.3135 21.3847C37.9998 16.6984 37.9998 9.10042 33.3135 4.41413L31.8993 2.99992L30.4851 4.41413C25.7988 9.10043 25.7988 16.6984 30.4851 21.3847L31.8993 22.7989L33.3135 21.3847Z"/>
       </svg>
       <div class="chef-text__bio">
-        <p class="chef-text__quote">Я собрал меню вокруг местных продуктов: мука своего помола, овощи и&nbsp;мясо от&nbsp;уральских фермеров. Смена начинается за&nbsp;час до&nbsp;гостей&nbsp;— с&nbsp;заготовок и&nbsp;бульонов. К&nbsp;открытию на&nbsp;кухне уже всё готово. Повара, официанты, бариста&nbsp;— многие работают вместе с&nbsp;самого открытия. Кухня у&nbsp;нас на&nbsp;виду, так что познакомиться можно прямо за&nbsp;обедом.</p>
+        <div>
+          <p class="chef-text__quote">Сначала показываем блюдо целиком и&nbsp;разбираем каждый шаг: где важна точность, а&nbsp;где можно проще. Потом вы&nbsp;повторяете его на&nbsp;своей станции&nbsp;— повар рядом и&nbsp;подсказывает.</p>
+          <p class="chef-text__quote">В&nbsp;конце садимся за&nbsp;стол и&nbsp;едим то, что получилось. Рецепт с&nbsp;пометками забираете с&nbsp;собой.</p>
+        </div>
         <div>
           <p class="chef__name">Имя Фамилия</p>
           <p class="chef__title">Шеф-повар ресторана</p>
         </div>
       </div>
     </div>
+    <div class="class-photos reveal">
+      <div class="class-photo"><img src="assets/kitchen/class-demo.jpg" alt="Повар показывает блюдо группе за рабочим столом" loading="lazy"></div>
+      <div class="class-photo"><img src="assets/kitchen/class-stations.jpg" alt="Гости готовят каждый на своей станции" loading="lazy"></div>
+    </div>
+    <div class="class-photos reveal">
+      <div class="class-photo"><img src="assets/kitchen/class-prep.jpg" alt="Участники мастер-класса режут зелень и овощи" loading="lazy"></div>
+      <div class="class-photo"><img src="assets/kitchen/class-group.jpg" alt="Группа после мастер-класса в холле музея" loading="lazy"></div>
+    </div>
   </div>
 
-  <!-- CTA брони — завершает секцию команды (макет 966:1572) -->
+  <!-- CTA записи — завершает секцию (макет 966:1586) -->
   <div class="cta reveal">
     <div>
-      <h2>Столик можно занять заранее</h2>
-      <p>На обед, ужин или отдельный повод. Перезвоним и подтвердим бронь.</p>
+      <h2>Научим готовить так, чтобы получилось и дома</h2>
+      <p>Мастер-классы по&nbsp;выходным, группы до&nbsp;восьми человек. Перезвоним и&nbsp;подтвердим бронь.</p>
     </div>
-    <button class="btn btn--primary" type="button" data-table-open>Забронировать стол</button>
+    <button class="btn btn--primary" type="button" data-class-open>Записаться на мастер-класс</button>
   </div>
 </section>
 
 </main>
 
-<!-- ===== Окно «Бронирование» — кнопка «Забронировать» в шапке ===== -->
+<!-- ===== Окно «Бронирование» — кнопка «Забронировать» в шапке (разметка с главной) ===== -->
 <div class="booking" id="booking" role="dialog" aria-modal="true" aria-labelledby="booking-title"
      data-state="form" aria-hidden="true">
   <div class="booking__card">
@@ -252,13 +260,14 @@
   </div>
 </div>
 
-<!-- ===== Окно «Бронирование стола» — кнопка в CTA ===== -->
-<div class="booking" id="booking-table" role="dialog" aria-modal="true" aria-labelledby="booking-table-title"
+<!-- ===== Окно «Запись на мастер-класс» — кнопка CTA (разметка с главной) ===== -->
+<div class="booking" id="booking-class" role="dialog" aria-modal="true" aria-labelledby="booking-class-title"
      data-state="form" aria-hidden="true">
   <div class="booking__card">
     <button class="booking__close" type="button" data-booking-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+
     <div class="booking__form-wrap">
-      <h2 class="booking__title" id="booking-table-title">Бронирование стола</h2>
+      <h2 class="booking__title" id="booking-class-title">Запись на мастер-класс</h2>
       <form class="booking-form" novalidate>
         <label class="field">
           <input class="field__control" type="text" name="name" placeholder="Введите имя" autocomplete="name" required>
@@ -284,13 +293,14 @@
         <button class="btn btn--primary" type="submit">Записаться</button>
         <div class="booking__consent">
           <div class="booking__consent-row">
-            <input class="checkbox" type="checkbox" id="booking-table-consent" name="consent" autocomplete="off" data-consent required>
-            <label class="booking__consent-text" for="booking-table-consent">Даю согласие на&nbsp;обработку моих персональных данных в&nbsp;соответствии с&nbsp;<a href="#" data-soon>политикой обработки персональных данных</a></label>
+            <input class="checkbox" type="checkbox" id="booking-class-consent" name="consent" autocomplete="off" data-consent required>
+            <label class="booking__consent-text" for="booking-class-consent">Даю согласие на&nbsp;обработку моих персональных данных в&nbsp;соответствии с&nbsp;<a href="#" data-soon>политикой обработки персональных данных</a></label>
           </div>
           <span class="field__hint"></span>
         </div>
       </form>
     </div>
+
     <div class="booking__success">
       <div class="booking__success-head">
         <h2 class="booking__title">Заявка принята!</h2>
@@ -300,6 +310,7 @@
     </div>
   </div>
 </div>
+
 
 </body>
 </html>
