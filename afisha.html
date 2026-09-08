@@ -62,10 +62,9 @@
     <button class="chip" type="button" data-filter="masterclass" aria-pressed="false">Мастер-классы</button>
   </div>
 
-  <div class="events-list events-list--flat" style="margin-top:var(--head-gap)">
-
-    <div class="month" data-batch data-hidden="false">
-      <div class="cards">
+  <!-- Одна сетка на всю ленту: фильтр и «Показать ещё» работают по карточкам,
+       поэтому при любом фильтре ряды остаются по три. -->
+  <div class="cards" data-list style="margin-top:var(--head-gap)">
         <article class="card reveal" data-type="lecture">
           <div class="card__photo">
             <img src="assets/conf1.jpg" alt="Лекция в конференц-зале Музея зерна" loading="lazy">
@@ -116,11 +115,7 @@
             <a class="card__link" href="event.html">Подробнее</a>
           </div>
         </article>
-      </div>
-    </div>
 
-    <div class="month" data-batch data-hidden="false">
-      <div class="cards">
         <article class="card reveal" data-type="museum">
           <div class="card__photo">
             <img src="assets/news-3.jpg" alt="Экскурсия у карты «Путешествие зерна»" loading="lazy">
@@ -171,12 +166,7 @@
             <a class="card__link" href="event.html">Подробнее</a>
           </div>
         </article>
-      </div>
-    </div>
 
-    <!-- следующая порция скрыта до нажатия «Показать ещё» -->
-    <div class="month" data-batch data-hidden="true" hidden>
-      <div class="cards">
         <article class="card reveal" data-type="masterclass">
           <div class="card__photo">
             <img src="assets/restaurant/dish-presnushka.jpg" alt="Уральская преснушка" loading="lazy">
@@ -227,9 +217,6 @@
             <a class="card__link" href="event.html">Подробнее</a>
           </div>
         </article>
-      </div>
-    </div>
-
   </div>
 
   <p class="list-empty" data-empty hidden>В&nbsp;ближайшие месяцы событий этого типа нет&nbsp;— посмотрите остальные.</p>

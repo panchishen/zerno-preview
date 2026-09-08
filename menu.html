@@ -80,6 +80,57 @@
 
 /* CTA завершает блок предложений — прижат к нему, а не отбит межблочным шагом */
 .section-offers .cta{ margin-top:var(--section-gap) }
+/* ===== ОКНО ПРЕДЛОЖЕНИЯ =====
+   Устройство то же, что у окна «О музее» на главной: подложка прокручивает длинный
+   текст, крестик снаружи у верхнего правого угла, на узком экране уходит внутрь. */
+.offer-modal{
+  position:fixed; inset:0; z-index:300;
+  display:grid; place-items:safe center; grid-template-columns:minmax(0, 1fr);
+  padding:48px; overflow-y:auto; overscroll-behavior:contain;
+  background:rgba(28,26,23,.8);
+  opacity:0; visibility:hidden; transition:opacity .25s ease, visibility .25s;
+}
+.offer-modal.is-open{ opacity:1; visibility:visible }
+.offer-modal__card{
+  position:relative; width:560px; max-width:100%; max-height:calc(100dvh - 96px);
+  background:#FFFFFF; border-radius:8px; corner-shape:squircle;
+  padding:40px 32px 32px; display:flex; flex-direction:column; gap:32px; align-items:flex-start;
+  transform:translateY(16px) scale(.98); transition:transform .25s cubic-bezier(.22,.61,.21,1);
+}
+.offer-modal.is-open .offer-modal__card{ transform:none }
+.offer-modal__body{ display:flex; flex-direction:column; gap:8px; min-height:0; width:100% }
+.offer-modal__date{ margin:0 }
+.offer-modal__title{
+  margin:0; font-family:var(--font-heading); font-weight:400; font-size:var(--fs-h3); line-height:1.28;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--gold-600);
+}
+.offer-modal__text{
+  margin-top:8px; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  padding-right:12px; margin-right:-12px; scrollbar-width:thin;
+  font:400 var(--fs-body)/1.6 var(--font-body); color:var(--text-primary);
+}
+.offer-modal__text p{ margin:0 }
+.offer-modal__text p + p{ margin-top:16px }
+.offer-modal__close{
+  position:absolute; left:100%; bottom:100%;
+  width:32px; height:32px; padding:0; border:0; background:transparent;
+  color:#FFFFFF; cursor:pointer; display:grid; place-items:center; transition:color .2s ease;
+}
+.offer-modal__close svg{ width:20px; height:20px; display:block; fill:currentColor }
+.offer-modal__close:hover{ color:var(--gold-300) }
+.offer-modal__close:focus-visible{ outline:2px solid var(--gold-400); outline-offset:3px }
+@media (max-width:639px){
+  .offer-modal{ padding:16px }
+  .offer-modal__card{ padding:32px 20px; max-height:calc(100dvh - 32px); gap:24px }
+  .offer-modal__close{ left:auto; right:12px; bottom:auto; top:12px; color:var(--text-primary) }
+  .offer-modal__close:hover{ color:var(--gold-700) }
+  .offer-modal__card .btn{ width:100% }
+}
+@media (prefers-reduced-motion: reduce){
+  .offer-modal, .offer-modal__card{ transition:none }
+}
+/* «Подробнее» стало кнопкой — снимаем её собственный вид, оформление берётся у .card__link */
+button.card__link{ border:0; background:none; padding:0; cursor:pointer; text-align:left }
 </style>
 </head>
 <body data-header="static">
@@ -280,78 +331,84 @@
         <div class="card__photo"><img src="assets/restaurant/offer-birthday.jpg" alt="День рождения в «Зерне»" loading="lazy"></div>
         <div class="card__info">
           <div class="card__top">
-            <span class="badge">До 31.12.2026</span>
+            <p class="card__date">До 31.12.2026</p>
             <div class="card__text">
               <h3 class="card__title">День рождения в «Зерне»</h3>
               <p class="card__desc">Отдельный зал на&nbsp;40 гостей, банкетное меню от&nbsp;шефа и&nbsp;торт на&nbsp;заказ. Берём на&nbsp;себя рассадку, музыку и&nbsp;оформление&nbsp;— вам остаётся только прийти.</p>
             </div>
           </div>
-          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+          <div class="offer-full" hidden><p>Отдельный зал на&nbsp;40 гостей с&nbsp;собственным входом: гости не&nbsp;пересекаются с&nbsp;общим потоком, музыку и&nbsp;громкость вы&nbsp;задаёте сами.</p><p>Банкетное меню собираем вместе с&nbsp;шефом за&nbsp;неделю до&nbsp;даты: холодные закуски, горячее на&nbsp;выбор и&nbsp;торт нашей кондитерской. Учитываем аллергии, вегетарианцев и&nbsp;детское меню.</p><p>Берём на&nbsp;себя рассадку, оформление стола сухоцветами и&nbsp;колосьями, свечи и&nbsp;подачу торта. Депозит зала&nbsp;— 15&nbsp;000&nbsp;₽, он&nbsp;входит в&nbsp;счёт.</p><p>Бронь&nbsp;— не&nbsp;позднее чем за&nbsp;три дня. По&nbsp;пятницам и&nbsp;субботам зал занят чаще, дату лучше держать заранее.</p></div>
+          <button class="card__link" type="button" data-offer-open>Подробнее</button>
         </div>
       </article>
       <article class="card reveal">
         <div class="card__photo"><img src="assets/restaurant/offer-wedding.jpg" alt="Свадьба в «Зерне»" loading="lazy"></div>
         <div class="card__info">
           <div class="card__top">
-            <span class="badge">До 30.06.2027</span>
+            <p class="card__date">До 30.06.2027</p>
             <div class="card__text">
               <h3 class="card__title">Свадьба в «Зерне»</h3>
               <p class="card__desc">Выездная регистрация в&nbsp;зале с&nbsp;панорамными окнами и&nbsp;банкет до&nbsp;80 гостей. Меню собираем вместе с&nbsp;вами, депозит фиксируем за&nbsp;полгода&nbsp;— цена не&nbsp;изменится.</p>
             </div>
           </div>
-          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+          <div class="offer-full" hidden><p>Выездная регистрация проходит в&nbsp;зале с&nbsp;панорамными окнами: свет держится до&nbsp;позднего вечера, поэтому церемонию можно ставить и&nbsp;на&nbsp;шесть, и&nbsp;на&nbsp;восемь.</p><p>Банкет&nbsp;— до&nbsp;80 гостей. Меню собираем вместе с&nbsp;вами: дегустация для пары бесплатная, пробуем до&nbsp;подписания сметы.</p><p>Депозит фиксируем за&nbsp;полгода, и&nbsp;цена больше не&nbsp;меняется&nbsp;— даже если продукты подорожают. Аванс&nbsp;— 30% от&nbsp;сметы.</p><p>Что берём на&nbsp;себя: рассадку и&nbsp;схему столов, оформление зала, торт, работу с&nbsp;вашим ведущим и&nbsp;площадку для музыкантов. Что оставляем вам: гостей и&nbsp;настроение.</p></div>
+          <button class="card__link" type="button" data-offer-open>Подробнее</button>
         </div>
       </article>
       <article class="card reveal">
         <div class="card__photo"><img src="assets/restaurant/offer-evening.jpg" alt="Вечер на двоих" loading="lazy"></div>
         <div class="card__info">
           <div class="card__top">
-            <span class="badge">До 30.11.2026</span>
+            <p class="card__date">До 30.11.2026</p>
             <div class="card__text">
               <h3 class="card__title">Вечер на двоих</h3>
               <p class="card__desc">Сет из&nbsp;пяти подач, бокал игристого и&nbsp;стол у&nbsp;окна. Бронируем на&nbsp;любой вечер, кроме пятницы и&nbsp;субботы&nbsp;— в&nbsp;эти дни в&nbsp;зале шумно.</p>
             </div>
           </div>
-          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+          <div class="offer-full" hidden><p>Сет из&nbsp;пяти подач от&nbsp;шефа: закуска, суп-крем, рыба или мясо на&nbsp;выбор, сыр и&nbsp;десерт. К&nbsp;сету&nbsp;— бокал игристого каждому.</p><p>Стол у&nbsp;окна держим за&nbsp;вами весь вечер, торопить не&nbsp;будем: обычно сет занимает около двух часов.</p><p>Бронируем на&nbsp;любой вечер, кроме пятницы и&nbsp;субботы&nbsp;— в&nbsp;эти дни в&nbsp;зале шумно, и&nbsp;разговора вдвоём не&nbsp;получится.</p><p>3&nbsp;900&nbsp;₽ за&nbsp;двоих. Предупредите об&nbsp;аллергиях при брони&nbsp;— заменим подачу без доплаты.</p></div>
+          <button class="card__link" type="button" data-offer-open>Подробнее</button>
         </div>
       </article>
       <article class="card reveal">
         <div class="card__photo"><img src="assets/restaurant/offer-lunch.jpg" alt="Бизнес-ланч" loading="lazy"></div>
         <div class="card__info">
           <div class="card__top">
-            <span class="badge">Ежедневно</span>
+            <p class="card__date">Ежедневно</p>
             <div class="card__text">
               <h3 class="card__title">Бизнес-ланч</h3>
               <p class="card__desc">Три блюда на&nbsp;выбор за&nbsp;450&nbsp;₽, с&nbsp;понедельника по&nbsp;пятницу с&nbsp;12:00 до&nbsp;16:00. Готовим порционно, ждать не&nbsp;придётся&nbsp;— уложимся в&nbsp;обеденный перерыв.</p>
             </div>
           </div>
-          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+          <div class="offer-full" hidden><p>Три блюда на&nbsp;выбор за&nbsp;450&nbsp;₽: суп, горячее с&nbsp;гарниром и&nbsp;салат. Каждый день меняем набор&nbsp;— повторов в&nbsp;течение недели нет.</p><p>С&nbsp;понедельника по&nbsp;пятницу, с&nbsp;12:00 до&nbsp;16:00. Готовим порционно и&nbsp;подаём в&nbsp;пределах десяти минут: в&nbsp;обеденный перерыв укладываемся.</p><p>Хлеб на&nbsp;муке своего помола и&nbsp;чай входят в&nbsp;стоимость. Кофе&nbsp;— отдельно.</p><p>Бронь на&nbsp;ланч не&nbsp;нужна, но&nbsp;для группы от&nbsp;шести человек лучше позвонить&nbsp;— соберём общий стол.</p></div>
+          <button class="card__link" type="button" data-offer-open>Подробнее</button>
         </div>
       </article>
       <article class="card reveal">
         <div class="card__photo"><img src="assets/restaurant/offer-tour.jpg" alt="Экскурсия с обедом" loading="lazy"></div>
         <div class="card__info">
           <div class="card__top">
-            <span class="badge">Будни</span>
+            <p class="card__date">Будни</p>
             <div class="card__text">
               <h3 class="card__title">Экскурсия с обедом</h3>
               <p class="card__desc">Часовая экскурсия по&nbsp;Музею зерна и&nbsp;обед в&nbsp;ресторане следом. Для групп от&nbsp;четырёх человек, по&nbsp;предварительной записи. 1&nbsp;200&nbsp;₽ с&nbsp;гостя.</p>
             </div>
           </div>
-          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+          <div class="offer-full" hidden><p>Часовая экскурсия по&nbsp;Музею зерна: путь зерна от&nbsp;поля до&nbsp;стола, зал с&nbsp;печью, макет элеватора и&nbsp;дегустация в&nbsp;конце.</p><p>Сразу после&nbsp;— обед в&nbsp;ресторане: суп, горячее и&nbsp;напиток. Стол накрыт к&nbsp;выходу группы, ждать не&nbsp;придётся.</p><p>Для групп от&nbsp;четырёх человек, по&nbsp;будням, по&nbsp;предварительной записи. 1&nbsp;200&nbsp;₽ с&nbsp;гостя.</p><p>Школьным и&nbsp;студенческим группам считаем отдельно&nbsp;— позвоните, подберём время и&nbsp;меню.</p></div>
+          <button class="card__link" type="button" data-offer-open>Подробнее</button>
         </div>
       </article>
       <article class="card reveal">
         <div class="card__photo"><img src="assets/restaurant/offer-family.jpg" alt="Семейное воскресенье" loading="lazy"></div>
         <div class="card__info">
           <div class="card__top">
-            <span class="badge">Каждое воскресенье</span>
+            <p class="card__date">Каждое воскресенье</p>
             <div class="card__text">
               <h3 class="card__title">Семейное воскресенье</h3>
               <p class="card__desc">Каждое воскресенье с&nbsp;11:00: детское меню, мастер-класс на&nbsp;кухне и&nbsp;место, где ребёнку можно шуметь. Взрослым&nbsp;— кофе и&nbsp;спокойный завтрак.</p>
             </div>
           </div>
-          <a class="card__link" href="#" data-soon data-tooltip="Страница в разработке">Подробнее</a>
+          <div class="offer-full" hidden><p>Каждое воскресенье с&nbsp;11:00. Детское меню, мастер-класс на&nbsp;открытой кухне и&nbsp;место, где ребёнку можно шуметь, не&nbsp;оглядываясь на&nbsp;соседние столы.</p><p>На&nbsp;мастер-классе дети лепят пельмени или пекут преснушки&nbsp;— то, что получилось, забирают с&nbsp;собой. Занятие ведёт повар, длится около сорока минут.</p><p>Взрослым в&nbsp;это время&nbsp;— кофе и&nbsp;спокойный завтрак: кухня работает по&nbsp;утреннему меню до&nbsp;13:00.</p><p>Участие в&nbsp;мастер-классе&nbsp;— 500&nbsp;₽ с&nbsp;ребёнка, детское меню&nbsp;— по&nbsp;счёту. Места лучше занять заранее: их&nbsp;восемь.</p></div>
+          <button class="card__link" type="button" data-offer-open>Подробнее</button>
         </div>
       </article>
   </div>
@@ -367,6 +424,19 @@
 </section>
 
 </main>
+
+<!-- ===== Окно предложения: подробности карточки (механика окна «О музее» с главной) ===== -->
+<div class="offer-modal" id="offer-modal" role="dialog" aria-modal="true" aria-labelledby="offer-modal-title" aria-hidden="true">
+  <div class="offer-modal__card">
+    <button class="offer-modal__close" type="button" data-offer-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
+    <div class="offer-modal__body">
+      <p class="offer-modal__date card__date" data-offer-date></p>
+      <h2 class="offer-modal__title" id="offer-modal-title" data-offer-title></h2>
+      <div class="offer-modal__text" data-offer-text></div>
+    </div>
+    <button class="btn btn--primary" type="button" data-table-open>Забронировать стол</button>
+  </div>
+</div>
 
 <!-- ===== Окно «Бронирование» — кнопка «Забронировать» в шапке ===== -->
 <div class="booking" id="booking" role="dialog" aria-modal="true" aria-labelledby="booking-title"
@@ -497,6 +567,62 @@
       панель.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
     });
   });
+})();
+</script>
+
+<script>
+(function(){
+  'use strict';
+  // ===== Окно предложения =====
+  // Текст лежит в самой карточке (.offer-full), окно только переносит его к себе —
+  // так данные не продублированы в скрипте и правятся там же, где сама карточка.
+  var окно = document.getElementById('offer-modal');
+  if (!окно) return;
+  var дата = окно.querySelector('[data-offer-date]');
+  var заголовок = окно.querySelector('[data-offer-title]');
+  var текст = окно.querySelector('[data-offer-text]');
+  var вернутьФокус = null;
+
+  function открыть(карточка){
+    вернутьФокус = document.activeElement;
+    дата.textContent = карточка.querySelector('.card__date').textContent;
+    заголовок.textContent = карточка.querySelector('.card__title').textContent;
+    текст.innerHTML = карточка.querySelector('.offer-full').innerHTML;
+    текст.scrollTop = 0;
+    окно.classList.add('is-open');
+    окно.removeAttribute('aria-hidden');
+    document.body.style.overflow = 'hidden';
+    // фокус — после появления: пока идёт переход visibility, элемент ещё скрыт и focus() не берётся
+    setTimeout(function(){ окно.querySelector('.offer-modal__close').focus(); }, 60);
+  }
+  function закрыть(){
+    окно.classList.remove('is-open');
+    окно.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (вернутьФокус && вернутьФокус.focus) вернутьФокус.focus();
+  }
+
+  document.querySelectorAll('[data-offer-open]').forEach(function(кнопка){
+    кнопка.addEventListener('click', function(){ открыть(кнопка.closest('.card')); });
+  });
+  окно.addEventListener('click', function(e){
+    if (e.target === окно || e.target.closest('[data-offer-close]')) закрыть();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && окно.classList.contains('is-open')) закрыть();
+  });
+  // из окна брони фокус не должен уходить в страницу под ним
+  окно.addEventListener('keydown', function(e){
+    if (e.key !== 'Tab') return;
+    var видимые = [].filter.call(окно.querySelectorAll('button, [href]'), function(el){ return el.offsetParent !== null; });
+    if (!видимые.length) return;
+    var первый = видимые[0], последний = видимые[видимые.length - 1];
+    if (e.shiftKey && document.activeElement === первый){ e.preventDefault(); последний.focus(); }
+    else if (!e.shiftKey && document.activeElement === последний){ e.preventDefault(); первый.focus(); }
+  });
+  // «Забронировать стол» в окне: закрываем своё окно, дальше работает booking.js
+  var бронь = окно.querySelector('[data-table-open]');
+  if (бронь) бронь.addEventListener('click', закрыть);
 })();
 </script>
 

@@ -212,19 +212,6 @@ main{ padding-top:var(--header-h) }
   .card:hover .card__photo img{ transform:none }
 }
 
-/* ===== Лента с разделителями по месяцам ===== */
-.events-list{ display:flex; flex-direction:column; gap:80px }
-@media (max-width:1279px){ .events-list{ gap:64px } }
-@media (max-width:767px){ .events-list{ gap:48px } }
-/* лента без группировки по месяцам: карточки идут сплошняком, шаг — как в сетке */
-.events-list--flat{ gap:var(--gap) }
-.month{ display:flex; flex-direction:column; gap:32px }
-@media (max-width:767px){ .month{ gap:24px } }
-.month__heading{
-  margin:0; font-family:var(--font-heading); font-weight:400; font-size:var(--fs-h3); line-height:1.28;
-  letter-spacing:.06em; text-transform:uppercase; color:var(--gold-600);
-}
-.month[hidden]{ display:none }
 /* пустой результат фильтрации */
 .list-empty{
   margin:0; padding:48px 0; text-align:center;

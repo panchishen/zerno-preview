@@ -97,7 +97,7 @@
   var NAV_FOOTER = NAV.reduce(function(список, t){ return список.concat(SUBMENU[t] || t); }, []);
   var PHONE = { label:'8 (922) 711-09-40', href:'tel:+79227110940' };
   // почта музея — в футере под телефоном (макет 658:1830)
-  var EMAIL = 'muzey_zerno@spp.ru';
+  var EMAIL = 'muzey_zerna@spp.ru';
   var ADDRESS = 'Свердловский проспект, 40А';
   // в шапке на тёмном адрес сокращён — там в строке ещё и «Контакты» (макет 430:1358)
   var ADDRESS_SHORT = 'Свердловский пр-кт, 40А';
@@ -197,7 +197,7 @@
         '<div class="mnav__contacts">' +
           '<a href="' + PHONE.href + '">' + PHONE.label + '</a>' +
           '<span>' + ADDRESS + '</span>' +
-          '<span>Время работы: 8:00–22:00</span>' +
+          '<span>Время работы: 8:00–16:00</span>' +
         '</div>' +
         '<button class="mnav__btn" type="button" data-booking-open>Забронировать</button>' +
       '</div>' +
@@ -306,7 +306,7 @@
           '<span>' + ADDRESS + '</span>' +
           // время работы временно скрыто (правка 25.08.2026): режим музея ещё не утверждён.
           // Строку не удаляем — вернуть её значит убрать одно правило .ft__hours в chrome.css
-          '<span class="ft__hours">Время работы: 8:00–22:00</span>' +
+          '<span class="ft__hours">Время работы: 8:00–16:00</span>' +
           '<div class="ft__soc">' + socialButtons() + '</div>' +  // соцсети внизу колонки (макет 159:422: y=132, ниже времени работы)
         '</div>' +
         // правый блок — вторичным цветом (макет 171:595)

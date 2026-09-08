@@ -2,8 +2,7 @@
    Зерно · скрипт внутренних страниц (афиша, событие, новости, новость)
    1) меряет высоту сквозной шапки → --header-h
    2) появление элементов .reveal (тот же механизм, что на главной)
-   3) фильтр афиши по типу события (чипы)
-   4) «Показать ещё» — раскрывает следующую порцию карточек
+   3) лента карточек: фильтр по типу + «Показать ещё»
    ========================================================================== */
 (function(){
   'use strict';
@@ -28,82 +27,71 @@
   } else setTimeout(мерить, 0);
   addEventListener('resize', мерить);
 
-  // ===== 3. Фильтр по типу события =====
-  // Чипы несут data-filter, карточки — data-type. «Все» = пустой фильтр.
-  var чипы = [].slice.call(document.querySelectorAll('[data-filter]'));
-  var пусто = document.querySelector('[data-empty]');
+  // ===== 3. Лента карточек =====
+  // Все карточки лежат в ОДНОЙ сетке [data-list] — тогда при любом фильтре ряды
+  // остаются по три, а не рассыпаются в колонку. Видно первые ПОРЦИЯ штук из
+  // подходящих под фильтр; остальные открывает «Показать ещё».
+  var ПОРЦИЯ = 6;
+  var сетка = document.querySelector('[data-list]');
 
-  function применитьФильтр(тип){
-    if (!чипы.length) return;                        // на странице без фильтра делать нечего
-    var видимых = 0;
-    [].forEach.call(document.querySelectorAll('.month'), function(месяц){
-      if (месяц.dataset.hidden === 'true') return;   // ещё не раскрыт кнопкой «показать ещё»
-      var карточки = месяц.querySelectorAll('[data-type]');
-      if (!карточки.length) return;                  // группа не участвует в фильтрации
-      var вМесяце = 0;
-      [].forEach.call(карточки, function(карточка){
-        var подходит = !тип || карточка.dataset.type === тип;
-        карточка.hidden = !подходит;
-        if (подходит) вМесяце++;
-      });
-      месяц.hidden = вМесяце === 0;
-      видимых += вМесяце;
-    });
-    if (пусто) пусто.hidden = видимых !== 0;
-  }
+  if (сетка){
+    var карточки = [].slice.call(сетка.querySelectorAll('.card'));
+    var чипы = [].slice.call(document.querySelectorAll('[data-filter]'));
+    var пусто = document.querySelector('[data-empty]');
+    var ещё = document.querySelector('[data-more]');
+    var строкаЕщё = ещё ? (ещё.closest('.more-row') || ещё) : null;
+    var показано = ПОРЦИЯ;
 
-  чипы.forEach(function(чип){
-    чип.addEventListener('click', function(){
-      чипы.forEach(function(c){ c.setAttribute('aria-pressed', String(c === чип)); });
-      применитьФильтр(чип.dataset.filter);
-    });
-  });
-
-  // ===== 4. «Показать ещё» =====
-  // Кнопка раскрывает следующий скрытый .month (или .cards-batch) и прячется,
-  // когда раскрывать больше нечего.
-  var ещё = document.querySelector('[data-more]');
-  if (ещё){
-    var строка = ещё.closest('.more-row') || ещё;
-    var порции = [].slice.call(document.querySelectorAll('[data-batch]'));
-
-    var обновитьКнопку = function(){
-      if (!порции.some(function(п){ return п.dataset.hidden === 'true'; })) строка.hidden = true;
+    var активныйТип = function(){
+      var чип = чипы.filter(function(c){ return c.getAttribute('aria-pressed') === 'true'; })[0];
+      return чип ? чип.dataset.filter : '';
     };
-    обновитьКнопку();
 
-    ещё.addEventListener('click', function(){
-      var следующая = порции.filter(function(п){ return п.dataset.hidden === 'true'; })[0];
-      if (!следующая) { строка.hidden = true; return; }
-      следующая.dataset.hidden = 'false';
-      следующая.hidden = false;
-
-      // фильтр применяем до показа: иначе карточки чужого типа успевают мигнуть
-      var активный = чипы.filter(function(c){ return c.getAttribute('aria-pressed') === 'true'; })[0];
-      применитьФильтр(активный ? активный.dataset.filter : '');
-
-      var новые = [].slice.call(следующая.querySelectorAll('.reveal'))
-        .filter(function(el){ return el.offsetParent !== null; });
-      // наблюдатель к ним больше не нужен — показываем вручную
+    // Показ догруженных карточек той же анимацией, что и при скролле.
+    // Синхронно, без requestAnimationFrame: в фоновой вкладке кадры не выдаются,
+    // и отложенный показ там не случился бы вовсе.
+    var показатьПлавно = function(новые){
+      if (!новые.length) return;
       новые.forEach(function(el){ if (наблюдатель) наблюдатель.unobserve(el); });
+      if (безАнимации){ новые.forEach(function(el){ el.classList.add('in'); }); return; }
+      // стартовый кадр: без него переход из display:none сразу в .in не анимируется
+      новые.forEach(function(el){ el.style.transitionDelay = ''; void el.offsetHeight; });
+      новые.forEach(function(el, i){
+        el.style.transitionDelay = задержка(i);
+        el.classList.add('in');
+      });
+    };
 
-      if (безАнимации){
-        новые.forEach(function(el){ el.classList.add('in'); });
-      } else {
-        // Стартовый кадр: чтение offsetHeight заставляет браузер посчитать стили уже
-        // показанных, но ещё прозрачных карточек. Без этого переход из display:none
-        // сразу в .in не анимируется — не с чего начинать, и карточки появляются рывком.
-        // Синхронно, без requestAnimationFrame: в фоновой вкладке кадры не выдаются,
-        // и отложенный показ там не случился бы вовсе.
-        новые.forEach(function(el){ el.style.transitionDelay = ''; void el.offsetHeight; });
-        новые.forEach(function(el, i){
-          el.style.transitionDelay = задержка(i);
-          el.classList.add('in');
-        });
-      }
+    var отрисовать = function(анимировать){
+      var тип = активныйТип();
+      var подходящие = карточки.filter(function(c){ return !тип || c.dataset.type === тип; });
+      var новые = [];
+      карточки.forEach(function(c){
+        var место = подходящие.indexOf(c);
+        var видима = место > -1 && место < показано;
+        if (видима && c.hidden) новые.push(c);
+        c.hidden = !видима;
+      });
+      if (пусто) пусто.hidden = подходящие.length !== 0;
+      if (строкаЕщё) строкаЕщё.hidden = подходящие.length <= показано;
+      if (анимировать) показатьПлавно(новые);
+    };
 
-      обновитьКнопку();
+    чипы.forEach(function(чип){
+      чип.addEventListener('click', function(){
+        if (чип.getAttribute('aria-pressed') === 'true') return;
+        чипы.forEach(function(c){ c.setAttribute('aria-pressed', String(c === чип)); });
+        показано = ПОРЦИЯ;          // новый фильтр — снова первая порция
+        отрисовать(true);
+      });
     });
+
+    if (ещё) ещё.addEventListener('click', function(){
+      показано += ПОРЦИЯ;
+      отрисовать(true);
+    });
+
+    отрисовать(false);              // стартовое состояние: лишние карточки скрыты
   }
 
   // ===== 2. Появление элементов =====

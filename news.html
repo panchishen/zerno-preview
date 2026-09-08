@@ -52,9 +52,8 @@
 
 <!-- ===== ЛЕНТА НОВОСТЕЙ (макет 970:1920) ===== -->
 <section class="section section--after-hero container" id="news">
-  <div class="events-list" style="gap:var(--gap)">
-    <section class="month" data-batch data-hidden="false" aria-label="Новости за сентябрь">
-      <div class="cards">
+  <!-- Одна сетка: первые шесть видны, остальные открывает «Показать ещё» -->
+  <div class="cards" data-list>
         <article class="card reveal">
           <div class="card__photo">
             <img src="assets/news-1.jpg" alt="Съёмки программы «Можно! С Можаевым» в Музее зерна" loading="lazy">
@@ -150,11 +149,7 @@
             <a class="card__link" href="news-article.html">Подробнее</a>
           </div>
         </article>
-      </div>
-    </section>
-    <!-- вторая порция раскрывается кнопкой «Показать ещё» -->
-    <section class="month" data-batch data-hidden="true" hidden aria-label="Более ранние новости">
-      <div class="cards">
+
         <article class="card reveal">
           <div class="card__photo">
             <img src="assets/museum-lab.jpg" alt="Лаборатория Музея зерна" loading="lazy">
@@ -202,8 +197,6 @@
             <a class="card__link" href="news-article.html">Подробнее</a>
           </div>
         </article>
-      </div>
-    </section>
   </div>
 
   <div class="more-row">
