@@ -58,10 +58,8 @@
   .hero-row{ grid-template-columns:repeat(2, minmax(0, 1fr)) }
   .hero-row__cell--wide{ grid-column:1 / -1; aspect-ratio:16/9 }
 }
-@media (max-width:767px){
-  .hero-row{ grid-template-columns:1fr }
-  .hero-row__cell--narrow{ aspect-ratio:4/3 }
-}
+/* на телефоне узкие кадры остаются парой в макетной пропорции 382:570 — снимки вертикальные,
+   и разворот в столбик 4:3 обрезал бы их до горизонтальных */
 
 /* ===== КАК ПРОХОДЯТ МАСТЕР-КЛАССЫ (макет 884:3352) =====
    Ряд из трёх колонок 517: карточка с рассказом шефа и две колонки

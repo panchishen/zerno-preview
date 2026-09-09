@@ -131,6 +131,8 @@ body{
 }
 .btn:hover{ transform:translateY(-4px) }
 .btn:active{ transform:none } /* нажатие «прижимает» кнопку обратно */
+/* на телефоне длинная подпись («Записаться на мастер-класс») не помещается в 295px — пусть переносится */
+@media (max-width:767px){ .btn{ white-space:normal; text-align:center } }
 .btn--primary{
   color:#FFFFFF; background:var(--gold-600); border:0; padding:17px 32px;
   /* перелив живёт в ::before; isolation держит его в своём слое, поэтому полоса
@@ -299,81 +301,7 @@ body{
 .hero-header__brand{ animation:hero2-rise .7s cubic-bezier(.22,.61,.21,1) .3s both }
 .hero-header__nav, .hero-header__contacts{ animation:hero2-rise .7s cubic-bezier(.22,.61,.21,1) .5s both }
 
-/* ===== ИНФОРМЕР (макет 511:1730) =====
-   Пилюля по центру внизу экрана: белый фон, мягкая тень, крестик справа. Появляется в тот же
-   момент, что и стики-шапка — когда первый экран уходит вверх. Закрывается нажатием и больше
-   не возвращается до перезагрузки: ничего не запоминаем намеренно.
-   Ниже, под классом .informer--card, лежит сентябрьский вариант — карточка с длинным текстом
-   (макет 744:3264). Он никуда не делся: вернуть его значит дописать класс в разметке
-   и вставить туда абзацы, они сохранены комментарием рядом с информером. */
-.informer{
-  position:fixed; left:50%; bottom:32px; z-index:200;
-  display:flex; align-items:center; gap:10px;
-  padding:12px 16px 12px 32px;          /* слева больше — крестик держит свой отступ сам */
-  background:#FFFFFF; border-radius:100px;
-  box-shadow:0 20px 15px rgba(0,0,0,.05);
-  /* сдвиг по X — часть transform, поэтому центровка и движение живут в одном свойстве */
-  opacity:0; transform:translate(-50%, 24px); pointer-events:none;
-  transition:opacity .5s cubic-bezier(.22,.61,.21,1), transform .5s cubic-bezier(.22,.61,.21,1);
-}
-.informer.is-shown{ opacity:1; transform:translate(-50%, 0); pointer-events:auto }
-.informer__text{
-  margin:0; font:400 18px/1.6 var(--font-body); color:var(--text-primary); white-space:nowrap;
-}
-.informer__close{
-  flex:none; width:32px; height:32px; padding:0; border:0; background:transparent;
-  color:var(--text-primary); cursor:pointer; display:grid; place-items:center;
-  transition:color .2s ease;
-}
-.informer__close svg{ width:32px; height:32px; display:block; fill:currentColor }
-.informer__close:hover{ color:var(--gold-700) } /* меняется только сам крестик, подложки нет */
-.informer__close:focus-visible{ outline:2px solid var(--gold-600); outline-offset:2px }
-
-/* ===== ИНФОРМЕР · карточка с длинным текстом (макет 744:3264) =====
-   Сентябрьский вариант: включается классом .informer--card на самом информере.
-   Типографика здесь вне шкалы проекта — 16/1.5 вместо Body/Small 16/1.52; в макете это
-   осознанное исключение, поэтому размеры заданы вручную, а не токеном. */
-.informer--card{
-  display:block; width:min(764px, calc(100vw - 32px)); padding:24px;
-  border-radius:24px; corner-shape:squircle;
-  /* высокий текст на невысоком экране прокручивается внутри карточки, а не уезжает за край */
-  max-height:calc(100dvh - 64px); overflow-y:auto; overscroll-behavior:contain;
-}
-.informer--card .informer__text{
-  padding-left:8px;   /* 24 поля карточки + 8 = макетные 32 слева */
-  font:400 16px/1.5 var(--font-body); white-space:normal;
-}
-.informer--card .informer__text p{ margin:0 }
-.informer--card .informer__text p + p{ margin-top:12px }
-/* место под крестик освобождает только первая строка — он стоит абсолютом над ней */
-.informer--card .informer__title{ font-weight:600; padding-right:48px }
-.informer--card .informer__text b{ font-weight:600 }
-.informer--card .informer__pre{ font-weight:500 }   /* «с» перед часами — Medium, как в макете */
-/* Телефон и адрес сайта в макете просто выделены начертанием; ссылками их делает вёрстка,
-   чтобы с телефона можно было позвонить и перейти, — вид при этом остаётся прежним */
-.informer--card .informer__text a{ color:inherit; text-decoration:none; font-weight:600 }
-.informer--card .informer__text a.informer__link{ color:var(--link-default) }
-.informer--card .informer__text a:hover{ color:var(--link-hover) }
-.informer--card .informer__close{ position:absolute; top:24px; right:24px }
-/* закрытие: та же пружина, только вниз */
-.informer.is-closing{
-  opacity:0; transform:translate(-50%, 16px); pointer-events:none;
-  transition:opacity .3s ease, transform .3s cubic-bezier(.22,.61,.21,1);
-}
-@media (max-width:767px){
-  .informer{ left:16px; right:16px; transform:translateY(24px); padding:12px 12px 12px 20px }
-  .informer--card{ width:auto; padding:20px }
-  .informer.is-shown{ transform:none }
-  .informer.is-closing{ transform:translateY(16px) }
-  .informer__text{ white-space:normal; font-size:16px }
-  .informer--card .informer__text{ padding-left:0 }
-  .informer--card .informer__title{ padding-right:40px }
-  .informer--card .informer__close{ top:20px; right:20px }
-  .informer__close{ top:20px; right:20px }
-}
-@media (prefers-reduced-motion: reduce){
-  .informer{ transition:none }
-}
+/* Информер (макет 511:1730) — сквозной, живёт в assets/chrome.js и chrome.css */
 
 /* ===== ПОЯВЛЕНИЕ ЭЛЕМЕНТОВ =====
    Одна механика на всю страницу: любой элемент с классом .reveal проступает, когда до него
@@ -419,14 +347,18 @@ body{
    занимает строку целиком, два обычных встают под ним квадратами. */
 @media (max-width:1023px){
   .rest-gallery__row{ display:grid; grid-template-columns:repeat(2, 1fr); height:auto }
-  .rest-gallery__cell{ aspect-ratio:1 / 1 }
+  /* пропорция ячейки — по формату кадра: горизонтальные снимки 4:3, вертикальные 3:4.
+     Квадрат для всех обрезал бы и те и другие, а разворот кадра в чужой формат недопустим */
+  .rest-gallery__cell{ aspect-ratio:4 / 3 }
+  .rest-gallery__cell--portrait{ aspect-ratio:3 / 4 }
   .rest-gallery__cell--wide{ grid-column:span 2; aspect-ratio:788 / 570 }
 }
-@media (max-width:767px){ /* на телефоне ряд разворачивается в столбик, высоту задаёт пропорция кадра */
-  .rest-gallery__row{ grid-template-columns:1fr }
-  /* 382/570 из макета здесь не берём: шесть портретных кадров подряд — это 3000px пролистывания */
-  .rest-gallery__cell{ aspect-ratio:4 / 3 }
-  .rest-gallery__cell--wide{ grid-column:span 1; aspect-ratio:16 / 9 }
+@media (max-width:767px){
+  /* На телефоне горизонтальные кадры встают во всю ширину (3:2), вертикальные остаются
+     парой в 3:4 — так они не разворачиваются в пейзаж и не растягивают страницу на 3000px */
+  .rest-gallery__cell{ grid-column:span 2; aspect-ratio:3 / 2 }
+  .rest-gallery__cell--portrait{ grid-column:span 1; aspect-ratio:3 / 4 }
+  .rest-gallery__cell--wide{ aspect-ratio:16 / 9 }
 }
 
 /* Плашка «Приходите пробовать» под фотосеткой (макет 519:1545): песочный фон, текст
@@ -742,6 +674,8 @@ body{
 }
 .reviews-card__more:hover{ color:var(--link-hover) }
 .reviews-card__more:focus-visible{ outline:2px solid var(--gold-600); outline-offset:3px; border-radius:2px }
+/* текстовая кнопка в 26px высотой: на таче зона нажатия добирается паддингом без сдвига раскладки */
+@media (hover:none){ .reviews-card__more{ padding-block:8px; margin-block:-8px } }
 .reviews-card__author{ display:flex; align-items:center; gap:16px }
 .reviews-card__ava{
   flex:none; width:56px; height:56px; border-radius:50%;
@@ -825,61 +759,7 @@ body{
   .review-modal__card{ transform:none }
 }
 
-/* ===== ОКНО «О МУЗЕЕ» (макет 764:1187) =====
-   Открывается кнопкой «Больше о музее» в блоке о музее. Устройство окна то же, что у окна
-   отзыва: подложка прокручивает длинный текст, крестик стоит снаружи у верхнего правого угла. */
-.about-modal{
-  position:fixed; inset:0; z-index:300;
-  display:grid; place-items:safe center;
-  /* см. комментарий у .review-modal — тот же приём против переполнения на узком экране */
-  grid-template-columns:minmax(0, 1fr);
-  padding:48px; overflow-y:auto; overscroll-behavior:contain;
-  background:rgba(28,26,23,.8);
-  opacity:0; visibility:hidden;
-  transition:opacity .25s ease, visibility .25s;
-}
-.about-modal.is-open{ opacity:1; visibility:visible }
-.about-modal__card{
-  position:relative; width:500px; max-width:100%;
-  max-height:calc(100dvh - 96px);
-  background:#FFFFFF; border-radius:8px; corner-shape:squircle;
-  padding:43px 32px; display:flex; flex-direction:column;
-  transform:translateY(16px) scale(.98);
-  transition:transform .25s cubic-bezier(.22,.61,.21,1);
-}
-.about-modal.is-open .about-modal__card{ transform:none }
-.about-modal__text{
-  margin:0; font:400 var(--fs-body)/1.6 var(--font-body); color:var(--text-primary);
-  min-height:0; overflow-y:auto; overscroll-behavior:contain;
-  padding-right:12px; margin-right:-12px; scrollbar-width:thin;
-}
-.about-modal__text p{ margin:0 }
-/* в макете абзацы разведены пустой строкой — здесь это интервал 24, не 0.8em из окна отзыва:
-   там текст короче и плотнее, тут — справочный список с телефоном и часами, ему нужен воздух */
-.about-modal__text p + p{ margin-top:24px }
-.about-modal__title{ font-weight:700 }
-.about-modal__text a{ color:inherit; text-decoration:none; font-weight:700 }
-.about-modal__text a.about-modal__link{ color:var(--link-default) }
-.about-modal__text a:hover{ color:var(--link-hover) }
-.about-modal__close{
-  position:absolute; left:100%; bottom:100%;
-  width:32px; height:32px; padding:0; border:0; background:transparent;
-  color:#FFFFFF; cursor:pointer; display:grid; place-items:center;
-  transition:color .2s ease;
-}
-.about-modal__close svg{ width:20px; height:20px; display:block; fill:currentColor }
-.about-modal__close:hover{ color:var(--gold-300) }
-.about-modal__close:focus-visible{ outline:2px solid var(--gold-400); outline-offset:3px }
-@media (max-width:559px){
-  .about-modal{ padding:16px }
-  .about-modal__card{ padding:32px 20px; max-height:calc(100dvh - 32px) }
-  .about-modal__close{ left:auto; right:12px; bottom:auto; top:12px; color:var(--text-primary) }
-  .about-modal__close:hover{ color:var(--gold-700) }
-}
-@media (prefers-reduced-motion: reduce){
-  .about-modal, .about-modal__card, .about-modal__close{ transition:none }
-  .about-modal__card{ transform:none }
-}
+/* Окно «о музее» (макет 764:1187) — сквозное, живёт в assets/chrome.js и chrome.css */
 
 /* CTA отзывов (макет 229:380): подпись + пилюли-ссылки на площадки с отзывами.
    Пилюли перекрываются на 16px, Яндекс сверху; ховер — как у secondary-кнопки
@@ -922,26 +802,7 @@ body{
 <!-- декоративные зёрна фона; пустые <i> — рисует их CSS фоновой картинкой -->
 <div class="grain-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 
-<!-- информер: сообщение о тестовом режиме, закрывается крестиком (макет 511:1730) -->
-<!-- Сентябрьский вариант информера (макет 744:3264). Чтобы вернуть: дописать информеру
-     класс informer--card и заменить строку текста этими абзацами.
-<div class="informer__text">
-  <p class="informer__title">Уважаемые гости!</p>
-  <p>В&nbsp;сентябре Музей зерна работает в&nbsp;техническом режиме: ежедневно <span class="informer__pre">с&nbsp;</span><b>8:00 до&nbsp;16:00</b>, экскурсии&nbsp;— по&nbsp;предварительной записи.</p>
-  <p>Стоимость экскурсии&nbsp;— 600&nbsp;₽. В&nbsp;неё входят 40-минутная интерактивная экскурсия и&nbsp;дегустация сета «Зерно»: уральская сытная преснушка&nbsp;— пирожок с&nbsp;секретной начинкой от&nbsp;шефа, каша на&nbsp;фундучном молоке с&nbsp;местными ягодами и&nbsp;чай по&nbsp;авторскому рецепту.</p>
-  <p>Экскурсионные группы: 9:00–11:00, 11:00–13:00, 13:00–15:00.</p>
-  <p>Запись по&nbsp;телефону <a href="tel:+79227110940">+7&nbsp;(922)&nbsp;711-09-40</a> или на&nbsp;<a class="informer__link" href="https://muzeyzerna.ru" target="_blank" rel="noopener">muzeyzerna.ru</a>.</p>
-  <p>Ждём вас в&nbsp;первом в&nbsp;России Музее зерна!</p>
-</div>
--->
-<div class="informer" id="informer" role="status">
-  <p class="informer__text">Музей временно работает в&nbsp;тестовом режиме с&nbsp;8:00 до&nbsp;16:00</p>
-  <button class="informer__close" type="button" aria-label="Закрыть сообщение">
-    <svg viewBox="0 0 32 32" aria-hidden="true">
-      <path d="M26 6.80102L16.7999 16L26 25.2001L25.2001 26L16 16.7999L6.79991 26L6 25.2001L15.199 16L6 6.80102L6.79991 6L16 15.2001L25.2001 6L26 6.80102Z"/>
-    </svg>
-  </button>
-</div>
+<!-- информер (макет 511:1730) вставляет chrome.js — он сквозной для всех страниц -->
 
 
 <section class="hero2" id="hero">
@@ -1057,7 +918,7 @@ body{
   </div>
   <div class="btn-row museum-cta-row reveal" id="museumCtaRow">
       <button class="btn btn--primary" type="button" data-tour-open>Записаться на&nbsp;экскурсию</button>
-      <button class="btn btn--secondary" type="button" data-about-open>Больше о&nbsp;музее</button>
+      <a class="btn btn--secondary" href="museum.html">Больше о&nbsp;музее</a>
   </div>
 </section>
 
@@ -1072,8 +933,8 @@ body{
         <video data-src="assets/car-restaurant.mp4" muted loop playsinline preload="none"
                aria-label="Видео: зал ресторана"></video>
       </div>
-      <div class="reveal rest-gallery__cell"><img src="assets/car-couple.jpg" alt="Официант разливает вино паре за столом" loading="lazy"></div>
-      <div class="reveal rest-gallery__cell"><img src="assets/car-photo2.jpg" alt="Рыбное блюдо и бокал белого вина" loading="lazy"></div>
+      <div class="reveal rest-gallery__cell rest-gallery__cell--portrait"><img src="assets/car-couple.jpg" alt="Официант разливает вино паре за столом" loading="lazy"></div>
+      <div class="reveal rest-gallery__cell rest-gallery__cell--portrait"><img src="assets/car-photo2.jpg" alt="Рыбное блюдо и бокал белого вина" loading="lazy"></div>
     </div>
     <div class="rest-gallery__row">
       <div class="reveal rest-gallery__cell"><img src="assets/car-events.jpg" alt="Гости за ужином тёплым вечером" loading="lazy"></div>
@@ -1088,7 +949,7 @@ body{
     </div>
     <div class="rest-cta__buttons">
       <button class="btn btn--primary" type="button" data-table-open>Забронировать стол</button>
-      <button class="btn btn--secondary" type="button" data-tooltip="Страница в разработке">Посмотреть меню</button>
+      <a class="btn btn--secondary" href="menu.html">Посмотреть меню</a>
     </div>
   </div>
 </section>
@@ -1103,7 +964,7 @@ body{
            aria-label="Видео: конференц-зал"></video>
   </div>
   <div class="btn-row conference-cta-row reveal">
-      <button class="btn btn--primary" type="button" data-tooltip="Страница в разработке">Смотреть мероприятия</button>
+      <a class="btn btn--primary" href="afisha.html">Смотреть мероприятия</a>
   </div>
 </section>
 
@@ -1123,7 +984,7 @@ body{
         <p class="event-card__label">Ресторан</p>
         <h3 class="event-card__title">Здоровые привычки внедряем каждый день</h3>
         <p class="event-card__desc">Вам не&nbsp;нужно думать о&nbsp;пользе блюда&nbsp;— мы&nbsp;сделали это за&nbsp;вас. Позвольте себе открыть уральскую кухню заново.</p>
-        <button class="btn btn--primary btn--m event-card__btn" type="button">Забронировать стол</button>
+        <button class="btn btn--primary btn--m event-card__btn" type="button" data-table-open>Забронировать стол</button>
       </div>
     </article>
     <article class="event-card">
@@ -1133,7 +994,7 @@ body{
         <p class="event-card__label">21 августа</p>
         <h3 class="event-card__title">Музыка позднего лета</h3>
         <p class="event-card__desc">Живая музыка, приглушённый свет и&nbsp;бокал вина&nbsp;— провожаем август не&nbsp;спеша. Столики у&nbsp;окна разбирают первыми, торопитесь!</p>
-        <button class="btn btn--primary btn--m event-card__btn" type="button">Забронировать стол</button>
+        <button class="btn btn--primary btn--m event-card__btn" type="button" data-table-open>Забронировать стол</button>
       </div>
     </article>
     <article class="event-card">
@@ -1143,7 +1004,7 @@ body{
         <p class="event-card__label">18 сентября</p>
         <h3 class="event-card__title">Мастер-класс</h3>
         <p class="event-card__desc">С&nbsp;шеф-поваром ресторана «Зерно» вы&nbsp;научитесь не&nbsp;просто готовить, вы&nbsp;проживёте историю: от&nbsp;выбора ингредиентов до&nbsp;финального приготовления. Бронируйте место заранее.</p>
-        <button class="btn btn--primary btn--m event-card__btn" type="button">Записаться</button>
+        <button class="btn btn--primary btn--m event-card__btn" type="button" data-class-open>Записаться</button>
       </div>
     </article>
     <article class="event-card">
@@ -1153,7 +1014,7 @@ body{
         <p class="event-card__label">Меню</p>
         <h3 class="event-card__title">Уральское блюдо на&nbsp;вашей тарелке&nbsp;— это история, в&nbsp;которой вековые традиции сочетаются с&nbsp;заботой о&nbsp;вашем здоровье</h3>
         <p class="event-card__desc">Мы&nbsp;бережно храним наследие предков и&nbsp;культивируем здоровое питание. Наше меню создано с&nbsp;учётом уральских традиций и&nbsp;полезного сочетания ингредиентов.</p>
-        <button class="btn btn--primary btn--m event-card__btn" type="button">Смотреть меню</button>
+        <a class="btn btn--primary btn--m event-card__btn" href="menu.html">Смотреть меню</a>
       </div>
     </article>
   </div>
@@ -1171,7 +1032,7 @@ body{
         <p class="event-card__label">25 августа</p>
         <h3 class="event-card__title">Яков Можаев: музей зерна глазами эксперта</h3>
         <p class="event-card__desc">В&nbsp;рамках программы «Можно! С&nbsp;Можаевым» Музей зерна посетил гастроном-эксперт Яков Можаев. Он высоко оценил концепцию музея, попробовал дегустационный сет и&nbsp;назвал фирменную преснушку «прекрасной гастрономической мыслью». Эксперт отметил, что основы полезного питания заложены именно русской кухней — каши, хлеб, зерновые продукты. Выпуск о&nbsp;Челябинске выйдет осенью, а&nbsp;музей скоро откроется для посетителей.</p>
-        <button class="btn btn--primary btn--m event-card__btn" type="button" data-tooltip="Страница в разработке">Подробнее</button>
+        <a class="btn btn--primary btn--m event-card__btn" href="news-article.html">Подробнее</a>
       </div>
     </article>
     <article class="event-card">
@@ -1185,7 +1046,7 @@ body{
           <p>В&nbsp;числе первых гостей музея — официальные лица Челябинска. Мы проведём экскурсию и&nbsp;угостим авторским меню от шеф-повара Дмитрия Кузьмина.</p>
           <p>Мы готовим для гостей встречу со вкусом, историей и&nbsp;атмосферой.</p>
         </div>
-        <button class="btn btn--primary btn--m event-card__btn" type="button" data-tooltip="Страница в разработке">Подробнее</button>
+        <a class="btn btn--primary btn--m event-card__btn" href="news-article.html">Подробнее</a>
       </div>
     </article>
     <article class="event-card">
@@ -1198,7 +1059,7 @@ body{
           <p>В&nbsp;этот день блогеры Челябинска придут к&nbsp;нам в&nbsp;музей. Они попробуют уральскую преснушку, которая уже успела покорить Якова Можаева, а&nbsp;также другие блюда, которые возрождают забытые вкусы нашего региона.</p>
           <p>Следите за новостями и&nbsp;анонсами!</p>
         </div>
-        <button class="btn btn--primary btn--m event-card__btn" type="button" data-tooltip="Страница в разработке">Подробнее</button>
+        <a class="btn btn--primary btn--m event-card__btn" href="news-article.html">Подробнее</a>
       </div>
     </article>
     <article class="event-card">
@@ -1208,7 +1069,7 @@ body{
         <p class="event-card__label">6 сентября</p>
         <h3 class="event-card__title">День открытых дверей!</h3>
         <p class="event-card__desc">В&nbsp;этот день Музей примет одну экскурсионную группу челябинцев и&nbsp;гостей города. Мы уверены: этот день запомнится каждому гостю. Впереди — много тёплых встреч, интересных разговоров и, конечно, вкусной еды.</p>
-        <button class="btn btn--primary btn--m event-card__btn" type="button" data-tooltip="Страница в разработке">Подробнее</button>
+        <a class="btn btn--primary btn--m event-card__btn" href="news-article.html">Подробнее</a>
       </div>
     </article>
   </div>
@@ -1269,10 +1130,10 @@ body{
   <div class="reviews-cta reveal">
     <p class="reviews-cta__note">Оставьте ваш отзыв или посмотрите 250+ отзывов других людей</p>
     <div class="reviews-platforms">
-      <a class="reviews-platform reviews-platform--front" href="#" data-soon aria-label="Отзывы на Яндекс Картах">
+      <a class="reviews-platform reviews-platform--front" href="https://yandex.ru/maps/" target="_blank" rel="noopener" aria-label="Отзывы на Яндекс Картах">
         <img src="assets/yamap-logo.png" alt="Яндекс Карты" width="218" height="40" loading="lazy">
       </a>
-      <a class="reviews-platform reviews-platform--back" href="#" data-soon aria-label="Отзывы в 2ГИС">
+      <a class="reviews-platform reviews-platform--back" href="https://2gis.ru/" target="_blank" rel="noopener" aria-label="Отзывы в 2ГИС">
         <img src="assets/2gis-logo.png" alt="2ГИС" width="110" height="40" loading="lazy">
       </a>
     </div>
@@ -1298,13 +1159,7 @@ body{
 
 <!-- ===== Окно «весь отзыв» (макет 653:1785) =====
      Содержимое подставляет скрипт: текст, аватар и имя берутся из карточки, по которой кликнули -->
-<!-- ===== Окно «о музее» (макет 764:1187) — текст тот же, что в информере первого экрана ===== -->
-<div class="about-modal" id="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-modal-title" aria-hidden="true">
-  <div class="about-modal__card">
-    <button class="about-modal__close" type="button" data-about-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>
-    <div class="about-modal__text" id="about-modal-title"><p class="about-modal__title">Уважаемые гости!</p><p>В&nbsp;сентябре Музей зерна работает в&nbsp;техническом режиме: ежедневно с&nbsp;8:00 до&nbsp;16:00, экскурсии&nbsp;— по&nbsp;предварительной записи.</p><p>Стоимость экскурсии&nbsp;— 600&nbsp;₽. В&nbsp;неё входят 40-минутная интерактивная экскурсия и&nbsp;дегустация сета «Зерно»: уральская сытная преснушка&nbsp;— пирожок с&nbsp;секретной начинкой от&nbsp;шефа, каша на&nbsp;фундучном молоке с&nbsp;местными ягодами и&nbsp;чай по&nbsp;авторскому рецепту.</p><p>Экскурсионные группы: 9:00–11:00, 11:00–13:00, 13:00–15:00.</p><p>Запись по&nbsp;телефону <a href="tel:+79227110940">8&nbsp;(922)&nbsp;711-09-40</a> или на&nbsp;<a class="about-modal__link" href="https://muzeyzerna.ru" target="_blank" rel="noopener">muzeyzerna.ru</a>.</p><p>Ждём вас в&nbsp;первом в&nbsp;России Музее зерна!</p></div>
-  </div>
-</div>
+<!-- окно «о музее» (макет 764:1187) вставляет chrome.js — оно сквозное, открывается из информера -->
 
 <div class="review-modal" id="review-modal" role="dialog" aria-modal="true" aria-label="Отзыв гостя" aria-hidden="true">
   <div class="review-modal__card">
@@ -1324,42 +1179,6 @@ body{
   // 1) показать «Читать весь отзыв» только там, где текст действительно не поместился;
   // 2) открыть окно с полным текстом. Текст в карточке лежит целиком — обрезка чисто
   //    визуальная, поэтому окну достаточно скопировать разметку, дублировать её не нужно.
-  // ——— окно «о музее» (макет 764:1187): текст статичный, разметка уже в HTML ———
-  (function(){
-    var окно = document.getElementById('about-modal');
-    var кнопки = document.querySelectorAll('[data-about-open]');
-    if (!окно || !кнопки.length) return;
-    var вернутьФокус = null;
-    function открыть(){
-      вернутьФокус = document.activeElement;
-      окно.classList.add('is-open');
-      окно.removeAttribute('aria-hidden');
-      document.body.style.overflow = 'hidden';
-      окно.querySelector('.about-modal__close').focus();
-    }
-    function закрыть(){
-      окно.classList.remove('is-open');
-      окно.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-      if (вернутьФокус && вернутьФокус.focus) вернутьФокус.focus();
-    }
-    кнопки.forEach(function(б){ б.addEventListener('click', открыть); });
-    окно.addEventListener('click', function(e){
-      if (e.target === окно || e.target.closest('[data-about-close]')) закрыть();
-    });
-    document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && окно.classList.contains('is-open')) закрыть();
-    });
-    окно.addEventListener('keydown', function(e){
-      if (e.key !== 'Tab') return;
-      var фокусируемые = окно.querySelectorAll('button, [href], input, select, textarea');
-      var видимые = [].filter.call(фокусируемые, function(el){ return !el.disabled && el.offsetParent !== null; });
-      if (!видимые.length) return;
-      var первый = видимые[0], последний = видимые[видимые.length - 1];
-      if (e.shiftKey && document.activeElement === первый){ e.preventDefault(); последний.focus(); }
-      else if (!e.shiftKey && document.activeElement === последний){ e.preventDefault(); первый.focus(); }
-    });
-  })();
 
   var окно = document.getElementById('review-modal');
   var карточки = [].slice.call(document.querySelectorAll('.reviews-card'));
@@ -1645,31 +1464,6 @@ body{
   </div>
 </div>
 
-<script>
-(function(){
-  // Информер: показывается ровно тогда же, когда выезжает стики-шапка — как только первый
-  // экран ушёл вверх. Условие то же самое, что у шапки в chrome.js, но проверяем сами,
-  // чтобы блок не зависел от её внутренностей.
-  const box = document.getElementById('informer');
-  const hero = document.getElementById('hero');
-  if (!box) return;
-  if (hero){
-    new IntersectionObserver(([e]) => {
-      box.classList.toggle('is-shown', !e.isIntersecting);
-    }, { threshold: 0 }).observe(hero);
-  } else {
-    box.classList.add('is-shown'); // на страницах без первого экрана показываем сразу
-  }
-
-  // Закрывается крестиком и убирается из разметки совсем. Ничего не запоминаем —
-  // при следующей загрузке страницы он должен появиться снова.
-  box.querySelector('.informer__close').addEventListener('click', () => {
-    box.classList.add('is-closing');
-    box.addEventListener('transitionend', () => box.remove(), { once: true });
-    setTimeout(() => box.remove(), 400); // на случай, если переход не запустится
-  });
-})();
-</script>
 <script>
 (function(){
   // ===== Появление элементов: одна очередь на всю страницу =====

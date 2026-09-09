@@ -62,6 +62,8 @@ img,video{ max-width:100%; display:block }
 }
 .btn:hover{ transform:translateY(-4px) }
 .btn:active{ transform:none }
+/* на телефоне длинная подпись («Записаться на мастер-класс») не помещается в 295px — пусть переносится */
+@media (max-width:767px){ .btn{ white-space:normal; text-align:center } }
 .btn--primary{
   color:#FFFFFF; background:var(--gold-600); padding:17px 32px;
   position:relative; overflow:hidden; isolation:isolate;
@@ -143,7 +145,10 @@ main{ padding-top:var(--header-h) }
 @media (max-width:1023px){
   /* на узких — горизонтальная лента, поля контейнера гасятся отрицательным margin */
   .chips{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; scrollbar-width:none;
-          margin-inline:calc(var(--margin) * -1); padding:0 var(--margin) 4px }
+          margin-inline:calc(var(--margin) * -1); padding:0 var(--margin) 4px;
+          /* в колонке .page-hero__head (align-items:center) лента брала ширину по содержимому
+             и на «Меню» вылезала за экран вместе со всей страницей; stretch держит её по контейнеру */
+          align-self:stretch; max-width:none }
   .chips::-webkit-scrollbar{ display:none }
 }
 .chip{
@@ -161,6 +166,8 @@ main{ padding-top:var(--header-h) }
 .chip[aria-pressed="true"]:hover, .chip[aria-selected="true"]:hover{ background:var(--gold-700); border-color:var(--gold-700) }
 /* на тач-устройствах цель не ниже 44px */
 @media (hover:none){ .chip{ min-height:44px; padding-block:12px 10px } }
+/* хлебные крошки — текст в 21px; на таче зона нажатия добирается паддингом без сдвига раскладки */
+@media (hover:none){ .breadcrumbs a{ padding-block:8px; margin-block:-8px } }
 
 /* ===== Бейдж (компонент Badge 721:1176) ===== */
 .badge{

@@ -191,7 +191,10 @@
     return '<div class="mnav" id="mobileNav" hidden>' +
       '<div class="mnav__sheet" role="dialog" aria-modal="true" aria-label="Меню">' +
         '<button class="mnav__close" type="button" aria-label="Закрыть меню">' +
-          '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M26 6.80102L16.7999 16L26 25.2001L25.2001 26L16 16.7999L6.79991 26L6 25.2001L15.199 16L6 6.80102L6.79991 6L16 15.2001L25.2001 6L26 6.80102Z"/></svg>' +
+          // Крестик той же руки, что бургер: две линии длиной 24 и толщиной 2 со скруглёнными
+          // концами (диагональ 3.5→20.5 в поле 24 — это ровно 24px по длине). Штрих, а не
+          // заливка: тонкий контурный глиф из макета рядом с полосками бургера читался нитью
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 3.5 20.5 20.5M20.5 3.5 3.5 20.5"/></svg>' +
         '</button>' +
         '<nav class="mnav__list" aria-label="Основное меню">' + пункты + '</nav>' +
         '<div class="mnav__contacts">' +
@@ -276,6 +279,102 @@
     '</header>';
   }
 
+  // ===== ИНФОРМЕР (макет 511:1730) =====
+  // Сообщение о тестовом режиме — пилюля внизу экрана, одна на все страницы (правка
+  // 09.09.2026: раньше стоял только на главной). Закрывается крестиком и до перезагрузки
+  // не возвращается; ничего не запоминаем намеренно. Оформление — .informer в chrome.css.
+  // Сентябрьский вариант с длинным текстом (макет 744:3264) никуда не делся: чтобы вернуть,
+  // дописать классу informer модификатор informer--card и заменить строку текста абзацами:
+  //   <div class="informer__text">
+  //     <p class="informer__title">Уважаемые гости!</p>
+  //     <p>В&nbsp;сентябре Музей зерна работает в&nbsp;техническом режиме: ежедневно
+  //        <span class="informer__pre">с&nbsp;</span><b>8:00 до&nbsp;16:00</b>, экскурсии&nbsp;— по&nbsp;предварительной записи.</p>
+  //     <p>Стоимость экскурсии&nbsp;— 600&nbsp;₽. В&nbsp;неё входят 40-минутная интерактивная экскурсия и&nbsp;дегустация
+  //        сета «Зерно»: уральская сытная преснушка&nbsp;— пирожок с&nbsp;секретной начинкой от&nbsp;шефа, каша
+  //        на&nbsp;фундучном молоке с&nbsp;местными ягодами и&nbsp;чай по&nbsp;авторскому рецепту.</p>
+  //     <p>Экскурсионные группы: 9:00–11:00, 11:00–13:00, 13:00–15:00.</p>
+  //     <p>Запись по&nbsp;телефону <a href="tel:+79227110940">+7&nbsp;(922)&nbsp;711-09-40</a> или
+  //        на&nbsp;<a class="informer__link" href="https://muzeyzerna.ru" target="_blank" rel="noopener">muzeyzerna.ru</a>.</p>
+  //     <p>Ждём вас в&nbsp;первом в&nbsp;России Музее зерна!</p>
+  //   </div>
+  // Текст по макету 511:1730 (правка 09.09.2026); «Подробнее» открывает окно «о музее» ниже
+  var INFORMER_TEXT = 'Музей работает в&nbsp;техническом режиме с&nbsp;8:00 до&nbsp;16:00.' +
+    '<a class="informer__more" href="#" data-about-open>Подробнее</a>';
+  function informerHTML(){
+    return '<div class="informer" id="informer" role="status">' +
+      '<p class="informer__text">' + INFORMER_TEXT + '</p>' +
+      '<button class="informer__close" type="button" aria-label="Закрыть сообщение">' +
+        '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M26 6.80102L16.7999 16L26 25.2001L25.2001 26L16 16.7999L6.79991 26L6 25.2001L15.199 16L6 6.80102L6.79991 6L16 15.2001L25.2001 6L26 6.80102Z"/></svg>' +
+      '</button>' +
+    '</div>';
+  }
+  // На главной появляется в тот же момент, что и стики-шапка — когда первый экран ушёл
+  // вверх; на внутренних страницах первого экрана нет, показываем сразу
+  function informerInit(hero){
+    var box = document.getElementById('informer');
+    if (!box) return;
+    if (hero && window.IntersectionObserver){
+      new IntersectionObserver(function(entries){
+        box.classList.toggle('is-shown', !entries[0].isIntersecting);
+      }, { threshold: 0 }).observe(hero);
+    } else {
+      box.classList.add('is-shown');
+    }
+    box.querySelector('.informer__close').addEventListener('click', function(){
+      box.classList.add('is-closing');
+      box.addEventListener('transitionend', function(){ box.remove(); }, { once:true });
+      setTimeout(function(){ box.remove(); }, 400); // на случай, если переход не запустится
+    });
+  }
+
+  // ===== ОКНО «О МУЗЕЕ» (макет 764:1187) =====
+  // Подробности технического режима. Открывается ссылкой «Подробнее» в информере на любой
+  // странице (раньше — кнопкой «Больше о музее» на главной; она теперь ведёт на страницу музея).
+  function aboutModalHTML(){
+    return '<div class="about-modal" id="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-modal-title" aria-hidden="true">' +
+           '<div class="about-modal__card">' +
+           '<button class="about-modal__close" type="button" data-about-close aria-label="Закрыть окно"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 5.4 14.6 4 10 8.6 5.4 4 4 5.4 8.6 10 4 14.6 5.4 16 10 11.4 14.6 16 16 14.6 11.4 10z"/></svg></button>' +
+           '<div class="about-modal__text" id="about-modal-title"><p class="about-modal__title">Уважаемые гости!</p><p>В&nbsp;сентябре Музей зерна работает в&nbsp;техническом режиме: ежедневно с&nbsp;8:00 до&nbsp;16:00, экскурсии&nbsp;— по&nbsp;предварительной записи.</p><p>Стоимость экскурсии&nbsp;— 600&nbsp;₽. В&nbsp;неё входят 40-минутная интерактивная экскурсия и&nbsp;дегустация сета «Зерно»: уральская сытная преснушка&nbsp;— пирожок с&nbsp;секретной начинкой от&nbsp;шефа, каша на&nbsp;фундучном молоке с&nbsp;местными ягодами и&nbsp;чай по&nbsp;авторскому рецепту.</p><p>Экскурсионные группы: 9:00–11:00, 11:00–13:00, 13:00–15:00.</p><p>Запись по&nbsp;телефону <a href="tel:+79227110940">8&nbsp;(922)&nbsp;711-09-40</a> или на&nbsp;<a class="about-modal__link" href="https://muzeyzerna.ru" target="_blank" rel="noopener">muzeyzerna.ru</a>.</p><p>Ждём вас в&nbsp;первом в&nbsp;России Музее зерна!</p></div>' +
+           '</div>' +
+           '</div>';
+  }
+  function aboutModalInit(){
+    var окно = document.getElementById('about-modal');
+    var кнопки = document.querySelectorAll('[data-about-open]');
+    if (!окно || !кнопки.length) return;
+    // ссылка «Подробнее» в информере — href="#" только ради семантики ссылки, переход не нужен
+    var вернутьФокус = null;
+    function открыть(){
+      вернутьФокус = document.activeElement;
+      окно.classList.add('is-open');
+      окно.removeAttribute('aria-hidden');
+      document.body.style.overflow = 'hidden';
+      окно.querySelector('.about-modal__close').focus();
+    }
+    function закрыть(){
+      окно.classList.remove('is-open');
+      окно.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (вернутьФокус && вернутьФокус.focus) вернутьФокус.focus();
+    }
+    кнопки.forEach(function(б){ б.addEventListener('click', function(e){ e.preventDefault(); открыть(); }); });
+    окно.addEventListener('click', function(e){
+      if (e.target === окно || e.target.closest('[data-about-close]')) закрыть();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && окно.classList.contains('is-open')) закрыть();
+    });
+    окно.addEventListener('keydown', function(e){
+      if (e.key !== 'Tab') return;
+      var фокусируемые = окно.querySelectorAll('button, [href], input, select, textarea');
+      var видимые = [].filter.call(фокусируемые, function(el){ return !el.disabled && el.offsetParent !== null; });
+      if (!видимые.length) return;
+      var первый = видимые[0], последний = видимые[видимые.length - 1];
+      if (e.shiftKey && document.activeElement === первый){ e.preventDefault(); последний.focus(); }
+      else if (!e.shiftKey && document.activeElement === последний){ e.preventDefault(); первый.focus(); }
+    });
+  }
+
   // Полоса прогресса — отдельный элемент, не часть шапки: она поверх шапки и не зависит
   // от того, показана та или нет. aria-hidden — то же самое сообщает нативный скроллбар.
   function progressHTML(){
@@ -350,7 +449,9 @@
       (isV2 ? heroHeaderHTML() + headerV2HTML()
             : mode === 'static' ? headerV2HTML(true, true) + headerV2HTML(false, true)
             : headerHTML()) + progressHTML());
-    document.body.insertAdjacentHTML('beforeend', footerHTML(isV2) + mobileNavHTML());
+    document.body.insertAdjacentHTML('beforeend', footerHTML(isV2) + mobileNavHTML() + informerHTML() + aboutModalHTML());
+    informerInit(hero);
+    aboutModalInit();
 
     var header = document.getElementById('siteHeader');
 

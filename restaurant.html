@@ -49,10 +49,8 @@
   .hero-row{ grid-template-columns:repeat(2, minmax(0, 1fr)) }
   .hero-row__cell--wide{ grid-column:1 / -1; aspect-ratio:16/9 }
 }
-@media (max-width:767px){
-  .hero-row{ grid-template-columns:1fr }
-  .hero-row__cell--narrow{ aspect-ratio:4/3 }
-}
+/* на телефоне узкие кадры остаются парой в макетной пропорции 382:570 — снимки вертикальные,
+   и разворот в столбик 4:3 обрезал бы их до горизонтальных */
 
 /* ===== КОМАНДА (макет 880:3166) =====
    Ряд из трёх колонок 517: портрет 700 высотой, две фотографии по 338
@@ -114,12 +112,13 @@
   .chef-text{ grid-column:1 / -1 }
 }
 @media (max-width:1023px){
-  .team-row{ grid-template-columns:1fr }
-  /* всё встало в столбик: портрет во всю ширину берёт пейзажную пропорцию,
-     половинки — свою макетную, тянуться им больше не за чем */
-  .team-row > .team-row__photo::before{ padding-top:62.5% }   /* 16:10 */
-  .team-photos .team-row__photo{ flex:none; aspect-ratio:517/338 }
   .chef-text{ padding:32px }
+}
+@media (max-width:767px){
+  .team-row{ grid-template-columns:1fr }
+  /* всё встало в столбик: портрет держит вертикальную пропорцию макета (517:700),
+     половинки — свою, тянуться им больше не за чем */
+  .team-photos .team-row__photo{ flex:none; aspect-ratio:517/338 }
 }
 </style>
 </head>

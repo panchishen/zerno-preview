@@ -88,6 +88,8 @@ img,video{ max-width:100%; display:block }
 }
 .btn:hover{ transform:translateY(-4px) }
 .btn:active{ transform:none }
+/* на телефоне длинная подпись («Записаться на мастер-класс») не помещается в 295px — пусть переносится */
+@media (max-width:767px){ .btn{ white-space:normal; text-align:center } }
 .btn--primary{
   color:#FFFFFF; background:var(--gold-600); padding:17px 32px;
   position:relative; overflow:hidden; isolation:isolate;

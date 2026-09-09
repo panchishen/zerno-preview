@@ -87,6 +87,8 @@ img,video{ max-width:100%; display:block }
 }
 .btn:hover{ transform:translateY(-4px) }
 .btn:active{ transform:none }
+/* на телефоне длинная подпись («Записаться на мастер-класс») не помещается в 295px — пусть переносится */
+@media (max-width:767px){ .btn{ white-space:normal; text-align:center } }
 .btn--primary{
   color:#FFFFFF; background:var(--gold-600); padding:17px 32px;
   position:relative; overflow:hidden; isolation:isolate;
@@ -135,7 +137,9 @@ main{ padding-top:var(--header-h) }
    высоты кадра, и aspect-ratio контейнера перестаёт работать */
 .m-hero__media{ position:relative; width:100%; aspect-ratio:1600/640; border-radius:9px; corner-shape:squircle; overflow:clip; background:var(--sand-200) }
 .m-hero__media video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
-@media (max-width:767px){ .m-hero__media{ aspect-ratio:4/5 } }
+/* ролик горизонтальный (1600×640): на телефоне он не разворачивается в портрет, а берёт 16:9,
+   как широкий кадр hero на «Ресторане» и «Открытой кухне» */
+@media (max-width:767px){ .m-hero__media{ aspect-ratio:16/9 } }
 
 /* ===== ОБРАЩЕНИЕ ДИРЕКТОРА (макет 880:2767) =====
    Устроено как на странице ресторана: фото 518×682 слева, текст по центру вертикали справа.
