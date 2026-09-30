@@ -412,6 +412,7 @@
         '<div class="ft__col ft__col--secondary">' +
           '<a href="#" data-soon>Политика обработки персональных данных</a>' +
           '<span>2026 © ООО «Объединение «Союзпищепром»</span>' +
+          '<span>ИНН 7453050475</span>' +   // макет 1095:1913 — между копирайтом и подписью разработчика
           '<span>Комплексное продвижение — <a href="https://www.alkon.pro/" target="_blank" rel="noopener">Алькон</a></span>' +
         '</div>' +
       '</div>' +
