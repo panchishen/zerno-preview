@@ -26,6 +26,11 @@
 
   var api = window.ZernoForms || {};
 
+  var CAPTCHA_JS = 'https://smartcaptcha.cloud.yandex.ru/captcha.js';
+  var captchaWidgetId = null;
+  var body = document.body;
+  body.classList.add('js-on');
+
   function инициализировать(modal, триггеры){
     if (!modal) return;
 
@@ -107,6 +112,7 @@
       document.body.classList.add('is-booking-open');   // поднимает календарь над окном и делает его компактным
       var первое = form.querySelector('.field__control');
       if (первое) setTimeout(function(){ первое.focus(); }, 60);
+      renderCaptcha(modal);
     }
     function закрыть(){
       modal.classList.remove('is-open');
@@ -207,6 +213,77 @@
       });
     }
 
+    //***************************************
+    var captchaScriptPromise = null;
+
+    function ensureCaptchaScript() {
+        if (captchaScriptPromise) return captchaScriptPromise;
+
+        captchaScriptPromise = new Promise(function (resolve, reject) {
+            if (window.smartCaptcha) { resolve(window.smartCaptcha); return; }
+
+            var s = document.createElement('script');
+            s.src = CAPTCHA_JS;
+            s.defer = true;
+            s.onerror = function () { reject(new Error('captcha.js не загрузился')); };
+            document.head.appendChild(s);
+
+            // Ждём появления объекта smartCaptcha (скрипт инициализируется асинхронно).
+            var tries = 0;
+            var timer = setInterval(function () {
+                if (window.smartCaptcha) {
+                    clearInterval(timer);
+                    resolve(window.smartCaptcha);
+                } else if (++tries > 100) { // ~10 c
+                    clearInterval(timer);
+                    reject(new Error('SmartCaptcha не инициализировалась'));
+                }
+            }, 100);
+        });
+
+        return captchaScriptPromise;
+    }
+
+    function renderCaptcha(root) {
+        var container = root.querySelector('#smartcaptcha-container');
+        if (!container) return;
+
+        ensureCaptchaScript().then(function (sc) {
+            captchaWidgetId = sc.render(container, {
+                sitekey: container.getAttribute('data-sitekey'),
+                hl: 'ru',
+                callback: function () { hideCaptchaError(root); }
+            });
+        }).catch(function () {
+            // Капча недоступна (например, тестовый ключ/офлайн) — не ломаем форму,
+            // финальную проверку всё равно делает сервер.
+            captchaWidgetId = null;
+        });
+    }
+
+    function getCaptchaToken() {
+        if (window.smartCaptcha && captchaWidgetId !== null) {
+            return window.smartCaptcha.getResponse(captchaWidgetId) || '';
+        }
+        return '';
+    }
+
+    function resetCaptcha() {
+        if (window.smartCaptcha && captchaWidgetId !== null) {
+            window.smartCaptcha.reset(captchaWidgetId);
+        }
+    }
+
+    function showCaptchaError(root) {
+        var el = root.querySelector('[data-captcha-error]');
+        if (el) el.hidden = false;
+    }
+    function hideCaptchaError(root) {
+        var el = root.querySelector('[data-captcha-error]');
+        if (el) el.hidden = true;
+    }
+    //***************************************
+
     // ——— проверка при отправке ———
     function проверитьДату(){
       var v = date.value.trim();
@@ -252,9 +329,40 @@
     form.addEventListener('submit', function(e){
       e.preventDefault();                                   // интеграции с системой броней ещё нет
       if (!проверить()) return;
+      
       modal.dataset.state = 'success';                      // экран «Заявка принята!»
-      var кнопкаЗакрыть = modal.querySelector('.booking__success .btn');
-      if (кнопкаЗакрыть) кнопкаЗакрыть.focus();
+  
+      var token = getCaptchaToken();
+      if (captchaWidgetId !== null && !token) {
+          showCaptchaError(root);
+          return;
+      }
+  
+      var data = new FormData(form);
+      //if (token && !data.get('smart-token')) data.append('smart-token', token);
+  
+      fetch('/send.php', {
+        method: 'POST',
+        body: data,
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(function (res) { return res.json().catch(function () { return { ok: res.ok }; }); })
+      .then(function (result) {
+          if (result && result.ok) {
+            var кнопкаЗакрыть = modal.querySelector('.booking__success .btn');
+            if (кнопкаЗакрыть) кнопкаЗакрыть.focus();
+          } else {
+              //showError(form, (result && result.error) || 'Не удалось отправить заявку. Попробуйте позвонить: +7 964 957 8000');
+              resetCaptcha();
+          }
+      })
+      .catch(function () {
+          //showError(form, 'Ошибка сети. Пожалуйста, позвоните: +7 964 957 8000');
+          resetCaptcha();
+      })
+      .finally(function () {
+      });
     });
 
     // ошибку снимаем, как только человек начал править поле
