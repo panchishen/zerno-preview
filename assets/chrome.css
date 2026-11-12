@@ -277,9 +277,6 @@
 .ft__col a:focus-visible, .ft__logo:focus-visible{
   outline:2px solid var(--gold-600, #A97C19); outline-offset:4px; border-radius:2px;
 }
-/* Время работы в футере временно скрыто: режим музея ещё не утверждён (правка 25.08.2026).
-   Разметка на месте — чтобы вернуть строку, достаточно убрать это правило */
-.ft__hours{ display:none }
 /* Почта скрыта там же и так же (правка 28.08.2026): вернуть — убрать правило */
 .ft__email{ display:none }
 
