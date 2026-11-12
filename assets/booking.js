@@ -27,11 +27,11 @@
   var api = window.ZernoForms || {};
 
   var CAPTCHA_JS = 'https://smartcaptcha.cloud.yandex.ru/captcha.js';
-  var captchaWidgetId = null;
+  var captchaWidgetId = [];
   var body = document.body;
   body.classList.add('js-on');
 
-  function инициализировать(modal, триггеры){
+  function инициализировать(modal, триггеры, id_form){
     if (!modal) return;
 
     var card    = modal.querySelector('.booking__card');
@@ -112,7 +112,11 @@
       document.body.classList.add('is-booking-open');   // поднимает календарь над окном и делает его компактным
       var первое = form.querySelector('.field__control');
       if (первое) setTimeout(function(){ первое.focus(); }, 60);
-      renderCaptcha(modal);
+      if (document.readyState === 'complete') {
+        renderCaptcha(modal,id_form);
+      } else {
+        window.addEventListener('load', function(){ renderCaptcha(modal,id_form); }, { once: true });
+      }      
     }
     function закрыть(){
       modal.classList.remove('is-open');
@@ -217,6 +221,8 @@
     var captchaScriptPromise = null;
 
     function ensureCaptchaScript() {
+        // при неудаче сбрасываем промис — иначе капча умирает до перезагрузки страницы
+        if (captchaScriptPromise && captchaScriptPromise.__failed) captchaScriptPromise = null;
         if (captchaScriptPromise) return captchaScriptPromise;
 
         captchaScriptPromise = new Promise(function (resolve, reject) {
@@ -224,53 +230,60 @@
 
             var s = document.createElement('script');
             s.src = CAPTCHA_JS;
-            s.defer = true;
-            s.onerror = function () { reject(new Error('captcha.js не загрузился')); };
+            s.onload = function () { resolve(window.smartCaptcha); };
+            s.onerror = function () {
+                captchaScriptPromise.__failed = true;
+                reject(new Error('captcha.js не загрузился'));
+            };
             document.head.appendChild(s);
 
-            // Ждём появления объекта smartCaptcha (скрипт инициализируется асинхронно).
             var tries = 0;
             var timer = setInterval(function () {
                 if (window.smartCaptcha) {
                     clearInterval(timer);
                     resolve(window.smartCaptcha);
-                } else if (++tries > 100) { // ~10 c
+                } else if (++tries > 100) {
                     clearInterval(timer);
+                    captchaScriptPromise.__failed = true;
                     reject(new Error('SmartCaptcha не инициализировалась'));
                 }
             }, 100);
+        }).catch(function (e) {
+            captchaScriptPromise.__failed = true;
+            throw e;
         });
 
         return captchaScriptPromise;
     }
 
-    function renderCaptcha(root) {
-        var container = root.querySelector('#smartcaptcha-container');
+    function renderCaptcha(rootEl, idY) {
+        var container = rootEl.querySelector('#smartcaptcha-container'+id_form);
         if (!container) return;
 
+        // капча уже отрендерена — при повторном открытии только сбрасываем её
+        if (captchaWidgetId[id_form]) { resetCaptcha(id_form); return; }
+
         ensureCaptchaScript().then(function (sc) {
-            captchaWidgetId = sc.render(container, {
+            captchaWidgetId[idY] = sc.render(container, {
                 sitekey: container.getAttribute('data-sitekey'),
                 hl: 'ru',
-                callback: function () { hideCaptchaError(root); }
+                callback: function () { hideCaptchaError(rootEl); }
             });
         }).catch(function () {
-            // Капча недоступна (например, тестовый ключ/офлайн) — не ломаем форму,
-            // финальную проверку всё равно делает сервер.
-            captchaWidgetId = null;
+            captchaWidgetId[idY] = null;
         });
     }
 
-    function getCaptchaToken() {
-        if (window.smartCaptcha && captchaWidgetId !== null) {
-            return window.smartCaptcha.getResponse(captchaWidgetId) || '';
+    function getCaptchaToken(idY) {
+        if (window.smartCaptcha && captchaWidgetId[idY] !== null) {
+            return window.smartCaptcha.getResponse(captchaWidgetId[idY]) || '';
         }
         return '';
     }
 
-    function resetCaptcha() {
-        if (window.smartCaptcha && captchaWidgetId !== null) {
-            window.smartCaptcha.reset(captchaWidgetId);
+    function resetCaptcha(idY) {
+        if (window.smartCaptcha && captchaWidgetId[idY] !== null) {
+            window.smartCaptcha.reset(captchaWidgetId[idY]);
         }
     }
 
@@ -327,20 +340,18 @@
     }
 
     form.addEventListener('submit', function(e){
-      e.preventDefault();                                   // интеграции с системой броней ещё нет
+      e.preventDefault();
       if (!проверить()) return;
-      
-      modal.dataset.state = 'success';                      // экран «Заявка принята!»
-  
-      var token = getCaptchaToken();
-      if (captchaWidgetId !== null && !token) {
-          showCaptchaError(root);
+
+      var token = getCaptchaToken(id_form);
+      if (captchaWidgetId[id_form] !== null && !token) {
+          showCaptchaError(modal, id_form);      // было: showCaptchaError(root) — ReferenceError
           return;
       }
-  
+
       var data = new FormData(form);
-      //if (token && !data.get('smart-token')) data.append('smart-token', token);
-  
+      if (token && !data.get('smart-token')) data.append('smart-token', token);
+
       fetch('/send.php', {
         method: 'POST',
         body: data,
@@ -350,18 +361,16 @@
       .then(function (res) { return res.json().catch(function () { return { ok: res.ok }; }); })
       .then(function (result) {
           if (result && result.ok) {
-            var кнопкаЗакрыть = modal.querySelector('.booking__success .btn');
-            if (кнопкаЗакрыть) кнопкаЗакрыть.focus();
+              resetCaptcha(id_form);
+              modal.dataset.state = 'success';   // успех — только после ответа сервера
+              var кнопкаЗакрыть = modal.querySelector('.booking__success .btn');
+              if (кнопкаЗакрыть) кнопкаЗакрыть.focus();
           } else {
-              //showError(form, (result && result.error) || 'Не удалось отправить заявку. Попробуйте позвонить: +7 964 957 8000');
-              resetCaptcha();
+              resetCaptcha(id_form);
           }
       })
       .catch(function () {
-          //showError(form, 'Ошибка сети. Пожалуйста, позвоните: +7 964 957 8000');
-          resetCaptcha();
-      })
-      .finally(function () {
+          resetCaptcha(id_form);
       });
     });
 
@@ -376,12 +385,12 @@
 
   // универсальная форма из шапки — открывает и сама кнопка (класс .hd__btn),
   // и любой элемент с data-booking-open (например пункт мобильного меню)
-  инициализировать(document.getElementById('booking'), '.hd__btn, [data-booking-open]');
+  инициализировать(document.getElementById('booking'), '.hd__btn, [data-booking-open]', 1);
   // Три формы под конкретный сценарий (макет 793:2754) — свои кнопки в блоках.
   // Форма мастер-класса свёрстана и подключена, но кнопки с [data-class-open] сейчас
   // на странице нет: в блоке конференц-зала вместо формы временно показывается
   // подсказка «Страница в разработке». Вернуть форму — дописать атрибут кнопке.
-  инициализировать(document.getElementById('booking-tour'),  '[data-tour-open]');
-  инициализировать(document.getElementById('booking-table'), '[data-table-open]');
-  инициализировать(document.getElementById('booking-class'), '[data-class-open]');
+  инициализировать(document.getElementById('booking-tour'),  '[data-tour-open]', 2);
+  инициализировать(document.getElementById('booking-table'), '[data-table-open]', 3);
+  инициализировать(document.getElementById('booking-class'), '[data-class-open]', 4);
 })();
