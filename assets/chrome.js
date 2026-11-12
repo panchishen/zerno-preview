@@ -167,7 +167,7 @@
         '<div class="mnav__contacts">' +
           '<a href="' + PHONE.href + '">' + PHONE.label + '</a>' +
           '<span>' + ADDRESS + '</span>' +
-          '<span>Время работы: 8:00–22:00</span>' +
+          '<span>Время работы: 8:30–19:00</span>' +
         '</div>' +
         '<button class="mnav__btn" type="button" data-booking-open>Забронировать</button>' +
       '</div>' +
@@ -269,7 +269,7 @@
           '<span>' + ADDRESS + '</span>' +
           // время работы временно скрыто (правка 25.08.2026): режим музея ещё не утверждён.
           // Строку не удаляем — вернуть её значит убрать одно правило .ft__hours в chrome.css
-          '<span class="ft__hours">Время работы: 8:00–22:00</span>' +
+          '<span class="ft__hours">Время работы: 8:30–19:00</span>' +
           '<div class="ft__soc">' + socialButtons() + '</div>' +  // соцсети внизу колонки (макет 159:422: y=132, ниже времени работы)
         '</div>' +
         // правый блок — вторичным цветом (макет 171:595)
